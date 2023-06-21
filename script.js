@@ -14,14 +14,104 @@ let cameraZoom = MIN_ZOOM;
 let box = 50; // Stitch width and height
 let i = 0;
 let j = 0;
+let cols = 0;
+let rows = 0;
+
+let csvData = '';
+let csvFile = 'rabbit.csv';
+
+const dataholder = document.getElementById("dataholder")
+
+//async function getCSV(csvFile) {
+
+    //return new Promise(async function(resolve, reject){
+    //    const res = await fetch(csvFile);
+
+    //    resolve(res.text());
+    //}) 
+
+    
+
+//    let response = await fetch(csvFile);
+//    let data = await response.text();
+    //console.log(data);
+
+//    let splitData = data.split('\n');
+//    console.log(splitData);
+//    return data;
+//}
+
+
+//THIS WORKS
+const response = fetch(csvFile)
+    .then(response => response.text())
+    .then((text) => {
+        dataholder.innerHTML = text;
+    })
+
+//console.log(dataholder.innerHTML.value);
+//THIS WORKS
+
+//async function fetchCSV() {
+//    const response = await fetch(csvFile);
+//    const csvData = await response.text();
+//    return csvData;
+//}
+
+//fetchCSV().then(csvData => {csvData;});
+
+//console.log(csvData);
+
+
+
+window.onload = function() {
+
+    
+    //csvData = getCSV(csvFile);
+    //console.log(csvData)//;
+    //console.log(dataholder.innerHTML);
+
+
+    //let csvText;
+    //let file = 'rabbit.csv';
+    //fetch(file)
+    //.then(x => x.text())
+    //.then(data => { csvText = data; })
+    //.then(() => { console.log(csvText); });
+
+    //console.log(csvText);
+
+}
+
+
+
 
 function draw()
 {
     
     //canvas.width = window.innerWidth
     //canvas.height = window.innerHeight
-    canvas.width = 5000;
-    canvas.height = 5000;
+    //console.log(csvData);
+    //csvData = getCSV(csvFile);
+    //console.log(dataholder.innerHTML.split("\n"));
+
+    bigArray = dataholder.innerHTML.split("\n")
+
+    
+    //console.log(bigArray[bigArray.length-2])
+    if(bigArray.length > 1) {
+        cols = parseInt(bigArray[bigArray.length-2].split(",")[0])+1
+        rows = parseInt(bigArray[bigArray.length-2].split(",")[1])+1
+    }
+    else {
+        rows = 10;
+        cols = 10;
+    }
+    //console.log(rows, cols)
+    canvas.width = cols * box;
+    canvas.height = rows * box;
+    //canvas.width = 5000;
+    //canvas.height = 5000;
     
     MIN_ZOOM = Math.min(canvas.clientHeight / canvas.height, canvas.clientWidth / canvas.width);
     
@@ -37,40 +127,26 @@ function draw()
     ctx.fillStyle = "#991111"
     drawRect(0, 0, canvas.width, canvas.height);
     
-    //ctx.fillStyle = "#eecc77"
-    //drawRect(-35,-35,20,20)
-    //drawRect(15,-35,20,20)
-    //drawRect(-35,15,70,20)
-    
-    i=0; j = 0;
-    //ctx.fillStyle = "#00ffff"
-    for(j = 0; j < 100; j++) {
-        //console.log(i, i%0);
-        for(i = 0; i < 100; i++) {
-            if((i+j)%2 == 0) { ctx.fillStyle = "#00ffff"; }
-            else { ctx.fillStyle = "#ff00ff"; }
-            drawRect(i*box, j*box, box, box);
+    if(bigArray.length > 1) {
+        for (i = 1; i < bigArray.length-1; i ++) {
+            let line = bigArray[i].split(",");
+            ctx.fillStyle = "rgb(" + line[4] + ", " + line[5] + ", " + line[6] + ")";
+            drawRect(line[0]*box, line[1]*box, box, box);
         }
-        
-        
     }
-    //ctx.fillStyle = "#00ffff"
-    //drawRect(0,0,box,box)
-    //ctx.fillStyle = "#ff00ff"
-    //drawRect(0,50,box,box)
 
-
-    //drawText("Simple Pan and Zoom Canvas", -255, -100, 32, "courier")
-    
-    //ctx.rotate((Math.round(Date.now()/40)%35000)*Math.PI / 180)
-    //ctx.fillStyle = `#${(Math.round(Date.now()/40)%4096).toString(16)}`
-    //drawText("Now with touch!", -110, 100, 32, "courier")
-    
-    //ctx.fillStyle = "#fff"
-    //ctx.rotate(31*Math.PI / 180)
-    
-    //drawText("Wow, you found me!", -260, -2000, 48, "courier")
-    
+    //i=0; j = 0;
+    //for(j = 0; j < 100; j++) {
+        //console.log(i, i%0);
+    //    for(i = 0; i < 100; i++) {
+    //        if((i+j)%2 == 0) { ctx.fillStyle = "#00ffff"; }
+    //        else { ctx.fillStyle = "#ff00ff"; }
+    //        drawRect(i*box, j*box, box, box);
+    //    }
+        
+        
+    //}
+       
     requestAnimationFrame( draw )
 }
 
@@ -109,15 +185,15 @@ function onPointerDown(e)
     isDragging = true
     dragStart.x = getEventLocation(e).x/cameraZoom - cameraOffset.x
     dragStart.y = getEventLocation(e).y/cameraZoom - cameraOffset.y
-    //console.log("Click X:", getEventLocation(e).x);
-    //console.log("Click Y:", getEventLocation(e).y);
+    console.log("Click X:", getEventLocation(e).x);
+    console.log("Click Y:", getEventLocation(e).y);
     mouseDown.x = e.clientX;
     mouseDown.y = e.clientY;
     
-    //console.log("Canvas Offset X:", cameraOffset.x - canvas.clientWidth/2);
-    //console.log("Canvas Offset Y:", cameraOffset.y - canvas.clientHeight/2);
-    console.log("Canvas Width:", canvas.width, canvas.clientWidth, window.innerWidth);
-    console.log("Canvas Height:", canvas.height, canvas.clientHeight, window.innerHeight);
+    console.log("Canvas Offset X:", cameraOffset.x - canvas.clientWidth/2);
+    console.log("Canvas Offset Y:", cameraOffset.y - canvas.clientHeight/2);
+    //console.log("Canvas Width:", canvas.width, canvas.clientWidth, window.innerWidth);
+    //console.log("Canvas Height:", canvas.height, canvas.clientHeight, window.innerHeight);
     console.log("Bounding Box:", canvas.getBoundingClientRect())
 
 }
@@ -132,10 +208,11 @@ function onPointerUp(e)
     //console.log(mouseDown, mouseUp);
 
     canvasClick.x = (getEventLocation(e).x - canvas.getBoundingClientRect().x)/cameraZoom - (cameraOffset.x - canvas.clientWidth/2);
-    canvasClick.y = (getEventLocation(e).y - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2);
+    canvasClick.y = box+(getEventLocation(e).y - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2);
+    // Why box + ...? Hell I don't know
 
-    //console.log("Canvas Click X:", canvasClick.x);
-    //console.log("Canvas Click Y:", canvasClick.y);
+    console.log("Canvas Click X:", canvasClick.x);
+    console.log("Canvas Click Y:", canvasClick.y);
     console.log(MIN_ZOOM);
     
 
