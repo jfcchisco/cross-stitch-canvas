@@ -129,9 +129,14 @@ function draw()
     
     if(bigArray.length > 1) {
         for (i = 1; i < bigArray.length-1; i ++) {
+            
             let line = bigArray[i].split(",");
+            //console.log(line);
             ctx.fillStyle = "rgb(" + line[4] + ", " + line[5] + ", " + line[6] + ")";
             drawRect(line[0]*box, line[1]*box, box, box);
+            ctx.fillStyle = "black";
+            ctx.font = "25px Arial";
+            ctx.fillText(line[7], line[0]*box+12, line[1]*box+30);
         }
     }
 
