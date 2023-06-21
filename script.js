@@ -144,8 +144,8 @@ function draw()
     for(i = 0; i < cols/10; i++) {
         ctx.fillStyle = "black";
         ctx.beginPath();
-        ctx.moveTo(i*10*box-1 + box, 0);
-        ctx.lineTo(i*10*box-1 + box, canvas.height);
+        ctx.moveTo(i*10*box-1, 0);
+        ctx.lineTo(i*10*box-1, canvas.height);
         ctx.lineWidth = 3;
         ctx.stroke();
     }
@@ -153,8 +153,8 @@ function draw()
     for(i = 0; i < rows/10; i++) {
         ctx.fillStyle = "black";
         ctx.beginPath();
-        ctx.moveTo(0, i*10*box-1 + box);
-        ctx.lineTo(canvas.width, i*10*box-1 + box);
+        ctx.moveTo(0, i*10*box-1);
+        ctx.lineTo(canvas.width, i*10*box-1);
         ctx.lineWidth = 3;
         ctx.stroke();
     }
