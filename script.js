@@ -140,6 +140,27 @@ function draw()
         }
     }
 
+    //DRAW LINES
+    for(i = 0; i < cols/10; i++) {
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(i*10*box-1 + box, 0);
+        ctx.lineTo(i*10*box-1 + box, canvas.height);
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
+
+    for(i = 0; i < rows/10; i++) {
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(0, i*10*box-1 + box);
+        ctx.lineTo(canvas.width, i*10*box-1 + box);
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
+
+
+
     //i=0; j = 0;
     //for(j = 0; j < 100; j++) {
         //console.log(i, i%0);
