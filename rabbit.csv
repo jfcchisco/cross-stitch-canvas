@@ -1583,7 +1583,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 57 , 12 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 58 , 12 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 59 , 12 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
-60 , 12 , 0 , Empty , 250 , 185 , 137 , 
+60 , 12 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 61 , 12 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 62 , 12 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 63 , 12 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -1708,8 +1708,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 55 , 13 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 56 , 13 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 57 , 13 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-58 , 13 , 0 , Empty , 250 , 185 , 137 , 
-59 , 13 , 0 , Empty , 250 , 185 , 137 , 
+58 , 13 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+59 , 13 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 60 , 13 , 945 , Tawny , 255 , 248 , 233 , C
 61 , 13 , 945 , Tawny , 255 , 248 , 233 , C
 62 , 13 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -1834,8 +1834,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 54 , 14 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 55 , 14 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 56 , 14 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-57 , 14 , 0 , Empty , 250 , 185 , 137 , 
-58 , 14 , 0 , Empty , 250 , 185 , 137 , 
+57 , 14 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+58 , 14 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 59 , 14 , 945 , Tawny , 255 , 248 , 233 , C
 60 , 14 , 945 , Tawny , 255 , 248 , 233 , C
 61 , 14 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
@@ -1960,8 +1960,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 53 , 15 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 54 , 15 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 55 , 15 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-56 , 15 , 0 , Empty , 250 , 185 , 137 , 
-57 , 15 , 0 , Empty , 250 , 185 , 137 , 
+56 , 15 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+57 , 15 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 58 , 15 , 945 , Tawny , 255 , 248 , 233 , C
 59 , 15 , 945 , Tawny , 255 , 248 , 233 , C
 60 , 15 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
@@ -2086,8 +2086,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 52 , 16 , 3862 , Mocha Beige - DK , 243 , 185 , 102 , O
 53 , 16 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 54 , 16 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
-55 , 16 , 0 , Empty , 250 , 185 , 137 , 
-56 , 16 , 0 , Empty , 250 , 185 , 137 , 
+55 , 16 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+56 , 16 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 57 , 16 , 945 , Tawny , 255 , 248 , 233 , C
 58 , 16 , 945 , Tawny , 255 , 248 , 233 , C
 59 , 16 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
@@ -2095,7 +2095,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 61 , 16 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 62 , 16 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 63 , 16 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-64 , 16 , 0 , Empty , 250 , 185 , 137 , 
+64 , 16 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 65 , 16 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 66 , 16 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 67 , 16 , 0 , Empty , 255 , 255, 255 , 
@@ -2212,8 +2212,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 51 , 17 , 3862 , Mocha Beige - DK , 243 , 185 , 102 , O
 52 , 17 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 53 , 17 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
-54 , 17 , 0 , Empty , 250 , 185 , 137 , 
-55 , 17 , 0 , Empty , 250 , 185 , 137 , 
+54 , 17 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+55 , 17 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 56 , 17 , 945 , Tawny , 255 , 248 , 233 , C
 57 , 17 , 945 , Tawny , 255 , 248 , 233 , C
 58 , 17 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
@@ -2221,8 +2221,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 60 , 17 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 61 , 17 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 62 , 17 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-63 , 17 , 0 , Empty , 250 , 185 , 137 , 
-64 , 17 , 0 , Empty , 250 , 185 , 137 , 
+63 , 17 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+64 , 17 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 65 , 17 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 66 , 17 , 0 , Empty , 255 , 255, 255 , 
 67 , 17 , 0 , Empty , 255 , 255, 255 , 
@@ -2339,8 +2339,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 51 , 18 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 52 , 18 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 53 , 18 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
-54 , 18 , 0 , Empty , 250 , 185 , 137 , 
-55 , 18 , 0 , Empty , 250 , 185 , 137 , 
+54 , 18 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+55 , 18 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 56 , 18 , 945 , Tawny , 255 , 248 , 233 , C
 57 , 18 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 58 , 18 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -2348,7 +2348,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 60 , 18 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 61 , 18 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 62 , 18 , 945 , Tawny , 255 , 248 , 233 , C
-63 , 18 , 0 , Empty , 250 , 185 , 137 , 
+63 , 18 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 64 , 18 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 65 , 18 , 0 , Empty , 255 , 255, 255 , 
 66 , 18 , 0 , Empty , 255 , 255, 255 , 
@@ -2466,7 +2466,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 51 , 19 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 52 , 19 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 53 , 19 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-54 , 19 , 0 , Empty , 250 , 185 , 137 , 
+54 , 19 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 55 , 19 , 945 , Tawny , 255 , 248 , 233 , C
 56 , 19 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 57 , 19 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -2474,8 +2474,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 59 , 19 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 60 , 19 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 61 , 19 , 945 , Tawny , 255 , 248 , 233 , C
-62 , 19 , 0 , Empty , 250 , 185 , 137 , 
-63 , 19 , 0 , Empty , 250 , 185 , 137 , 
+62 , 19 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+63 , 19 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 64 , 19 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 65 , 19 , 0 , Empty , 255 , 255, 255 , 
 66 , 19 , 0 , Empty , 255 , 255, 255 , 
@@ -2593,15 +2593,15 @@ X,Y,DMC Number,DMC Name,R,G,B
 51 , 20 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 52 , 20 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 53 , 20 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
-54 , 20 , 0 , Empty , 250 , 185 , 137 , 
+54 , 20 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 55 , 20 , 945 , Tawny , 255 , 248 , 233 , C
 56 , 20 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 57 , 20 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 58 , 20 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 59 , 20 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 60 , 20 , 945 , Tawny , 255 , 248 , 233 , C
-61 , 20 , 0 , Empty , 250 , 185 , 137 , 
-62 , 20 , 0 , Empty , 250 , 185 , 137 , 
+61 , 20 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+62 , 20 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 63 , 20 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 64 , 20 , 0 , Empty , 255 , 255, 255 , 
 65 , 20 , 0 , Empty , 255 , 255, 255 , 
@@ -2719,15 +2719,15 @@ X,Y,DMC Number,DMC Name,R,G,B
 50 , 21 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 51 , 21 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 52 , 21 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-53 , 21 , 0 , Empty , 250 , 185 , 137 , 
+53 , 21 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 54 , 21 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 55 , 21 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 56 , 21 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 57 , 21 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 58 , 21 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 59 , 21 , 945 , Tawny , 255 , 248 , 233 , C
-60 , 21 , 0 , Empty , 250 , 185 , 137 , 
-61 , 21 , 0 , Empty , 250 , 185 , 137 , 
+60 , 21 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+61 , 21 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 62 , 21 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 63 , 21 , 0 , Empty , 255 , 255, 255 , 
 64 , 21 , 0 , Empty , 255 , 255, 255 , 
@@ -2851,9 +2851,9 @@ X,Y,DMC Number,DMC Name,R,G,B
 55 , 22 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 56 , 22 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 57 , 22 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-58 , 22 , 0 , Empty , 250 , 185 , 137 , 
-59 , 22 , 0 , Empty , 250 , 185 , 137 , 
-60 , 22 , 0 , Empty , 250 , 185 , 137 , 
+58 , 22 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+59 , 22 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+60 , 22 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 61 , 22 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 62 , 22 , 0 , Empty , 255 , 255, 255 , 
 63 , 22 , 0 , Empty , 255 , 255, 255 , 
@@ -2977,8 +2977,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 54 , 23 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 55 , 23 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 56 , 23 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-57 , 23 , 0 , Empty , 250 , 185 , 137 , 
-58 , 23 , 0 , Empty , 250 , 185 , 137 , 
+57 , 23 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+58 , 23 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 59 , 23 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 60 , 23 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 61 , 23 , 0 , Empty , 255 , 255, 255 , 
@@ -3104,7 +3104,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 54 , 24 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 55 , 24 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 56 , 24 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
-57 , 24 , 0 , Empty , 250 , 185 , 137 , 
+57 , 24 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 58 , 24 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 59 , 24 , 0 , Empty , 255 , 255, 255 , 
 60 , 24 , 0 , Empty , 255 , 255, 255 , 
@@ -9538,8 +9538,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 11 , 75 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 12 , 75 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 13 , 75 , 945 , Tawny , 255 , 248 , 233 , C
-14 , 75 , 0 , Empty , 250 , 185 , 137 , 
-15 , 75 , 0 , Empty , 223 , 111 , 110 , 
+14 , 75 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+15 , 75 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 16 , 75 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 17 , 75 , 581 , Moss Green , 123 , 176 , 74 , 7
 18 , 75 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -9662,11 +9662,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 8 , 76 , 945 , Tawny , 255 , 248 , 233 , C
 9 , 76 , 945 , Tawny , 255 , 248 , 233 , C
 10 , 76 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-11 , 76 , 0 , Empty , 250 , 185 , 137 , 
-12 , 76 , 0 , Empty , 250 , 185 , 137 , 
-13 , 76 , 0 , Empty , 223 , 111 , 110 , 
-14 , 76 , 0 , Empty , 223 , 111 , 110 , 
-15 , 76 , 0 , Empty , 223 , 111 , 110 , 
+11 , 76 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+12 , 76 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+13 , 76 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+14 , 76 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+15 , 76 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 16 , 76 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 17 , 76 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 18 , 76 , 581 , Moss Green , 123 , 176 , 74 , 7
@@ -9788,11 +9788,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 7 , 77 , 945 , Tawny , 255 , 248 , 233 , C
 8 , 77 , 945 , Tawny , 255 , 248 , 233 , C
 9 , 77 , 945 , Tawny , 255 , 248 , 233 , C
-10 , 77 , 0 , Empty , 250 , 185 , 137 , 
-11 , 77 , 0 , Empty , 250 , 185 , 137 , 
-12 , 77 , 0 , Empty , 223 , 111 , 110 , 
+10 , 77 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+11 , 77 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+12 , 77 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 13 , 77 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-14 , 77 , 0 , Empty , 223 , 111 , 110 , 
+14 , 77 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 15 , 77 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 16 , 77 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 17 , 77 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
@@ -9914,10 +9914,10 @@ X,Y,DMC Number,DMC Name,R,G,B
 6 , 78 , 945 , Tawny , 255 , 248 , 233 , C
 7 , 78 , 945 , Tawny , 255 , 248 , 233 , C
 8 , 78 , 945 , Tawny , 255 , 248 , 233 , C
-9 , 78 , 0 , Empty , 250 , 185 , 137 , 
-10 , 78 , 0 , Empty , 250 , 185 , 137 , 
-11 , 78 , 0 , Empty , 250 , 185 , 137 , 
-12 , 78 , 0 , Empty , 250 , 185 , 137 , 
+9 , 78 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+10 , 78 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+11 , 78 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+12 , 78 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 13 , 78 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 14 , 78 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 15 , 78 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10040,10 +10040,10 @@ X,Y,DMC Number,DMC Name,R,G,B
 5 , 79 , 945 , Tawny , 255 , 248 , 233 , C
 6 , 79 , 945 , Tawny , 255 , 248 , 233 , C
 7 , 79 , 945 , Tawny , 255 , 248 , 233 , C
-8 , 79 , 0 , Empty , 250 , 185 , 137 , 
-9 , 79 , 0 , Empty , 250 , 185 , 137 , 
-10 , 79 , 0 , Empty , 250 , 185 , 137 , 
-11 , 79 , 0 , Empty , 250 , 185 , 137 , 
+8 , 79 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+9 , 79 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+10 , 79 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+11 , 79 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 12 , 79 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 13 , 79 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 14 , 79 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
@@ -10166,11 +10166,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 4 , 80 , 945 , Tawny , 255 , 248 , 233 , C
 5 , 80 , 945 , Tawny , 255 , 248 , 233 , C
 6 , 80 , 945 , Tawny , 255 , 248 , 233 , C
-7 , 80 , 0 , Empty , 250 , 185 , 137 , 
-8 , 80 , 0 , Empty , 250 , 185 , 137 , 
-9 , 80 , 0 , Empty , 250 , 185 , 137 , 
-10 , 80 , 0 , Empty , 250 , 185 , 137 , 
-11 , 80 , 0 , Empty , 223 , 111 , 110 , 
+7 , 80 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+8 , 80 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+9 , 80 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+10 , 80 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+11 , 80 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 12 , 80 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 13 , 80 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 14 , 80 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10291,11 +10291,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 2 , 81 , 945 , Tawny , 255 , 248 , 233 , C
 3 , 81 , 945 , Tawny , 255 , 248 , 233 , C
 4 , 81 , 945 , Tawny , 255 , 248 , 233 , C
-5 , 81 , 0 , Empty , 250 , 185 , 137 , 
+5 , 81 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 6 , 81 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 7 , 81 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-8 , 81 , 0 , Empty , 250 , 185 , 137 , 
-9 , 81 , 0 , Empty , 250 , 185 , 137 , 
+8 , 81 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+9 , 81 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 10 , 81 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 11 , 81 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 12 , 81 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10420,9 +10420,9 @@ X,Y,DMC Number,DMC Name,R,G,B
 4 , 82 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 5 , 82 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 6 , 82 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-7 , 82 , 0 , Empty , 250 , 185 , 137 , 
-8 , 82 , 0 , Empty , 250 , 185 , 137 , 
-9 , 82 , 0 , Empty , 223 , 111 , 110 , 
+7 , 82 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+8 , 82 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+9 , 82 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 10 , 82 , 3364 , Pine Green , 169 , 202 , 150 , G
 11 , 82 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 12 , 82 , 3364 , Pine Green , 169 , 202 , 150 , G
@@ -10547,8 +10547,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 4 , 83 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 5 , 83 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 6 , 83 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-7 , 83 , 0 , Empty , 250 , 185 , 137 , 
-8 , 83 , 0 , Empty , 250 , 185 , 137 , 
+7 , 83 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+8 , 83 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 9 , 83 , 3364 , Pine Green , 169 , 202 , 150 , G
 10 , 83 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 11 , 83 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10673,9 +10673,9 @@ X,Y,DMC Number,DMC Name,R,G,B
 3 , 84 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 4 , 84 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 5 , 84 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-6 , 84 , 0 , Empty , 250 , 185 , 137 , 
-7 , 84 , 0 , Empty , 250 , 185 , 137 , 
-8 , 84 , 0 , Empty , 223 , 111 , 110 , 
+6 , 84 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+7 , 84 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+8 , 84 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 9 , 84 , 3364 , Pine Green , 169 , 202 , 150 , G
 10 , 84 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 11 , 84 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10797,10 +10797,10 @@ X,Y,DMC Number,DMC Name,R,G,B
 0 , 85 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 1 , 85 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 2 , 85 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-3 , 85 , 0 , Empty , 250 , 185 , 137 , 
-4 , 85 , 0 , Empty , 250 , 185 , 137 , 
-5 , 85 , 0 , Empty , 250 , 185 , 137 , 
-6 , 85 , 0 , Empty , 250 , 185 , 137 , 
+3 , 85 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+4 , 85 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+5 , 85 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+6 , 85 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 7 , 85 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 8 , 85 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 9 , 85 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -10922,13 +10922,13 @@ X,Y,DMC Number,DMC Name,R,G,B
 125 , 85 , 0 , Empty , 255 , 255, 255 , 
 126 , 85 , 0 , Empty , 255 , 255, 255 , 
 0 , 86 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
-1 , 86 , 0 , Empty , 250 , 185 , 137 , 
-2 , 86 , 0 , Empty , 250 , 185 , 137 , 
-3 , 86 , 0 , Empty , 250 , 185 , 137 , 
-4 , 86 , 0 , Empty , 250 , 185 , 137 , 
+1 , 86 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+2 , 86 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+3 , 86 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+4 , 86 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 5 , 86 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 6 , 86 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-7 , 86 , 0 , Empty , 223 , 111 , 110 , 
+7 , 86 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 8 , 86 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 9 , 86 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 10 , 86 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -11049,13 +11049,13 @@ X,Y,DMC Number,DMC Name,R,G,B
 125 , 86 , 0 , Empty , 255 , 255, 255 , 
 126 , 86 , 0 , Empty , 255 , 255, 255 , 
 0 , 87 , 0 , Empty , 255 , 255, 255 , 
-1 , 87 , 0 , Empty , 250 , 185 , 137 , 
-2 , 87 , 0 , Empty , 250 , 185 , 137 , 
-3 , 87 , 0 , Empty , 250 , 185 , 137 , 
+1 , 87 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+2 , 87 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+3 , 87 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 4 , 87 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 5 , 87 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-6 , 87 , 0 , Empty , 223 , 111 , 110 , 
-7 , 87 , 0 , Empty , 223 , 111 , 110 , 
+6 , 87 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+7 , 87 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 8 , 87 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 9 , 87 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 10 , 87 , 3364 , Pine Green , 169 , 202 , 150 , G
@@ -11176,12 +11176,12 @@ X,Y,DMC Number,DMC Name,R,G,B
 125 , 87 , 0 , Empty , 255 , 255, 255 , 
 126 , 87 , 0 , Empty , 255 , 255, 255 , 
 0 , 88 , 0 , Empty , 255 , 255, 255 , 
-1 , 88 , 0 , Empty , 250 , 185 , 137 , 
+1 , 88 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 2 , 88 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 3 , 88 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 4 , 88 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 5 , 88 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-6 , 88 , 0 , Empty , 223 , 111 , 110 , 
+6 , 88 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 7 , 88 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 8 , 88 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 9 , 88 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -11304,11 +11304,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 126 , 88 , 0 , Empty , 255 , 255, 255 , 
 0 , 89 , 0 , Empty , 255 , 255, 255 , 
 1 , 89 , 0 , Empty , 255 , 255, 255 , 
-2 , 89 , 0 , Empty , 250 , 185 , 137 , 
-3 , 89 , 0 , Empty , 223 , 111 , 110 , 
+2 , 89 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+3 , 89 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 4 , 89 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-5 , 89 , 0 , Empty , 223 , 111 , 110 , 
-6 , 89 , 0 , Empty , 223 , 111 , 110 , 
+5 , 89 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+6 , 89 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 7 , 89 , 3046 , Yellow Beige - MD , 246 , 243 , 167 , D
 8 , 89 , 581 , Moss Green , 123 , 176 , 74 , 7
 9 , 89 , 3364 , Pine Green , 169 , 202 , 150 , G
@@ -11432,10 +11432,10 @@ X,Y,DMC Number,DMC Name,R,G,B
 0 , 90 , 0 , Empty , 255 , 255, 255 , 
 1 , 90 , 0 , Empty , 255 , 255, 255 , 
 2 , 90 , 0 , Empty , 255 , 255, 255 , 
-3 , 90 , 0 , Empty , 250 , 185 , 137 , 
-4 , 90 , 0 , Empty , 223 , 111 , 110 , 
-5 , 90 , 0 , Empty , 223 , 111 , 110 , 
-6 , 90 , 0 , Empty , 223 , 111 , 110 , 
+3 , 90 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+4 , 90 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+5 , 90 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+6 , 90 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 7 , 90 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
 8 , 90 , 3364 , Pine Green , 169 , 202 , 150 , G
 9 , 90 , 3348 , Yellow Green - LT , 241 , 246 , 219 , F
@@ -11498,12 +11498,12 @@ X,Y,DMC Number,DMC Name,R,G,B
 66 , 90 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 67 , 90 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 68 , 90 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
-69 , 90 , 0 , Empty , 250 , 185 , 137 , 
-70 , 90 , 0 , Empty , 250 , 185 , 137 , 
-71 , 90 , 0 , Empty , 250 , 185 , 137 , 
+69 , 90 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+70 , 90 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+71 , 90 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 72 , 90 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-73 , 90 , 0 , Empty , 223 , 111 , 110 , 
-74 , 90 , 0 , Empty , 223 , 111 , 110 , 
+73 , 90 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+74 , 90 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 75 , 90 , 310 , Black , 73 , 77 , 78 , 1
 76 , 90 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 77 , 90 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -11628,11 +11628,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 69 , 91 , 945 , Tawny , 255 , 248 , 233 , C
 70 , 91 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 91 , 945 , Tawny , 255 , 248 , 233 , C
-72 , 91 , 0 , Empty , 250 , 185 , 137 , 
+72 , 91 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 73 , 91 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 74 , 91 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-75 , 91 , 0 , Empty , 223 , 111 , 110 , 
-76 , 91 , 0 , Empty , 231 , 88 , 74 , 
+75 , 91 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+76 , 91 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 77 , 91 , 310 , Black , 73 , 77 , 78 , 1
 78 , 91 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 79 , 91 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -11756,11 +11756,11 @@ X,Y,DMC Number,DMC Name,R,G,B
 70 , 92 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 92 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 92 , 945 , Tawny , 255 , 248 , 233 , C
-73 , 92 , 0 , Empty , 250 , 185 , 137 , 
+73 , 92 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 74 , 92 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 92 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-76 , 92 , 0 , Empty , 223 , 111 , 110 , 
-77 , 92 , 0 , Empty , 231 , 88 , 74 , 
+76 , 92 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+77 , 92 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 78 , 92 , 310 , Black , 73 , 77 , 78 , 1
 79 , 92 , 3371 , Black Brown , 246 , 144 , 107 , H
 80 , 92 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -11883,12 +11883,12 @@ X,Y,DMC Number,DMC Name,R,G,B
 70 , 93 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 93 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 93 , 945 , Tawny , 255 , 248 , 233 , C
-73 , 93 , 0 , Empty , 250 , 185 , 137 , 
+73 , 93 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 74 , 93 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 93 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 93 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-77 , 93 , 0 , Empty , 223 , 111 , 110 , 
-78 , 93 , 0 , Empty , 231 , 88 , 74 , 
+77 , 93 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 93 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 79 , 93 , 310 , Black , 73 , 77 , 78 , 1
 80 , 93 , 310 , Black , 73 , 77 , 78 , 1
 81 , 93 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12010,13 +12010,13 @@ X,Y,DMC Number,DMC Name,R,G,B
 70 , 94 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 94 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 94 , 945 , Tawny , 255 , 248 , 233 , C
-73 , 94 , 0 , Empty , 250 , 185 , 137 , 
-74 , 94 , 0 , Empty , 250 , 185 , 137 , 
+73 , 94 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+74 , 94 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 75 , 94 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 94 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 94 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-78 , 94 , 0 , Empty , 223 , 111 , 110 , 
-79 , 94 , 0 , Empty , 231 , 88 , 74 , 
+78 , 94 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 94 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 80 , 94 , 310 , Black , 73 , 77 , 78 , 1
 81 , 94 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 82 , 94 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12138,12 +12138,12 @@ X,Y,DMC Number,DMC Name,R,G,B
 71 , 95 , 3866 , Beige Brown - UL VY LT , 255 , 255 , 255 , R
 72 , 95 , 945 , Tawny , 255 , 248 , 233 , C
 73 , 95 , 945 , Tawny , 255 , 248 , 233 , C
-74 , 95 , 0 , Empty , 250 , 185 , 137 , 
+74 , 95 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 75 , 95 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 95 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 95 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-78 , 95 , 0 , Empty , 223 , 111 , 110 , 
-79 , 95 , 0 , Empty , 231 , 88 , 74 , 
+78 , 95 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 95 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 80 , 95 , 3371 , Black Brown , 246 , 144 , 107 , H
 81 , 95 , 310 , Black , 73 , 77 , 78 , 1
 82 , 95 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12265,13 +12265,13 @@ X,Y,DMC Number,DMC Name,R,G,B
 71 , 96 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 96 , 945 , Tawny , 255 , 248 , 233 , C
 73 , 96 , 945 , Tawny , 255 , 248 , 233 , C
-74 , 96 , 0 , Empty , 250 , 185 , 137 , 
-75 , 96 , 0 , Empty , 250 , 185 , 137 , 
+74 , 96 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+75 , 96 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 76 , 96 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 96 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-78 , 96 , 0 , Empty , 223 , 111 , 110 , 
-79 , 96 , 0 , Empty , 231 , 88 , 74 , 
-80 , 96 , 0 , Empty , 231 , 88 , 74 , 
+78 , 96 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 96 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+80 , 96 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 81 , 96 , 310 , Black , 73 , 77 , 78 , 1
 82 , 96 , 310 , Black , 73 , 77 , 78 , 1
 83 , 96 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12392,13 +12392,13 @@ X,Y,DMC Number,DMC Name,R,G,B
 71 , 97 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 97 , 945 , Tawny , 255 , 248 , 233 , C
 73 , 97 , 945 , Tawny , 255 , 248 , 233 , C
-74 , 97 , 0 , Empty , 250 , 185 , 137 , 
-75 , 97 , 0 , Empty , 250 , 185 , 137 , 
+74 , 97 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+75 , 97 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 76 , 97 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 97 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 78 , 97 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-79 , 97 , 0 , Empty , 223 , 111 , 110 , 
-80 , 97 , 0 , Empty , 231 , 88 , 74 , 
+79 , 97 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 97 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 81 , 97 , 3371 , Black Brown , 246 , 144 , 107 , H
 82 , 97 , 310 , Black , 73 , 77 , 78 , 1
 83 , 97 , 310 , Black , 73 , 77 , 78 , 1
@@ -12519,14 +12519,14 @@ X,Y,DMC Number,DMC Name,R,G,B
 71 , 98 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 98 , 945 , Tawny , 255 , 248 , 233 , C
 73 , 98 , 945 , Tawny , 255 , 248 , 233 , C
-74 , 98 , 0 , Empty , 250 , 185 , 137 , 
-75 , 98 , 0 , Empty , 250 , 185 , 137 , 
+74 , 98 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+75 , 98 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 76 , 98 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 98 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 78 , 98 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-79 , 98 , 0 , Empty , 223 , 111 , 110 , 
-80 , 98 , 0 , Empty , 231 , 88 , 74 , 
-81 , 98 , 0 , Empty , 231 , 88 , 74 , 
+79 , 98 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 98 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+81 , 98 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 82 , 98 , 3371 , Black Brown , 246 , 144 , 107 , H
 83 , 98 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 84 , 98 , 3371 , Black Brown , 246 , 144 , 107 , H
@@ -12645,15 +12645,15 @@ X,Y,DMC Number,DMC Name,R,G,B
 70 , 99 , 3866 , Beige Brown - UL VY LT , 255 , 255 , 255 , R
 71 , 99 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 99 , 945 , Tawny , 255 , 248 , 233 , C
-73 , 99 , 0 , Empty , 250 , 185 , 137 , 
-74 , 99 , 0 , Empty , 250 , 185 , 137 , 
-75 , 99 , 0 , Empty , 250 , 185 , 137 , 
+73 , 99 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+74 , 99 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+75 , 99 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 76 , 99 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 99 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 78 , 99 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-79 , 99 , 0 , Empty , 223 , 111 , 110 , 
-80 , 99 , 0 , Empty , 231 , 88 , 74 , 
-81 , 99 , 0 , Empty , 231 , 88 , 74 , 
+79 , 99 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 99 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+81 , 99 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 82 , 99 , 3371 , Black Brown , 246 , 144 , 107 , H
 83 , 99 , 310 , Black , 73 , 77 , 78 , 1
 84 , 99 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12772,16 +12772,16 @@ X,Y,DMC Number,DMC Name,R,G,B
 70 , 100 , 3866 , Beige Brown - UL VY LT , 255 , 255 , 255 , R
 71 , 100 , 945 , Tawny , 255 , 248 , 233 , C
 72 , 100 , 945 , Tawny , 255 , 248 , 233 , C
-73 , 100 , 0 , Empty , 250 , 185 , 137 , 
-74 , 100 , 0 , Empty , 250 , 185 , 137 , 
+73 , 100 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+74 , 100 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 75 , 100 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 100 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 100 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 78 , 100 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-79 , 100 , 0 , Empty , 223 , 111 , 110 , 
-80 , 100 , 0 , Empty , 223 , 111 , 110 , 
-81 , 100 , 0 , Empty , 231 , 88 , 74 , 
-82 , 100 , 0 , Empty , 231 , 88 , 74 , 
+79 , 100 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 100 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 100 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 100 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 100 , 310 , Black , 73 , 77 , 78 , 1
 84 , 100 , 310 , Black , 73 , 77 , 78 , 1
 85 , 100 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -12898,17 +12898,17 @@ X,Y,DMC Number,DMC Name,R,G,B
 69 , 101 , 3866 , Beige Brown - UL VY LT , 255 , 255 , 255 , R
 70 , 101 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 101 , 945 , Tawny , 255 , 248 , 233 , C
-72 , 101 , 0 , Empty , 250 , 185 , 137 , 
-73 , 101 , 0 , Empty , 250 , 185 , 137 , 
+72 , 101 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+73 , 101 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 74 , 101 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 101 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 101 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 101 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 78 , 101 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-79 , 101 , 0 , Empty , 223 , 111 , 110 , 
-80 , 101 , 0 , Empty , 223 , 111 , 110 , 
-81 , 101 , 0 , Empty , 231 , 88 , 74 , 
-82 , 101 , 0 , Empty , 231 , 88 , 74 , 
+79 , 101 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 101 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 101 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 101 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 101 , 3371 , Black Brown , 246 , 144 , 107 , H
 84 , 101 , 310 , Black , 73 , 77 , 78 , 1
 85 , 101 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -13025,17 +13025,17 @@ X,Y,DMC Number,DMC Name,R,G,B
 69 , 102 , 945 , Tawny , 255 , 248 , 233 , C
 70 , 102 , 945 , Tawny , 255 , 248 , 233 , C
 71 , 102 , 945 , Tawny , 255 , 248 , 233 , C
-72 , 102 , 0 , Empty , 250 , 185 , 137 , 
-73 , 102 , 0 , Empty , 250 , 185 , 137 , 
+72 , 102 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+73 , 102 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 74 , 102 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 102 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 102 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 102 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-78 , 102 , 0 , Empty , 223 , 111 , 110 , 
-79 , 102 , 0 , Empty , 223 , 111 , 110 , 
-80 , 102 , 0 , Empty , 223 , 111 , 110 , 
-81 , 102 , 0 , Empty , 231 , 88 , 74 , 
-82 , 102 , 0 , Empty , 231 , 88 , 74 , 
+78 , 102 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 102 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 102 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 102 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 102 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 102 , 3371 , Black Brown , 246 , 144 , 107 , H
 84 , 102 , 310 , Black , 73 , 77 , 78 , 1
 85 , 102 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -13151,18 +13151,18 @@ X,Y,DMC Number,DMC Name,R,G,B
 68 , 103 , 945 , Tawny , 255 , 248 , 233 , C
 69 , 103 , 3866 , Beige Brown - UL VY LT , 255 , 255 , 255 , R
 70 , 103 , 945 , Tawny , 255 , 248 , 233 , C
-71 , 103 , 0 , Empty , 250 , 185 , 137 , 
-72 , 103 , 0 , Empty , 250 , 185 , 137 , 
-73 , 103 , 0 , Empty , 250 , 185 , 137 , 
+71 , 103 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+72 , 103 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+73 , 103 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 74 , 103 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 103 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 103 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 77 , 103 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-78 , 103 , 0 , Empty , 223 , 111 , 110 , 
-79 , 103 , 0 , Empty , 223 , 111 , 110 , 
-80 , 103 , 0 , Empty , 223 , 111 , 110 , 
-81 , 103 , 0 , Empty , 231 , 88 , 74 , 
-82 , 103 , 0 , Empty , 231 , 88 , 74 , 
+78 , 103 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 103 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 103 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 103 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 103 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 103 , 3371 , Black Brown , 246 , 144 , 107 , H
 84 , 103 , 3371 , Black Brown , 246 , 144 , 107 , H
 85 , 103 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
@@ -13278,18 +13278,18 @@ X,Y,DMC Number,DMC Name,R,G,B
 68 , 104 , 945 , Tawny , 255 , 248 , 233 , C
 69 , 104 , 945 , Tawny , 255 , 248 , 233 , C
 70 , 104 , 945 , Tawny , 255 , 248 , 233 , C
-71 , 104 , 0 , Empty , 250 , 185 , 137 , 
-72 , 104 , 0 , Empty , 250 , 185 , 137 , 
+71 , 104 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+72 , 104 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 73 , 104 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 74 , 104 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 104 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 104 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-77 , 104 , 0 , Empty , 223 , 111 , 110 , 
-78 , 104 , 0 , Empty , 223 , 111 , 110 , 
-79 , 104 , 0 , Empty , 223 , 111 , 110 , 
-80 , 104 , 0 , Empty , 223 , 111 , 110 , 
-81 , 104 , 0 , Empty , 231 , 88 , 74 , 
-82 , 104 , 0 , Empty , 231 , 88 , 74 , 
+77 , 104 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 104 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 104 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 104 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 104 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 104 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 104 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 84 , 104 , 3371 , Black Brown , 246 , 144 , 107 , H
 85 , 104 , 3371 , Black Brown , 246 , 144 , 107 , H
@@ -13404,19 +13404,19 @@ X,Y,DMC Number,DMC Name,R,G,B
 67 , 105 , 945 , Tawny , 255 , 248 , 233 , C
 68 , 105 , 945 , Tawny , 255 , 248 , 233 , C
 69 , 105 , 945 , Tawny , 255 , 248 , 233 , C
-70 , 105 , 0 , Empty , 250 , 185 , 137 , 
-71 , 105 , 0 , Empty , 250 , 185 , 137 , 
+70 , 105 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+71 , 105 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 72 , 105 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 73 , 105 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 74 , 105 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 105 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 76 , 105 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-77 , 105 , 0 , Empty , 223 , 111 , 110 , 
-78 , 105 , 0 , Empty , 223 , 111 , 110 , 
-79 , 105 , 0 , Empty , 223 , 111 , 110 , 
-80 , 105 , 0 , Empty , 231 , 88 , 74 , 
-81 , 105 , 0 , Empty , 231 , 88 , 74 , 
-82 , 105 , 0 , Empty , 231 , 88 , 74 , 
+77 , 105 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 105 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 105 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 105 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+81 , 105 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 105 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 83 , 105 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 84 , 105 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 85 , 105 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
@@ -13529,21 +13529,21 @@ X,Y,DMC Number,DMC Name,R,G,B
 65 , 106 , 945 , Tawny , 255 , 248 , 233 , C
 66 , 106 , 945 , Tawny , 255 , 248 , 233 , C
 67 , 106 , 945 , Tawny , 255 , 248 , 233 , C
-68 , 106 , 0 , Empty , 250 , 185 , 137 , 
-69 , 106 , 0 , Empty , 250 , 185 , 137 , 
-70 , 106 , 0 , Empty , 250 , 185 , 137 , 
-71 , 106 , 0 , Empty , 250 , 185 , 137 , 
+68 , 106 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+69 , 106 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+70 , 106 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+71 , 106 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 72 , 106 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 73 , 106 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 74 , 106 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 75 , 106 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-76 , 106 , 0 , Empty , 223 , 111 , 110 , 
-77 , 106 , 0 , Empty , 223 , 111 , 110 , 
-78 , 106 , 0 , Empty , 223 , 111 , 110 , 
-79 , 106 , 0 , Empty , 231 , 88 , 74 , 
-80 , 106 , 0 , Empty , 231 , 88 , 74 , 
-81 , 106 , 0 , Empty , 231 , 88 , 74 , 
-82 , 106 , 0 , Empty , 223 , 111 , 110 , 
+76 , 106 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+77 , 106 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 106 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+79 , 106 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+80 , 106 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+81 , 106 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+82 , 106 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 83 , 106 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 84 , 106 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 85 , 106 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -13652,24 +13652,24 @@ X,Y,DMC Number,DMC Name,R,G,B
 61 , 107 , 3371 , Black Brown , 246 , 144 , 107 , H
 62 , 107 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 63 , 107 , 3364 , Pine Green , 169 , 202 , 150 , G
-64 , 107 , 0 , Empty , 250 , 185 , 137 , 
+64 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 65 , 107 , 945 , Tawny , 255 , 248 , 233 , C
-66 , 107 , 0 , Empty , 250 , 185 , 137 , 
-67 , 107 , 0 , Empty , 250 , 185 , 137 , 
-68 , 107 , 0 , Empty , 250 , 185 , 137 , 
-69 , 107 , 0 , Empty , 250 , 185 , 137 , 
-70 , 107 , 0 , Empty , 250 , 185 , 137 , 
+66 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+67 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+68 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+69 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+70 , 107 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 71 , 107 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 72 , 107 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 73 , 107 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 74 , 107 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-75 , 107 , 0 , Empty , 223 , 111 , 110 , 
-76 , 107 , 0 , Empty , 223 , 111 , 110 , 
-77 , 107 , 0 , Empty , 223 , 111 , 110 , 
-78 , 107 , 0 , Empty , 231 , 88 , 74 , 
-79 , 107 , 0 , Empty , 231 , 88 , 74 , 
-80 , 107 , 0 , Empty , 231 , 88 , 74 , 
-81 , 107 , 0 , Empty , 231 , 88 , 74 , 
+75 , 107 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+76 , 107 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+77 , 107 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 107 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+79 , 107 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+80 , 107 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+81 , 107 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 82 , 107 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
 83 , 107 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 84 , 107 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -13780,23 +13780,23 @@ X,Y,DMC Number,DMC Name,R,G,B
 62 , 108 , 3364 , Pine Green , 169 , 202 , 150 , G
 63 , 108 , 936 , Avocado Green - DK MD , 147 , 160 , 130 , B
 64 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-65 , 108 , 0 , Empty , 250 , 185 , 137 , 
-66 , 108 , 0 , Empty , 250 , 185 , 137 , 
+65 , 108 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
+66 , 108 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 67 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-68 , 108 , 0 , Empty , 250 , 185 , 137 , 
+68 , 108 , 758 , Terra Cotta - VY LT , 250 , 185 , 137 , 8
 69 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 70 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 71 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 72 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 73 , 108 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-74 , 108 , 0 , Empty , 223 , 111 , 110 , 
-75 , 108 , 0 , Empty , 223 , 111 , 110 , 
-76 , 108 , 0 , Empty , 223 , 111 , 110 , 
-77 , 108 , 0 , Empty , 231 , 88 , 74 , 
-78 , 108 , 0 , Empty , 231 , 88 , 74 , 
-79 , 108 , 0 , Empty , 231 , 88 , 74 , 
-80 , 108 , 0 , Empty , 223 , 111 , 110 , 
-81 , 108 , 0 , Empty , 223 , 111 , 110 , 
+74 , 108 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+75 , 108 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+76 , 108 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+77 , 108 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+78 , 108 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+79 , 108 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+80 , 108 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+81 , 108 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 82 , 108 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 83 , 108 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
 84 , 108 , 3864 , Mocha Beige - LT , 251 , 226 , 192 , Q
@@ -13914,15 +13914,15 @@ X,Y,DMC Number,DMC Name,R,G,B
 69 , 109 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 70 , 109 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 71 , 109 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-72 , 109 , 0 , Empty , 223 , 111 , 110 , 
-73 , 109 , 0 , Empty , 223 , 111 , 110 , 
-74 , 109 , 0 , Empty , 223 , 111 , 110 , 
-75 , 109 , 0 , Empty , 223 , 111 , 110 , 
-76 , 109 , 0 , Empty , 231 , 88 , 74 , 
-77 , 109 , 0 , Empty , 231 , 88 , 74 , 
-78 , 109 , 0 , Empty , 231 , 88 , 74 , 
-79 , 109 , 0 , Empty , 223 , 111 , 110 , 
-80 , 109 , 0 , Empty , 223 , 111 , 110 , 
+72 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+73 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+74 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+75 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+76 , 109 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+77 , 109 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+78 , 109 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+79 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+80 , 109 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 81 , 109 , 3862 , Mocha Beige - DK , 243 , 185 , 102 , O
 82 , 109 , 3862 , Mocha Beige - DK , 243 , 185 , 102 , O
 83 , 109 , 3863 , Mocha Beige - MD , 250 , 186 , 171 , P
@@ -14038,16 +14038,16 @@ X,Y,DMC Number,DMC Name,R,G,B
 66 , 110 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 67 , 110 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 68 , 110 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-69 , 110 , 0 , Empty , 223 , 111 , 110 , 
-70 , 110 , 0 , Empty , 223 , 111 , 110 , 
-71 , 110 , 0 , Empty , 223 , 111 , 110 , 
-72 , 110 , 0 , Empty , 223 , 111 , 110 , 
-73 , 110 , 0 , Empty , 231 , 88 , 74 , 
-74 , 110 , 0 , Empty , 231 , 88 , 74 , 
-75 , 110 , 0 , Empty , 231 , 88 , 74 , 
-76 , 110 , 0 , Empty , 231 , 88 , 74 , 
-77 , 110 , 0 , Empty , 223 , 111 , 110 , 
-78 , 110 , 0 , Empty , 223 , 111 , 110 , 
+69 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+70 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+71 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+72 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+73 , 110 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+74 , 110 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+75 , 110 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+76 , 110 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+77 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+78 , 110 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 79 , 110 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 80 , 110 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
 81 , 110 , 898 , Coffee Brown - VY DK , 122 , 94 , 81 , A
@@ -14166,14 +14166,14 @@ X,Y,DMC Number,DMC Name,R,G,B
 67 , 111 , 842 , Beige Brown - VY LT , 201 , 234 , 240 , 9
 68 , 111 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
 69 , 111 , 3778 , Terra Cotta - LT , 247 , 167 , 161 , J
-70 , 111 , 0 , Empty , 231 , 88 , 74 , 
-71 , 111 , 0 , Empty , 231 , 88 , 74 , 
-72 , 111 , 0 , Empty , 231 , 88 , 74 , 
-73 , 111 , 0 , Empty , 231 , 88 , 74 , 
-74 , 111 , 0 , Empty , 231 , 88 , 74 , 
-75 , 111 , 0 , Empty , 231 , 88 , 74 , 
-76 , 111 , 0 , Empty , 231 , 88 , 74 , 
-77 , 111 , 0 , Empty , 231 , 88 , 74 , 
+70 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+71 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+72 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+73 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+74 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+75 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+76 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
+77 , 111 , 347 , Salmon - VY DK , 231 , 88 , 74 , 3
 78 , 111 , 3371 , Black Brown , 246 , 144 , 107 , H
 79 , 111 , 3371 , Black Brown , 246 , 144 , 107 , H
 80 , 111 , 3371 , Black Brown , 246 , 144 , 107 , H
@@ -14414,7 +14414,7 @@ X,Y,DMC Number,DMC Name,R,G,B
 61 , 113 , 0 , Empty , 255 , 255, 255 , 
 62 , 113 , 0 , Empty , 255 , 255, 255 , 
 63 , 113 , 0 , Empty , 255 , 255, 255 , 
-64 , 113 , 0 , Empty , 223 , 111 , 110 , 
+64 , 113 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 65 , 113 , 0 , Empty , 255 , 255, 255 , 
 66 , 113 , 0 , Empty , 255 , 255, 255 , 
 67 , 113 , 0 , Empty , 255 , 255, 255 , 
@@ -14543,8 +14543,8 @@ X,Y,DMC Number,DMC Name,R,G,B
 63 , 114 , 0 , Empty , 255 , 255, 255 , 
 64 , 114 , 0 , Empty , 255 , 255, 255 , 
 65 , 114 , 0 , Empty , 255 , 255, 255 , 
-66 , 114 , 0 , Empty , 223 , 111 , 110 , 
-67 , 114 , 0 , Empty , 223 , 111 , 110 , 
+66 , 114 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+67 , 114 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 68 , 114 , 0 , Empty , 255 , 255, 255 , 
 69 , 114 , 0 , Empty , 255 , 255, 255 , 
 70 , 114 , 0 , Empty , 255 , 255, 255 , 
@@ -14672,9 +14672,9 @@ X,Y,DMC Number,DMC Name,R,G,B
 65 , 115 , 0 , Empty , 255 , 255, 255 , 
 66 , 115 , 0 , Empty , 255 , 255, 255 , 
 67 , 115 , 0 , Empty , 255 , 255, 255 , 
-68 , 115 , 0 , Empty , 223 , 111 , 110 , 
-69 , 115 , 0 , Empty , 223 , 111 , 110 , 
-70 , 115 , 0 , Empty , 223 , 111 , 110 , 
+68 , 115 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+69 , 115 , 3328 , Salmon - DK , 223 , 111 , 110 , E
+70 , 115 , 3328 , Salmon - DK , 223 , 111 , 110 , E
 71 , 115 , 0 , Empty , 255 , 255, 255 , 
 72 , 115 , 0 , Empty , 255 , 255, 255 , 
 73 , 115 , 0 , Empty , 255 , 255, 255 , 

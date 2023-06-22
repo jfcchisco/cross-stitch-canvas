@@ -17,6 +17,10 @@ let j = 0;
 let cols = 0;
 let rows = 0;
 
+let highFlag = false;
+let highCode = 0;
+let alpha = 1;
+
 let csvData = '';
 let csvFile = 'rabbit.csv';
 
@@ -124,17 +128,29 @@ function draw()
     ctx.translate( -window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y )
     //ctx.translate(0, 0);
     ctx.clearRect(0,0, window.innerWidth, window.innerHeight)
-    ctx.fillStyle = "#991111"
+    ctx.fillStyle = "#ffffff"
     drawRect(0, 0, canvas.width, canvas.height);
     
+    highCode = 553;
+
+
     if(bigArray.length > 1) {
         for (i = 1; i < bigArray.length-1; i ++) {
             
             let line = bigArray[i].split(",");
             //console.log(line);
-            ctx.fillStyle = "rgb(" + line[4] + ", " + line[5] + ", " + line[6] + ")";
+
+            if(highFlag == true && line[2] != highCode) {
+                alpha = 0.2;
+            }
+            else {
+                alpha = 1;
+            }
+
+
+            ctx.fillStyle = "rgba(" + line[4] + ", " + line[5] + ", " + line[6] + "," + alpha + ")";
             drawRect(line[0]*box, line[1]*box, box, box);
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
             ctx.font = "25px Arial";
             ctx.fillText(line[7], line[0]*box+12, line[1]*box+30);
         }
@@ -148,6 +164,12 @@ function draw()
         ctx.lineTo(i*10*box-1, canvas.height);
         ctx.lineWidth = 3;
         ctx.stroke();
+
+        drawRect(i*10*box, box+(100 - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2), 50, 32)
+
+        ctx.fillStyle = "white";
+        ctx.fillText(i*10, i*10*box+5, box+((100+25*cameraZoom) - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2));
+
     }
 
     for(i = 0; i < rows/10; i++) {
@@ -157,6 +179,15 @@ function draw()
         ctx.lineTo(canvas.width, i*10*box-1);
         ctx.lineWidth = 3;
         ctx.stroke();
+        
+        ctx.fillStyle = "blue";
+        drawRect((canvas.getBoundingClientRect().x)/cameraZoom - (cameraOffset.x - canvas.clientWidth/2), i*10*box, 50, 32)
+
+        ctx.fillStyle = "white";
+
+        //ctx.rotate((90 * Math.PI) / 180);
+        ctx.fillText(i*10, ((2*cameraZoom) - canvas.getBoundingClientRect().x)/cameraZoom - (cameraOffset.x - canvas.clientWidth/2), i*10*box+25);
+        //ctx.rotate(0);
     }
 
 
@@ -323,6 +354,12 @@ function getStitchCoord(canvasClick) {
     
     //console.log(Math.floor(canvasClick.x/box)+1, Math.floor(canvasClick.y/box)+1);
     return obj;
+}
+
+function highlight() {
+    //console.log(highFlag);
+    highFlag = !highFlag;
+    //console.log(highFlag);
 }
 
 canvas.addEventListener('mousedown', onPointerDown)
