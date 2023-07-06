@@ -1,6 +1,9 @@
 let canvas = document.getElementById("canvas")
 let ctx = canvas.getContext('2d')
 
+const colorTemplate = document.querySelector("[data-color-template]");
+const colorContainer = document.querySelector("[data-color-container]");
+
 canvas.width = 5000;
 canvas.height = 5000;
 
@@ -17,6 +20,7 @@ let j = 0;
 let cols = 0;
 let rows = 0;
 
+let paintFlag = false;
 let highFlag = false;
 let highCode = 0;
 let alpha = 1;
@@ -25,6 +29,8 @@ let alpha = 1;
 let jsonText = '';
 let jsonFile = 'rabbit.json';
 let jsonObject = {};
+
+let jsonColors = {};
 
 //const dataholder = document.getElementById("dataholder")
 
@@ -87,6 +93,40 @@ window.onload = function() {
 
     //console.log(csvText);
 
+    
+
+    fetch("./rabbit_colors.json")
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            jsonColors = data;
+            colors = data.map(color =>  {
+                //console.log(color.R);
+                const colorDiv = colorTemplate.content.cloneNode(true).children[0];
+                const colorBack = colorDiv.querySelector("[data-color-back]");
+                const colorFront = colorDiv.querySelector("[data-color]");
+                const colorId = colorDiv.querySelector("[data-color-id]");
+
+                colorId.textContent = color.symbol;
+                
+                const backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
+                colorFront.setAttribute('style', backColor)
+                const colorTitle = color.code + " - " + color.name;
+                colorFront.setAttribute('title', colorTitle);
+                const colorClick = "selectColor(" + color.code + ", \"" + color.symbol + "\")";
+                colorFront.setAttribute('onclick', colorClick);
+
+                if(colorBack != null) {
+                    colorBack.classList.add('holyS');
+                    console.log('added');
+                }
+                colorContainer.append(colorDiv);
+                
+
+            })
+        })
+
 
     fetch("./rabbit.json")
         .then(response => {
@@ -116,8 +156,7 @@ function draw()
     //jsonText = jsonText.replace("]","");
     
     
-    //console.log()
-
+    //console.log(jsonColors);
     
 
     //console.log(jsonObject[Object.keys(jsonObject).length-1]);
@@ -164,7 +203,7 @@ function draw()
     ctx.fillStyle = "#ffffff"
     drawRect(0, 0, canvas.width, canvas.height);
     
-    highCode = 553;
+    //highCode = 553;
 
     //console.log(bigArray.length, Object.keys(jsonObject).length)
 
@@ -179,7 +218,21 @@ function draw()
 
             if(highFlag == true && line.dmcCode != highCode) {
                 alpha = 0.2;
-            }
+            } 
+            else if (highFlag == true && line.dmcCode == highCode) {
+                alpha = 1;
+                ctx.fillStyle = "black";
+                ctx.lineWidth = 1;
+                //draw lines around box
+                //up
+                ctx.beginPath()
+                ctx.moveTo(line.X*box, line.Y*box);
+                ctx.lineTo(line.X*box, line.Y*box+box);
+                ctx.lineTo(line.X*box+box, line.Y*box+box);
+                ctx.lineTo(line.X*box+box, line.Y*box);
+                ctx.lineTo(line.X*box, line.Y*box);
+                ctx.stroke();
+            } 
             else {
                 alpha = 1;
             }
@@ -190,6 +243,7 @@ function draw()
             ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
             ctx.font = "25px Arial";
             ctx.fillText(line.symbol, line.X*box+12, line.Y*box+30);
+
         }
     }
 
@@ -279,16 +333,16 @@ function onPointerDown(e)
     isDragging = true
     dragStart.x = getEventLocation(e).x/cameraZoom - cameraOffset.x
     dragStart.y = getEventLocation(e).y/cameraZoom - cameraOffset.y
-    console.log("Click X:", getEventLocation(e).x);
-    console.log("Click Y:", getEventLocation(e).y);
+    //console.log("Click X:", getEventLocation(e).x);
+    //console.log("Click Y:", getEventLocation(e).y);
     mouseDown.x = e.clientX;
     mouseDown.y = e.clientY;
     
-    console.log("Canvas Offset X:", cameraOffset.x - canvas.clientWidth/2);
-    console.log("Canvas Offset Y:", cameraOffset.y - canvas.clientHeight/2);
+    //console.log("Canvas Offset X:", cameraOffset.x - canvas.clientWidth/2);
+    //console.log("Canvas Offset Y:", cameraOffset.y - canvas.clientHeight/2);
     //console.log("Canvas Width:", canvas.width, canvas.clientWidth, window.innerWidth);
     //console.log("Canvas Height:", canvas.height, canvas.clientHeight, window.innerHeight);
-    console.log("Bounding Box:", canvas.getBoundingClientRect())
+    //console.log("Bounding Box:", canvas.getBoundingClientRect())
 
 }
 
@@ -305,13 +359,13 @@ function onPointerUp(e)
     canvasClick.y = box+(getEventLocation(e).y - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2);
     // Why box + ...? Hell I don't know
 
-    console.log("Canvas Click X:", canvasClick.x);
-    console.log("Canvas Click Y:", canvasClick.y);
-    console.log(MIN_ZOOM);
+    //console.log("Canvas Click X:", canvasClick.x);
+    //console.log("Canvas Click Y:", canvasClick.y);
+    //console.log(MIN_ZOOM);
     
 
     if(mouseUp.x == mouseDown.x && mouseUp.y == mouseDown.y) { console.log(getStitchCoord(canvasClick))}
-    else { console.log("Dragged") }
+    //else { console.log("Dragged") }
 }
 
 function onPointerMove(e)
@@ -378,7 +432,7 @@ function adjustZoom(zoomAmount, zoomFactor)
         cameraZoom = Math.min( cameraZoom, MAX_ZOOM )
         cameraZoom = Math.max( cameraZoom, MIN_ZOOM )
         
-        console.log(zoomAmount)
+        //console.log(zoomAmount)
     }
 }
 
@@ -395,8 +449,53 @@ function getStitchCoord(canvasClick) {
 
 function highlight() {
     //console.log(highFlag);
+    clearActiveTool();
     highFlag = !highFlag;
     //console.log(highFlag);
+    if(highFlag) {
+        document.getElementById("highTool").classList.add("activeTool");
+    }
+
+    //clear other flags
+    paintFlag = false;
+}
+
+function paint() {
+    clearActiveTool();
+    paintFlag = !paintFlag;
+
+    if(paintFlag) {
+        document.getElementById("paintTool").classList.add("activeTool");
+    }
+
+    //clear other flags
+    highFlag = false;
+}
+
+function clearActiveTool() {
+    const collection = document.getElementsByClassName("toolback");
+    for (let i = 0; i < collection.length; i++) {
+        collection[i].classList.remove("activeTool");
+    }
+   
+}
+
+function selectColor(color, symbol) {
+    //console.log(color);
+    const collection = document.getElementsByClassName("colorback");
+    for (let i = 0; i < collection.length; i++) {
+        collection[i].classList.remove("activeColor");
+    }
+
+    for (let i = 0; i < collection.length; i++) {
+        if(collection[i].children[0].children[0].innerHTML == symbol) {
+            collection[i].classList.add("activeColor");
+        }
+        //console.log(collection[i].children[0].children[0].innerHTML);
+    }
+
+    highCode = color;
+
 }
 
 canvas.addEventListener('mousedown', onPointerDown)

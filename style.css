@@ -14,7 +14,7 @@ html, body
 #canvas
 {
   width: 100%;
-  height: calc(100% - 100px);
+  height: calc(100% - 115px);
   background: #111;
 }
 
@@ -32,19 +32,40 @@ html, body
 .colorid, .toolid {
     margin-top: 10px;
     font-size: larger;
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
 }
 
 .colors, .tools {
     display: flex;
-    background-color: lightpink;
     width: 100%;
-    height: 50px;
+
 }
 
-
+.colors {
+    background-color: lightpink;
+    height: 65px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
 
 .tools {
     background-color: lightsteelblue;
-    width: 100%;
     height: 50px;
 }
+
+.activeTool {
+    background-color: steelblue;
+}
+
+.toolImage {
+    height: 40px;
+    padding: 5px;
+}
+
+.activeColor {
+    background-color: darkmagenta;
+}
+

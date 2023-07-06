@@ -10,17 +10,29 @@
 </head>
 <body>
     <div class="tools">
-        <div class="toolback" style="background-color: blue;">
+        <div id="highTool" class="toolback">
             <div title="Highlight color" class="tool" onclick="highlight()">
-                <p class="toolid">H</p></div>
+                <img src="./img/highlight.png" class="toolImage">
+            </div>
         </div>
-        <div title="Paint color" class="tool"><p class="toolid">P</p></div>
+        <div id="paintTool" class="toolback">
+            <div title="Paint color" class="tool" onclick="paint()">
+                <img src="./img/brush.png" class="toolImage">
+            </div>
+        </div>
+        
     </div>
-    <div class="colors">
-        <div class="color"><p class="colorid">1</p></div>
-        <div class="color"><p class="colorid">2</p></div>
-    </div>
+    <div class="colors" data-color-container></div>
     <canvas id="canvas"></canvas>
+
+    <template data-color-template>
+        <div class="colorback" data-color-back>
+            <div class="color" data-color>
+                <p class="colorid" data-color-id></p>
+            </div>
+        </div>
+
+    </template>
     
     
 </body>
