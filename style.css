@@ -27,7 +27,6 @@ html, body
     background-clip: content-box, padding-box;
     text-align: center;
     cursor: pointer;
-    user-select: none;
 }
 
 .colorid, .toolid {

@@ -10,7 +10,10 @@
 </head>
 <body>
     <div class="tools">
-        <div title="Highlight color" class="tool" onclick="highlight()"><p class="toolid">H</p></div>
+        <div class="toolback" style="background-color: blue;">
+            <div title="Highlight color" class="tool" onclick="highlight()">
+                <p class="toolid">H</p></div>
+        </div>
         <div title="Paint color" class="tool"><p class="toolid">P</p></div>
     </div>
     <div class="colors">
@@ -18,8 +21,7 @@
         <div class="color"><p class="colorid">2</p></div>
     </div>
     <canvas id="canvas"></canvas>
-    <div id="dataholder" hidden="hidden"></div>
-    <div id="unique" hidden="hidden"></div>
+    
     
 </body>
 <script src="script.js"></script>

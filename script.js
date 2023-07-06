@@ -21,10 +21,12 @@ let highFlag = false;
 let highCode = 0;
 let alpha = 1;
 
-let csvData = '';
-let csvFile = 'rabbit.csv';
 
-const dataholder = document.getElementById("dataholder")
+let jsonText = '';
+let jsonFile = 'rabbit.json';
+let jsonObject = {};
+
+//const dataholder = document.getElementById("dataholder")
 
 //async function getCSV(csvFile) {
 
@@ -47,11 +49,11 @@ const dataholder = document.getElementById("dataholder")
 
 
 //THIS WORKS
-const response = fetch(csvFile)
-    .then(response => response.text())
-    .then((text) => {
-        dataholder.innerHTML = text;
-    })
+//const response = fetch(csvFile)
+//    .then(response => response.text())
+//    .then((text) => {
+//        dataholder.innerHTML = text;
+//    })
 
 //console.log(dataholder.innerHTML.value);
 //THIS WORKS
@@ -85,9 +87,19 @@ window.onload = function() {
 
     //console.log(csvText);
 
+
+    fetch("./rabbit.json")
+        .then(response => {
+            return response.json();
+        })
+        .then((data) => {
+            jsonObject = data;
+            //dataholder.dataset.json = JSON.stringify(data);
+            //dataholder.innerHTML = JSON.stringify(data);
+        })
+
+
 }
-
-
 
 
 function draw()
@@ -99,13 +111,34 @@ function draw()
     //csvData = getCSV(csvFile);
     //console.log(dataholder.innerHTML.split("\n"));
 
-    bigArray = dataholder.innerHTML.split("\n")
+    //jsonText = dataholder.getAttribute("data-json");
+    //jsonText = jsonText.replace("[",""); 
+    //jsonText = jsonText.replace("]","");
+    
+    
+    //console.log()
 
     
+
+    //console.log(jsonObject[Object.keys(jsonObject).length-1]);
+
+    //var jsonObject = JSON.parse('[{"X":"0","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"1","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"2","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"3","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"4","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"5","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"6","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"7","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"8","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"9","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"10","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"11","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"12","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"13","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"14","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"15","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"16","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"17","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"18","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"19","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"20","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"21","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"22","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"23","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"24","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"25","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"26","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"27","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"28","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"29","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""},{"X":"30","Y":"0","dmcCode":"0","dmcName":"Empty","R":"0","G":"0","B":"0","symbol":""}]');
+    //console.log(jsonObject);
+    //jsonText = "'" + jsonText + "'"
+    //let jsonObject = JSON.parse(dataholder.innerHTML);
+    
+    //bigArray = dataholder.innerHTML.split("\n")
+
+    jsonLength = Object.keys(jsonObject).length
+    
     //console.log(bigArray[bigArray.length-2])
-    if(bigArray.length > 1) {
-        cols = parseInt(bigArray[bigArray.length-2].split(",")[0])+1
-        rows = parseInt(bigArray[bigArray.length-2].split(",")[1])+1
+    if(jsonLength > 1) {
+        cols = jsonObject[jsonLength-1].X + 1;
+        rows = jsonObject[jsonLength-1].Y + 1;
+        //cols = parseInt(bigArray[bigArray.length-2].split(",")[0])+1
+        //rows = parseInt(bigArray[bigArray.length-2].split(",")[1])+1
+        //console.log(cols, rows)
+        //console.log(jsonObject[Object.keys(jsonObject).length-1].X + 1)
     }
     else {
         rows = 10;
@@ -133,14 +166,18 @@ function draw()
     
     highCode = 553;
 
+    //console.log(bigArray.length, Object.keys(jsonObject).length)
 
-    if(bigArray.length > 1) {
-        for (i = 1; i < bigArray.length-1; i ++) {
+
+    if(jsonLength > 1) {
+        for (i = 1; i < jsonLength; i ++) {
             
-            let line = bigArray[i].split(",");
+            //let line = bigArray[i].split(",");
+            let line = jsonObject[i]
+            //console.log(line)
             //console.log(line);
 
-            if(highFlag == true && line[2] != highCode) {
+            if(highFlag == true && line.dmcCode != highCode) {
                 alpha = 0.2;
             }
             else {
@@ -148,11 +185,11 @@ function draw()
             }
 
 
-            ctx.fillStyle = "rgba(" + line[4] + ", " + line[5] + ", " + line[6] + "," + alpha + ")";
-            drawRect(line[0]*box, line[1]*box, box, box);
+            ctx.fillStyle = "rgba(" + line.R + ", " + line.G + ", " + line.B + "," + alpha + ")";
+            drawRect(line.X*box, line.Y*box, box, box);
             ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
             ctx.font = "25px Arial";
-            ctx.fillText(line[7], line[0]*box+12, line[1]*box+30);
+            ctx.fillText(line.symbol, line.X*box+12, line.Y*box+30);
         }
     }
 
