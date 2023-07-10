@@ -144,6 +144,17 @@ window.onload = function() {
                 colorArray = checkAndAddColor(colorArray, obj);
             })
 
+            //Add non-existing color for painting
+            colorArray.push( { 
+                "code": 1,
+                "name": "STITCHED",
+                "R": 0,
+                "G": 255,
+                "B": 0,
+                "symbol": "X",
+                "count": 0
+            } );
+
             colorArray.sort(function(a, b) {
                 if(a.count < b.count) return 1;
                 if(a.count > b.count) return -1;
@@ -216,6 +227,8 @@ function checkAndAddColor (colors, line)
             "count": 1
         } );
     }
+
+    
    
     return colors;
 
