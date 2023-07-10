@@ -10,6 +10,11 @@
 </head>
 <body>
     <div class="tools">
+        <div id="saveTool" class="toolback">
+            <div title="Save" class="tool">
+                <img src="./img/save.png" class="toolImage">
+            </div>
+        </div>
         <div id="highTool" class="toolback">
             <div title="Highlight color" class="tool" onclick="highlight()">
                 <img src="./img/highlight.png" class="toolImage">
@@ -20,10 +25,48 @@
                 <img src="./img/brush.png" class="toolImage">
             </div>
         </div>
+        <div id="undoTool" class="toolback">
+            <div title="Undo" class="tool">
+                <img src="./img/undo.png" class="toolImage">
+            </div>
+        </div>
+        <div id="zoomPlus" class="toolback" onclick="adjustZoom(0.1)">
+            <div title="Zoom In" class="tool">
+                <img src="./img/zoomPlus.png" class="toolImage">
+            </div>
+        </div>
+        <div id="zoomMinus" class="toolback" onclick="adjustZoom(-0.1)">
+            <div title="Zoom Out" class="tool">
+                <img src="./img/zoomMinus.png" class="toolImage">
+            </div>
+        </div>
+        <div id="zoomReset" class="toolback" onclick="zoomReset()">
+            <div title="Zoom Reset" class="tool">
+                <img src="./img/zoomReset.png" class="toolImage">
+            </div>
+        </div>
+        <div id="flossUsage" class="toolback" onclick="flossUsageOpen()">
+            <div title="Floss Usage" class="tool">
+                <img src="./img/report.png" class="toolImage">
+            </div>
+        </div>
         
     </div>
     <div class="colors" data-color-container></div>
     <canvas id="canvas"></canvas>
+
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="flossUsageClose()">&times;</span>
+            <p id="properties"></p>
+            <div id="modalList">
+                <table id="modalTable"></table>
+            </div>
+        </div>
+      
+      </div>
 
     <template data-color-template>
         <div class="colorback" data-color-back>

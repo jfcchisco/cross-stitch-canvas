@@ -94,7 +94,7 @@ window.onload = function() {
     //console.log(csvText);
 
     
-
+/*
     fetch("./rabbit_colors.json")
         .then(response => {
             return response.json();
@@ -127,17 +127,97 @@ window.onload = function() {
             })
         })
 
-
+*/
     fetch("./rabbit.json")
         .then(response => {
             return response.json();
         })
         .then((data) => {
             jsonObject = data;
+
+            //Create object with unique colors and count
+            //jsonColors = {};
+            colorArray = [];
+
+            data.forEach(obj => {
+                //console.log(obj);
+                colorArray = checkAndAddColor(colorArray, obj);
+            })
+
+            colorArray.sort(function(a, b) {
+                if(a.count < b.count) return 1;
+                if(a.count > b.count) return -1;
+                return 0;
+            });
+            //console.log(colorArray);
             //dataholder.dataset.json = JSON.stringify(data);
             //dataholder.innerHTML = JSON.stringify(data);
+
+            colors = colorArray.map(color =>  {
+                //console.log(color.R);
+                if(color.code!=0) {
+                    const colorDiv = colorTemplate.content.cloneNode(true).children[0];
+                    const colorBack = colorDiv.querySelector("[data-color-back]");
+                    const colorFront = colorDiv.querySelector("[data-color]");
+                    const colorId = colorDiv.querySelector("[data-color-id]");
+
+                    colorId.textContent = color.symbol;
+                    colorId.style.color = (((color.R * 0.299)+(color.G * 0.587)+(color.B * 0.114)) > 186) ? 'black' : 'white'; // contrast threshold
+                    
+                    const backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
+                    colorFront.setAttribute('style', backColor)
+                    const colorTitle = color.code + " - " + color.name;
+                    colorFront.setAttribute('title', colorTitle);
+                    const colorClick = "selectColor(" + color.code + ", \"" + color.symbol + "\")";
+                    colorFront.setAttribute('onclick', colorClick);
+
+                    if(colorBack != null) {
+                        colorBack.classList.add('holyS');
+                        console.log('added');
+                    }
+                    colorContainer.append(colorDiv);
+                }
+                
+                
+
+            })
+
+            fillFlossUsage();
+
+            
         })
 
+
+}
+
+function checkAndAddColor (colors, line) 
+{
+    let length = colors.length;
+    let found = false;
+    //console.log(line);
+
+    for (i = 0; i < length; i ++) {
+        
+        if(line.dmcCode == colors[i].code) {
+            found = true;
+            colors[i].count = colors[i].count + 1;
+        }
+    }
+    
+
+    if(!found) {
+        colors.push( { 
+            "code": line.dmcCode,
+            "name": line.dmcName,
+            "R": line.R,
+	        "G": line.G,
+	        "B": line.B,
+	        "symbol": line.symbol,
+            "count": 1
+        } );
+    }
+   
+    return colors;
 
 }
 
@@ -196,12 +276,14 @@ function draw()
     // Translate to the canvas centre before zooming - so you'll always zoom on what you're looking directly at
     //ctx.translate( window.innerWidth / 2, window.innerHeight / 2 )
     //ctx.translate(0, 0);
-    ctx.scale((canvas.width/canvas.clientWidth)*cameraZoom, (canvas.height/canvas.clientHeight)*cameraZoom)
-    ctx.translate( -window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y )
+    ctx.scale((canvas.width/canvas.clientWidth)*cameraZoom, (canvas.height/canvas.clientHeight)*cameraZoom);
+    ctx.translate( -window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y );
+    
     //ctx.translate(0, 0);
     ctx.clearRect(0,0, window.innerWidth, window.innerHeight)
     ctx.fillStyle = "#ffffff"
     drawRect(0, 0, canvas.width, canvas.height);
+    
     
     //highCode = 553;
 
@@ -221,17 +303,17 @@ function draw()
             } 
             else if (highFlag == true && line.dmcCode == highCode) {
                 alpha = 1;
-                ctx.fillStyle = "black";
-                ctx.lineWidth = 1;
+                //ctx.fillStyle = "black";
+                //ctx.lineWidth = 1;
                 //draw lines around box
                 //up
-                ctx.beginPath()
-                ctx.moveTo(line.X*box, line.Y*box);
-                ctx.lineTo(line.X*box, line.Y*box+box);
-                ctx.lineTo(line.X*box+box, line.Y*box+box);
-                ctx.lineTo(line.X*box+box, line.Y*box);
-                ctx.lineTo(line.X*box, line.Y*box);
-                ctx.stroke();
+                //ctx.beginPath()
+                //ctx.moveTo(line.X*box, line.Y*box);
+                //ctx.lineTo(line.X*box, line.Y*box+box);
+                //ctx.lineTo(line.X*box+box, line.Y*box+box);
+                //ctx.lineTo(line.X*box+box, line.Y*box);
+                //ctx.lineTo(line.X*box, line.Y*box);
+                //ctx.stroke();
             } 
             else {
                 alpha = 1;
@@ -240,9 +322,10 @@ function draw()
 
             ctx.fillStyle = "rgba(" + line.R + ", " + line.G + ", " + line.B + "," + alpha + ")";
             drawRect(line.X*box, line.Y*box, box, box);
-            ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
-            ctx.font = "25px Arial";
-            ctx.fillText(line.symbol, line.X*box+12, line.Y*box+30);
+            //ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
+            ctx.fillStyle = (((line.R * 0.299)+(line.G * 0.587)+(line.B * 0.114)) > 186) ? "rgba(0,0,0," + alpha + ")" : "rgba(255,255,255," + alpha + ")"; // contrast threshold
+            ctx.font = "bold 35px Arial";
+            ctx.fillText(line.symbol, line.X*box+12, line.Y*box+38);
 
         }
     }
@@ -256,10 +339,10 @@ function draw()
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        drawRect(i*10*box, box+(100 - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2), 50, 32)
+        drawRect(i*10*box, box+(125 - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2), 50, 32)
 
         ctx.fillStyle = "white";
-        ctx.fillText(i*10, i*10*box+5, box+((100+25*cameraZoom) - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2));
+        ctx.fillText(i*10, i*10*box+5, box+((125+25*cameraZoom) - canvas.getBoundingClientRect().y)/cameraZoom - (cameraOffset.y - canvas.clientHeight/2));
 
     }
 
@@ -346,6 +429,7 @@ function onPointerDown(e)
 
 }
 
+
 function onPointerUp(e)
 {
     isDragging = false
@@ -362,9 +446,13 @@ function onPointerUp(e)
     //console.log("Canvas Click X:", canvasClick.x);
     //console.log("Canvas Click Y:", canvasClick.y);
     //console.log(MIN_ZOOM);
+
+    //console.log(cameraOffset);
     
 
-    if(mouseUp.x == mouseDown.x && mouseUp.y == mouseDown.y) { console.log(getStitchCoord(canvasClick))}
+    if(mouseUp.x == mouseDown.x && mouseUp.y == mouseDown.y) { 
+        console.log(getStitchCoord(canvasClick))
+    }
     //else { console.log("Dragged") }
 }
 
@@ -436,6 +524,14 @@ function adjustZoom(zoomAmount, zoomFactor)
     }
 }
 
+function zoomReset() {
+    cameraZoom = MIN_ZOOM;
+    cameraOffset = { x: window.innerWidth/2, y: window.innerHeight/2 }
+    
+}
+
+
+
 function getStitchCoord(canvasClick) {
 
     var obj = {
@@ -496,6 +592,84 @@ function selectColor(color, symbol) {
 
     highCode = color;
 
+}
+
+function fillFlossUsage() {
+    //Fill properties
+    let par = document.getElementById("properties");
+    par.innerHTML = (jsonObject[Object.keys(jsonObject).length-1].X + 1) + "w x " + (jsonObject[Object.keys(jsonObject).length-1].Y + 1) + "h"
+
+
+    //Fill table
+    let table = document.getElementById("modalTable");
+    const headRow = document.createElement('tr');
+
+    let heads = ["Color", "Symbol", "Code", "Name", "Count"];
+    for (let i in heads) {
+        const headCell = document.createElement('th');
+        headCell.textContent = heads[i];
+        headRow.appendChild(headCell);
+    }
+
+    table.appendChild(headRow);
+
+    let newRow = document.createElement('tr');
+    let newCell = document.createElement('td');
+
+    colors = colorArray.map(color =>  {
+        newRow = document.createElement('tr');
+
+        newCell = document.createElement('td');
+        //newCell.textContent = color.R + "," + color.G + "," + color.B;
+        let backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
+        newCell.setAttribute('style', backColor);
+        newRow.appendChild(newCell);
+
+        newCell = document.createElement('td');
+        newCell.textContent = color.symbol;
+        newCell.setAttribute('style', 'text-align: center');
+        newRow.appendChild(newCell);
+
+        newCell = document.createElement('td');
+        newCell.textContent = color.code;
+        newCell.setAttribute('style', 'text-align: right');
+        newRow.appendChild(newCell);
+
+        newCell = document.createElement('td');
+        newCell.textContent = color.name;
+        newRow.appendChild(newCell);
+
+        newCell = document.createElement('td');
+        newCell.textContent = color.count;
+        newCell.setAttribute('style', 'text-align: right');
+        newRow.appendChild(newCell);
+
+        table.appendChild(newRow);
+    })
+
+
+    //list.appendChild(table);
+}
+
+function flossUsageOpen() {
+    let modal = document.getElementById("myModal");
+    modal.style.display = "block";
+
+
+}
+
+function flossUsageClose() {
+    let modal = document.getElementById("myModal");
+    modal.style.display = "none";
+}
+
+
+
+window.onclick = function(event) {
+    let modal = document.getElementById("myModal");
+    if(event.target == modal) {
+        modal.style.display = "none";
+    }
 }
 
 canvas.addEventListener('mousedown', onPointerDown)
