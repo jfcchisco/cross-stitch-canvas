@@ -10,9 +10,19 @@
 </head>
 <body>
     <div class="tools">
+        <div id="openTool" class="toolback">
+            <div title="Open" class="tool" onclick="openFile()">
+                <img src="./img/open.png" class="toolImage">
+            </div>
+        </div>
         <div id="saveTool" class="toolback">
-            <div title="Save" class="tool">
+            <div title="Save" class="tool" onclick="save()">
                 <img src="./img/save.png" class="toolImage">
+            </div>
+        </div>
+        <div id="flossUsage" class="toolback" onclick="flossUsageOpen()">
+            <div title="Floss Usage" class="tool">
+                <img src="./img/report.png" class="toolImage">
             </div>
         </div>
         <div id="highTool" class="toolback">
@@ -26,11 +36,11 @@
             </div>
         </div>
         <div id="bucketTool" class="toolback">
-            <div title="Bucket color" class="tool" ">
+            <div title="Bucket color" class="tool" onclick="bucket()">
                 <img src="./img/bucket.png" class="toolImage">
             </div>
         </div>
-        <div id="undoTool" class="toolback">
+        <div id="undoTool" class="toolback" onclick="undo()">
             <div title="Undo" class="tool">
                 <img src="./img/undo.png" class="toolImage">
             </div>
@@ -50,11 +60,7 @@
                 <img src="./img/zoomReset.png" class="toolImage">
             </div>
         </div>
-        <div id="flossUsage" class="toolback" onclick="flossUsageOpen()">
-            <div title="Floss Usage" class="tool">
-                <img src="./img/report.png" class="toolImage">
-            </div>
-        </div>
+        
         
     </div>
     <div class="colors" data-color-container></div>
@@ -67,7 +73,7 @@
             <span class="close" onclick="flossUsageClose()">&times;</span>
             <p id="properties"></p>
             <div id="modalList">
-                <table id="modalTable"></table>
+                
             </div>
         </div>
       

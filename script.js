@@ -22,15 +22,24 @@ let rows = 0;
 
 let paintFlag = false;
 let highFlag = false;
+let bucketFlag = false;
 let highCode = 0;
 let alpha = 1;
 
+let firstLoop = true;
 
 let jsonText = '';
 let jsonFile = 'rabbit.json';
-let jsonObject = {};
+let jsonObject = {}; // resulting object after fetch
+let originalObject = {};
 
-let jsonColors = {};
+let json2draw = {};
+
+let jsonColors = {}; // json containing color usage
+
+let changes = []; // after a paint event a change has to be added
+
+var downloadURL = null;
 
 //const dataholder = document.getElementById("dataholder")
 
@@ -130,75 +139,91 @@ window.onload = function() {
 */
     fetch("./rabbit.json")
         .then(response => {
-            return response.json();
+            return response.text();
         })
         .then((data) => {
-            jsonObject = data;
-
-            //Create object with unique colors and count
-            //jsonColors = {};
-            colorArray = [];
-
-            data.forEach(obj => {
-                //console.log(obj);
-                colorArray = checkAndAddColor(colorArray, obj);
-            })
-
-            //Add non-existing color for painting
-            colorArray.push( { 
-                "code": 1,
-                "name": "STITCHED",
-                "R": 0,
-                "G": 255,
-                "B": 0,
-                "symbol": "X",
-                "count": 0
-            } );
-
-            colorArray.sort(function(a, b) {
-                if(a.count < b.count) return 1;
-                if(a.count > b.count) return -1;
-                return 0;
-            });
-            //console.log(colorArray);
-            //dataholder.dataset.json = JSON.stringify(data);
-            //dataholder.innerHTML = JSON.stringify(data);
-
-            colors = colorArray.map(color =>  {
-                //console.log(color.R);
-                if(color.code!=0) {
-                    const colorDiv = colorTemplate.content.cloneNode(true).children[0];
-                    const colorBack = colorDiv.querySelector("[data-color-back]");
-                    const colorFront = colorDiv.querySelector("[data-color]");
-                    const colorId = colorDiv.querySelector("[data-color-id]");
-
-                    colorId.textContent = color.symbol;
-                    colorId.style.color = (((color.R * 0.299)+(color.G * 0.587)+(color.B * 0.114)) > 186) ? 'black' : 'white'; // contrast threshold
-                    
-                    const backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
-                    colorFront.setAttribute('style', backColor)
-                    const colorTitle = color.code + " - " + color.name;
-                    colorFront.setAttribute('title', colorTitle);
-                    const colorClick = "selectColor(" + color.code + ", \"" + color.symbol + "\")";
-                    colorFront.setAttribute('onclick', colorClick);
-
-                    if(colorBack != null) {
-                        colorBack.classList.add('holyS');
-                        console.log('added');
-                    }
-                    colorContainer.append(colorDiv);
-                }
-                
-                
-
-            })
-
-            fillFlossUsage();
+            data = JSON.parse(data);
+            loadJSON(data);
 
             
-        })
+    })
+
+    
 
 
+}
+
+function loadJSON(data) {
+    originalObject = data; // keep as loaded
+            //jsonObject = data; // this will be merged with changes, every time there is a change, changes are added to original and stored here for display and count
+
+    //Create object with unique colors and count
+    //jsonColors = {};
+    colorArray = [];
+
+    data.forEach(obj => {
+        //console.log(obj);
+        colorArray = checkAndAddColor(colorArray, obj);
+    })
+
+    //Add non-existing color for painting
+    colorArray.push( { 
+        "code": 1,
+        "name": "STITCHED",
+        "R": 0,
+        "G": 255,
+        "B": 0,
+        "symbol": "X",
+        "count": 0
+    } );
+
+    colorArray.sort(function(a, b) {
+        if(a.count < b.count) return 1;
+        if(a.count > b.count) return -1;
+        return 0;
+    });
+    //console.log(colorArray);
+    //dataholder.dataset.json = JSON.stringify(data);
+    //dataholder.innerHTML = JSON.stringify(data);
+
+
+    //Clear colors
+    while(colorContainer.lastElementChild) {
+        colorContainer.removeChild(colorContainer.lastElementChild);
+    }
+
+
+    colors = colorArray.map(color =>  {
+        //console.log(color.R);
+        if(color.code!=0) {
+            const colorDiv = colorTemplate.content.cloneNode(true).children[0];
+            const colorBack = colorDiv.querySelector("[data-color-back]");
+            const colorFront = colorDiv.querySelector("[data-color]");
+            const colorId = colorDiv.querySelector("[data-color-id]");
+
+            colorId.textContent = color.symbol;
+            colorId.style.color = (((color.R * 0.299)+(color.G * 0.587)+(color.B * 0.114)) > 186) ? 'black' : 'white'; // contrast threshold
+            
+            const backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
+            colorFront.setAttribute('style', backColor)
+            const colorTitle = color.code + " - " + color.name;
+            colorFront.setAttribute('title', colorTitle);
+            const colorClick = "selectColor(" + color.code + ", \"" + color.symbol + "\")";
+            colorFront.setAttribute('onclick', colorClick);
+
+            if(colorBack != null) {
+                colorBack.classList.add('holyS');
+                console.log('added');
+            }
+            colorContainer.append(colorDiv);
+        }
+        
+        
+
+    })
+    jsonObject = mergeChanges();
+    //changes = colorArray;
+    fillFlossUsage();
 }
 
 function checkAndAddColor (colors, line) 
@@ -260,6 +285,19 @@ function draw()
     //let jsonObject = JSON.parse(dataholder.innerHTML);
     
     //bigArray = dataholder.innerHTML.split("\n")
+
+    
+    //console.log(json2draw.length, jsonObject.length);
+
+
+
+    if(firstLoop) {
+        firstLoop = false;
+        //fillFlossUsage();
+        //console.log(jsonObject);
+        jsonObject = mergeChanges();
+    }
+
 
     jsonLength = Object.keys(jsonObject).length
     
@@ -342,6 +380,42 @@ function draw()
 
         }
     }
+
+    //DRAW CHANGES ON TOP
+    /* for(i = 0; i < changes.length; i++) {
+        line = changes[i]
+        //console.log(line)
+        //console.log(line);
+
+        if(highFlag == true && line.dmcCode != highCode) {
+            alpha = 0.2;
+        } 
+        else if (highFlag == true && line.dmcCode == highCode) {
+            alpha = 1;
+            //ctx.fillStyle = "black";
+            //ctx.lineWidth = 1;
+            //draw lines around box
+            //up
+            //ctx.beginPath()
+            //ctx.moveTo(line.X*box, line.Y*box);
+            //ctx.lineTo(line.X*box, line.Y*box+box);
+            //ctx.lineTo(line.X*box+box, line.Y*box+box);
+            //ctx.lineTo(line.X*box+box, line.Y*box);
+            //ctx.lineTo(line.X*box, line.Y*box);
+            //ctx.stroke();
+        } 
+        else {
+            alpha = 1;
+        }
+
+
+        ctx.fillStyle = "rgba(" + line.R + ", " + line.G + ", " + line.B + "," + alpha + ")";
+        drawRect(line.X*box, line.Y*box, box, box);
+        //ctx.fillStyle = "rgba(0,0,0," + alpha + ")";
+        ctx.fillStyle = (((line.R * 0.299)+(line.G * 0.587)+(line.B * 0.114)) > 186) ? "rgba(0,0,0," + alpha + ")" : "rgba(255,255,255," + alpha + ")"; // contrast threshold
+        ctx.font = "bold 35px Arial";
+        ctx.fillText(line.symbol, line.X*box+12, line.Y*box+38);
+    } */
 
     //DRAW LINES
     for(i = 0; i < cols/10; i++) {
@@ -463,8 +537,13 @@ function onPointerUp(e)
     //console.log(cameraOffset);
     
 
-    if(mouseUp.x == mouseDown.x && mouseUp.y == mouseDown.y) { 
+    if(mouseUp.x == mouseDown.x && mouseUp.y == mouseDown.y) { // there was a click not a drag
         console.log(getStitchCoord(canvasClick))
+
+        //check paint flag
+        if(paintFlag) {
+            paintClick(getStitchCoord(canvasClick));
+        }
     }
     //else { console.log("Dragged") }
 }
@@ -548,8 +627,8 @@ function zoomReset() {
 function getStitchCoord(canvasClick) {
 
     var obj = {
-        x: Math.floor(canvasClick.x/box)+1,
-        y: Math.floor(canvasClick.y/box)+1
+        X: Math.floor(canvasClick.x/box)+1,
+        Y: Math.floor(canvasClick.y/box)+1
     }
     
     //console.log(Math.floor(canvasClick.x/box)+1, Math.floor(canvasClick.y/box)+1);
@@ -567,6 +646,7 @@ function highlight() {
 
     //clear other flags
     paintFlag = false;
+    bucketFlag = false;
 }
 
 function paint() {
@@ -579,6 +659,89 @@ function paint() {
 
     //clear other flags
     highFlag = false;
+    bucketFlag = false;
+}
+
+function paintClick(stitchCoord) {
+    let alreadyStitched = false;
+
+    for(let i = 0; i < changes.length; i++) {
+        //console.log(i, changes[i], stitchCoord);
+        //console.log(changes[i].X, stitchCoord.X, changes[i].Y, stitchCoord.Y);
+        if(changes[i].X == stitchCoord.X-1 && changes[i].Y == stitchCoord.Y-1) {
+            alreadyStitched = true;
+            
+        }
+    }
+    
+
+
+    if(!alreadyStitched) {
+        changes.push(
+            {
+                "X": stitchCoord.X-1,
+                "Y": stitchCoord.Y-1,
+                "dmcCode": 1,
+                "dmcName": "STITCHED",
+                "R": 0,
+                "G": 255,
+                "B": 0,
+                "symbol": "X"
+            },
+        )
+        jsonObject = mergeChanges();
+        fillFlossUsage();
+        console.log(changes);
+    }
+    
+}
+
+function mergeChanges() {
+    //jsonObject = originalObject; // restore initial state
+    let newJson = [];
+    let foundChange = false;
+
+    for(let j = 0; j < originalObject.length; j++) {
+        foundChange = false;
+        for(let i = 0; i < changes.length; i++) {
+            if(changes[i].X == originalObject[j].X && changes[i].Y == originalObject[j].Y) {
+                //console.log(jsonObject.length, jsonObject, originalObject.length, originalObject);
+                //jsonObject[j] = changes[i];
+                newJson.push(changes[i]);
+                foundChange = true;
+                //j++;
+
+            }
+        }
+
+        if(!foundChange) {
+            newJson.push(originalObject[j]);
+        }
+
+    }
+    
+    //fillFlossUsage();
+
+    return(newJson);
+    
+    //console.log(jsonObject);
+}
+
+function bucket() {
+    clearActiveTool();
+    bucketFlag = !bucketFlag;
+
+    if(bucketFlag) {
+        document.getElementById("bucketTool").classList.add("activeTool");
+    }
+
+    //clear other flags
+    highFlag = false;
+    paintFlag = false;
+}
+
+function getNeighborStitches(stitchCoord) {
+    return false;
 }
 
 function clearActiveTool() {
@@ -588,6 +751,74 @@ function clearActiveTool() {
     }
    
 }
+
+function undo() {
+    //console.log(changes);
+    changes.pop();
+    //console.log(changes);
+    jsonObject = mergeChanges();
+    fillFlossUsage();
+    
+}
+
+function save() {
+    //mergeChanges();
+    var text2write = JSON.stringify(jsonObject);
+    
+    var element = document.createElement('a');
+
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text2write));
+    element.setAttribute('download', 'out.json');
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+    //console.log(text2write);
+    //dummy.href = 'data:attachment/text' + encodeURI(text2write);
+    //dummy.target = '_blank';
+    //dummy.download = 'out.txt';
+    //dummy.click();
+
+
+
+}
+
+function openFile() {
+
+    originalObject = {};
+    colorArray = {};
+    jsonObject = {};
+
+    let jsonContent = "";
+
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = _ => {
+    // you can use this method to get file and perform respective operations
+        let file =  input.files[0];
+        console.log(file);
+        if(file) {
+            var reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function (evt) {
+                console.log(evt.target.result);
+                jsonContent = evt.target.result;
+                loadJSON(JSON.parse(jsonContent));
+            }
+        }
+
+        
+    };
+    input.click();
+
+    
+
+    //console.log(input)
+}
+
 
 function selectColor(color, symbol) {
     //console.log(color);
@@ -608,13 +839,35 @@ function selectColor(color, symbol) {
 }
 
 function fillFlossUsage() {
+    //clear all elements of the modal
+    let modalList = document.getElementById("modalList");
+    while(modalList.lastElementChild) {
+        modalList.removeChild(modalList.lastElementChild);
+    }
+    
+    //Refresh color list
+    colorArray = [];
+    jsonObject.forEach(obj => {
+        //console.log(obj);
+        colorArray = checkAndAddColor(colorArray, obj);
+    })
+
+    colorArray.sort(function(a, b) {
+        if(a.count < b.count) return 1;
+        if(a.count > b.count) return -1;
+        return 0;
+    });
+    
+
     //Fill properties
     let par = document.getElementById("properties");
     par.innerHTML = (jsonObject[Object.keys(jsonObject).length-1].X + 1) + "w x " + (jsonObject[Object.keys(jsonObject).length-1].Y + 1) + "h"
 
 
     //Fill table
-    let table = document.getElementById("modalTable");
+    
+    //let table = document.getElementById("modalTable");
+    let table = document.createElement("table");
     const headRow = document.createElement('tr');
 
     let heads = ["Color", "Symbol", "Code", "Name", "Count"];
@@ -661,7 +914,7 @@ function fillFlossUsage() {
     })
 
 
-    //list.appendChild(table);
+    modalList.appendChild(table);
 }
 
 function flossUsageOpen() {
@@ -675,7 +928,6 @@ function flossUsageClose() {
     let modal = document.getElementById("myModal");
     modal.style.display = "none";
 }
-
 
 
 window.onclick = function(event) {
