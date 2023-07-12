@@ -544,6 +544,10 @@ function onPointerUp(e)
         if(paintFlag) {
             paintClick(getStitchCoord(canvasClick));
         }
+
+        if(bucketFlag) {
+            bucketClick(getStitchCoord(canvasClick));
+        }
     }
     //else { console.log("Dragged") }
 }
@@ -627,8 +631,8 @@ function zoomReset() {
 function getStitchCoord(canvasClick) {
 
     var obj = {
-        X: Math.floor(canvasClick.x/box)+1,
-        Y: Math.floor(canvasClick.y/box)+1
+        X: Math.floor(canvasClick.x/box),
+        Y: Math.floor(canvasClick.y/box)
     }
     
     //console.log(Math.floor(canvasClick.x/box)+1, Math.floor(canvasClick.y/box)+1);
@@ -665,10 +669,16 @@ function paint() {
 function paintClick(stitchCoord) {
     let alreadyStitched = false;
 
+    //console.log(getStitchColor(stitchCoord));
+
+    if(stitchCoord.X < 0 || stitchCoord.Y < 0 || getStitchColor(stitchCoord) == 0) {
+        return;
+    }
+
     for(let i = 0; i < changes.length; i++) {
         //console.log(i, changes[i], stitchCoord);
         //console.log(changes[i].X, stitchCoord.X, changes[i].Y, stitchCoord.Y);
-        if(changes[i].X == stitchCoord.X-1 && changes[i].Y == stitchCoord.Y-1) {
+        if(changes[i].X == stitchCoord.X && changes[i].Y == stitchCoord.Y) {
             alreadyStitched = true;
             
         }
@@ -676,11 +686,11 @@ function paintClick(stitchCoord) {
     
 
 
-    if(!alreadyStitched) {
+    if(!alreadyStitched && stitchCoord.X >= 0 && stitchCoord.Y >= 0) {
         changes.push(
             {
-                "X": stitchCoord.X-1,
-                "Y": stitchCoord.Y-1,
+                "X": stitchCoord.X,
+                "Y": stitchCoord.Y,
                 "dmcCode": 1,
                 "dmcName": "STITCHED",
                 "R": 0,
@@ -691,8 +701,26 @@ function paintClick(stitchCoord) {
         )
         jsonObject = mergeChanges();
         fillFlossUsage();
-        console.log(changes);
+        //console.log(changes);
     }
+    
+}
+
+function getStitchColor(stitchCoord) {
+    let X = stitchCoord.X;
+    let Y = stitchCoord.Y;
+
+    let dmcCode = -1
+
+    stitches = jsonObject.map(stitch => {
+        //console.log(stitch);
+        if(stitch.X == X && stitch.Y == Y) {
+            dmcCode = stitch.dmcCode;
+        }
+    });
+
+    //console.log(dmcCode);
+    return dmcCode;
     
 }
 
@@ -704,7 +732,7 @@ function mergeChanges() {
     for(let j = 0; j < originalObject.length; j++) {
         foundChange = false;
         for(let i = 0; i < changes.length; i++) {
-            if(changes[i].X == originalObject[j].X && changes[i].Y == originalObject[j].Y) {
+            if(changes[i].X == originalObject[j].X && changes[i].Y == originalObject[j].Y && originalObject[j].dmcCode != 0) {
                 //console.log(jsonObject.length, jsonObject, originalObject.length, originalObject);
                 //jsonObject[j] = changes[i];
                 newJson.push(changes[i]);
@@ -740,9 +768,98 @@ function bucket() {
     paintFlag = false;
 }
 
-function getNeighborStitches(stitchCoord) {
-    return false;
+function bucketClick(stitchCoord) {
+    let stitches2Paint = getNeighborStitches(stitchCoord.X, stitchCoord.Y);
+
+    stitches2Paint.forEach(stitch => {
+        paintClick(stitch);
+    })
 }
+
+
+
+function getNeighborStitches(X, Y) {
+    //array of coordinates to return for painting    
+    let foundStitches = [];
+    //array to iterate last element, get new stitches that are not already in found and pop it
+    let newStitches = [];
+
+    let color2Paint = getStitchColor({X:X,Y:Y});
+    //console.log(color2Paint, X, Y);
+
+    
+    //add the clicked coordinates
+    newStitches.push(
+        {"X": X, 
+        "Y": Y
+    });
+
+    foundStitches.push(
+        {"X": X, 
+        "Y": Y
+    });
+    
+
+    //console.log(foundStitches, newStitches);
+
+    // check four stitches that share an edge with the clicked
+    while(newStitches.length > 0) {
+        //check last element of array
+        let stitch2Test = newStitches[newStitches.length-1];
+        //console.log(stitch2Test);
+        //and remove it
+        newStitches.pop();
+
+        // check 4 edges of the stitch to test
+        let edges = [
+            {X:stitch2Test.X, Y:stitch2Test.Y-1},
+            {X:stitch2Test.X, Y:stitch2Test.Y+1},
+            {X:stitch2Test.X-1, Y:stitch2Test.Y},
+            {X:stitch2Test.X+1, Y:stitch2Test.Y}
+        ];
+
+        edges.forEach(edge => {
+            if(getStitchColor(edge) == color2Paint) {
+                if(!IsCoordAlreadyThere(edge, foundStitches)) {
+                    newStitches.push(edge);
+                    foundStitches.push(edge);
+                }
+            }
+        });
+
+
+
+        //if(getStitchColor({X:stitch2Test.X, Y:stitch2Test.Y-1}) == color2Paint) {if(!IsCoordAlreadyThere(stitch2Test, foundStitches)) { newStitches.push(stitch2Test); foundStitches.push(stitch2Test) }}
+        //if(getStitchColor({X:stitch2Test.X, Y:stitch2Test.Y+1}) == color2Paint) {if(!IsCoordAlreadyThere(stitch2Test, foundStitches)) { newStitches.push(stitch2Test); foundStitches.push(stitch2Test) }}
+        //if(getStitchColor({X:stitch2Test.X-1, Y:stitch2Test.Y}) == color2Paint) {if(!IsCoordAlreadyThere(stitch2Test, foundStitches)) { newStitches.push(stitch2Test); foundStitches.push(stitch2Test) }}
+        //if(getStitchColor({X:stitch2Test.X+1, Y:stitch2Test.Y}) == color2Paint) {if(!IsCoordAlreadyThere(stitch2Test, foundStitches)) { newStitches.push(stitch2Test); foundStitches.push(stitch2Test) }}
+
+    }
+
+
+    // process must be repeated for all new found stitches checking for repeated stitches, otherwise it will run forever
+
+
+    
+    //console.log(foundStitches);
+
+
+
+
+    return foundStitches;
+}
+
+function IsCoordAlreadyThere (stitchCoord, array2Test) {
+    let ret = false;
+    test = array2Test.map(coord => {
+        //console.log(coord, stitchCoord);
+        if(coord.X == stitchCoord.X && coord.Y == stitchCoord.Y) {
+            ret = true;
+        }
+    })
+    return ret;
+}
+
 
 function clearActiveTool() {
     const collection = document.getElementsByClassName("toolback");
