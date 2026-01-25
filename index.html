@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="#" />
     
     <title>Cross Stitch canvas</title>
 </head>
@@ -40,17 +40,22 @@
                 <img src="./img/bucket.png" class="toolImage">
             </div>
         </div>
+        <div id="previewTool" class="toolback">
+            <div title="Preview" class="tool" onclick="previewOpen()">
+                <img src="./img/preview.png" class="toolImage">
+            </div>
+        </div>
         <div id="undoTool" class="toolback" onclick="undo()">
             <div title="Undo" class="tool">
                 <img src="./img/undo.png" class="toolImage">
             </div>
         </div>
-        <div id="zoomPlus" class="toolback" onclick="adjustZoom(0.1)">
+        <div id="zoomPlus" class="toolback" onclick="zoomIn()">
             <div title="Zoom In" class="tool">
                 <img src="./img/zoomPlus.png" class="toolImage">
             </div>
         </div>
-        <div id="zoomMinus" class="toolback" onclick="adjustZoom(-0.1)">
+        <div id="zoomMinus" class="toolback" onclick="zoomOut()">
             <div title="Zoom Out" class="tool">
                 <img src="./img/zoomMinus.png" class="toolImage">
             </div>
@@ -60,35 +65,94 @@
                 <img src="./img/zoomReset.png" class="toolImage">
             </div>
         </div>
-        
+        <div id="contrastTool" onclick="highContrast()">
+            <div title="High Contrast" class="tool">
+                <img src="./img/contrast.png" class="toolImage">
+            </div>
+        </div>
+        <div id="nextTool" onclick="loadNextFile()">
+            <div title="Next Design" class="tool">
+                <img src="./img/arrow.png" class="toolImage">
+            </div>
+        </div>
         
     </div>
+    <div id="loadingSpinner" class="spinner-overlay">
+        <div class="spinner"></div>
+        <p id="spinnerMessage">Loading pattern...</p>
+    </div>
     <div class="colors" data-color-container></div>
-    <canvas id="canvas"></canvas>
-
+    <div class="tile-container" data-tile-container></div>
+    <div class="footnote">
+        <div class="footLeft">LEFT</div>
+        <div class="footRight">RIGHT</div>
+    </div>
+    
+    <!-- MODALS -->
     <div id="myModal" class="modal">
-
-        <!-- Modal content -->
         <div class="modal-content">
             <span class="close" onclick="flossUsageClose()">&times;</span>
             <p id="properties"></p>
-            <div id="modalList">
-                
-            </div>
+            <p id="flossCount"></p>
+            <div id="modalList"></div>
         </div>
       
-      </div>
+    </div>
+
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="previewClose()">&times;</span>
+            <canvas id="canvas"></canvas>
+            <div class="pathButtons">
+                <span class="pathButton" onclick="previewPath(0)">FIRST</span>
+                <span class="pathButton" onclick="previewPath(1)">CENTER</span>
+                <span class="pathButton" onclick="previewPath(2)">COORD</span>
+                <span class="pathButton" onclick="previewPath(3)">RANDOM</span>
+            </div>
+            <div class="inputFields">
+                <div class="inputField thresholdDiv">
+                    <label for="pathInput">Threshold:</label>
+                    <input type="number" id="pathInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="10" />
+                </div>
+                <div class="inputField">
+                    <label for="pathXInput">Start X:</label>
+                    <input type="number" id="pathXInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" />
+                </div>
+                <div class="inputField">
+                    <label for="pathYInput">Start Y:</label>
+                    <input type="number" id="pathYInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" />
+                </div>
+            </div>
+            <div class="pathButtons">
+                <span class="pathButton" onclick="drawSVG()">DRAW SVG</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATES -->
 
     <template data-color-template>
         <div class="colorback" data-color-back>
             <div class="color" data-color>
-                <p class="colorid" data-color-id></p>
+                <div class="coloridback">
+                    <p class="colorid" data-color-id></p>
+                </div>
             </div>
         </div>
 
     </template>
+
+    <template data-tile-template>
+        <div class="tile" data-tile-x data-tile-y data-tile-code>
+            <span class="tile-span"></span>
+        </div>
+    </template>
+
+    <template data-row-template>
+        <div class="row" data-tile-row></div>
+    </template>
     
     
 </body>
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </html>

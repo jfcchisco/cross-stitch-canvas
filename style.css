@@ -1,5 +1,6 @@
 * {
     box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 html, body
@@ -31,8 +32,8 @@ html, body
 }
 
 .colorid, .toolid {
-    margin-top: 7px;
-    font-size: 1.55rem;
+    margin: 1px;
+    font-size: 1.5rem;
     font-weight: bolder;
     font-family: Arial, Helvetica, sans-serif;
     user-select: none;
@@ -41,14 +42,20 @@ html, body
     
 }
 
+.coloridback {
+    height: 40px;
+    width: 40px; 
+    border: 2px solid black; 
+    border-radius:5px;
+}
+
 .colors, .tools {
     display: flex;
     width: 100%;
-
+    background-color: cadetblue;
 }
 
 .colors {
-    background-color: lightpink;
     height: 65px;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -56,12 +63,14 @@ html, body
 }
 
 .tools {
-    background-color: lightsteelblue;
-    height: 50px;
+    height: 65px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
 }
 
 .activeTool {
-    background-color: steelblue;
+    background-color: orangered;
 }
 
 .toolImage {
@@ -70,7 +79,7 @@ html, body
 }
 
 .activeColor {
-    background-color: darkmagenta;
+    background-color: orangered;
 }
 
 .modal {
@@ -110,12 +119,195 @@ html, body
     cursor: pointer;
 }
 
+.container {
+    overflow: scroll;
+    
+}
+
+.tile-container {
+    overflow: scroll;
+    height: 82vh;
+    position: relative;
+}
+
+.row {
+    font-size: 0px;
+    white-space: nowrap;
+}
+
+.tile {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: greenyellow;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid gray;
+    border-right: 1px solid gray;
+    font-family: Arial, Helvetica, sans-serif;
+    
+}
+
+.footnote {
+    font-size: 14px;
+}
+
+span {
+    display: inline-block;
+    line-height: normal;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 1px;
+    user-select: none;
+}
+
 th, td {
     text-align: left;
     padding: 2px;
+    font-size: 14px;
+}
+
+th {
+    font-weight: bold;
 }
 
 table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
+}
+
+.borderLeft {
+    border-left: 1px solid black;
+}
+
+.borderRight {
+    border-right: 1px solid black;
+}
+
+.borderTop {
+    border-top: 1px solid black;
+}
+
+.borderBottom {
+    border-bottom: 1px solid black;
+}
+
+.horBorder {
+    border-bottom: 2px solid black;
+}
+
+.vertRulerDiv {
+    position: sticky;
+    left: 0;
+    background-color: rgb(241, 241, 241);
+}
+
+.horRulerRow {
+    background-color: rgb(241, 241, 241);
+}
+
+.horRulerRow {
+    position: sticky;
+    top: 0;
+}
+
+.midRowTop {
+    border-bottom: 1px dashed black;
+}
+
+.midRowBot {
+    border-top: 1px dashed black;
+}
+
+.midColLeft {
+    border-right: 1px dashed black;
+}
+
+.midColRight {
+    border-left: 1px dashed black;
+}
+
+.pathButtons {
+    border: 2px solid gray;
+    border-radius: 3px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.pathButton {
+    background-color: lightgray;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 2px 5px;
+    margin: 5px;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+}
+
+.inputFields {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.inputField {
+    margin: 5px;
+    padding: 2px 5px;
+}
+
+.svg-container {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+}
+
+.footnote {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+}
+
+.footLeft {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.footRight {
+    text-align: right;
+    padding-right: 5px;
+    border-left: 1px solid gray;
+}
+
+/* Loading Spinner */
+.spinner-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spinner-overlay p {
+    color: white;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
