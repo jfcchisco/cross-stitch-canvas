@@ -733,21 +733,23 @@ class GridManager {
         
     onPointerDown(e) {
         this.isDragging = true;
-        this.dragStart.x = e.clientX / this.cameraZoom - this.cameraOffset.x;
-        this.dragStart.y = e.clientY / this.cameraZoom - this.cameraOffset.y;
-        this.mouseDown.x = e.clientX;
-        this.mouseDown.y = e.clientY;
+        const eventLoc = this.getEventLocation(e);
+        this.dragStart.x = eventLoc.x / this.cameraZoom - this.cameraOffset.x;
+        this.dragStart.y = eventLoc.y / this.cameraZoom - this.cameraOffset.y;
+        this.mouseDown.x = eventLoc.x;
+        this.mouseDown.y = eventLoc.y;
     }
 
     onPointerUp(e) {
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
-        this.mouseUp.x = e.clientX;
-        this.mouseUp.y = e.clientY;
+        const eventLoc = this.getEventLocation(e);
+        this.mouseUp.x = eventLoc.x;
+        this.mouseUp.y = eventLoc.y;
         const canvas = document.getElementById("tileCanvas");
-        this.canvasClick.x = (this.getEventLocation(e).x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
-        this.canvasClick.y = (this.getEventLocation(e).y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
+        this.canvasClick.x = (eventLoc.x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
+        this.canvasClick.y = (eventLoc.y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
         console.log(`Canvas Click at X: ${this.canvasClick.x}, Y: ${this.canvasClick.y}`);
     }
 
