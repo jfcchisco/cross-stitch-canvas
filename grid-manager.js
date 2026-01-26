@@ -759,6 +759,27 @@ class GridManager {
         }
     }
 
+    handleTouch(e, singleTouchHandler) {
+        if (e.touches.length == 1) {
+            singleTouchHandler(e);
+        } else if (e.type == "touchmove" && e.touches.length == 2) {
+            this.isDragging = false;
+            this.handlePinch(e);
+        }
+    }
+
+    handlePinch(e) {
+        const touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        const touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+        const currentDistance = Math.hypot(touch2.x - touch1.x, touch2.y - touch1.y);
+        if (this.initialPinchDistance == null) {
+            this.initialPinchDistance = currentDistance;
+        } else {
+            const zoomFactor = currentDistance / this.initialPinchDistance;
+            this.adjustCanvasZoom(null, zoomFactor, e);
+        }
+    }
+
     removeAllTiles() {
         while (this.tileContainer.firstChild) {
             this.tileContainer.removeChild(this.tileContainer.firstChild);
