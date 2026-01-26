@@ -220,6 +220,7 @@ window.zoomReset = () => gridManager.zoomReset();
 window.selectColor = selectColor;
 window.tileClick = tileClick;
 
+// Tile canvas event listeners
 document.querySelector('#tileCanvas').addEventListener('wheel', function(e) {
     const zoomAmount = -e.deltaY * gridManager.scrollSensitivity;
     gridManager.adjustCanvasZoom(zoomAmount, null, e);
@@ -232,6 +233,21 @@ document.querySelector('#tileCanvas').addEventListener('mouseup', function(e) {
 });
 document.querySelector('#tileCanvas').addEventListener('mousemove', function(e) {
     gridManager.onPointerMove(e);
+});
+document.querySelector('#tileCanvas').addEventListener('touchstart', function(e) {
+    gridManager.handleTouch(e, function(e) {
+        gridManager.onPointerDown(e);
+    });
+});
+document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) {
+    gridManager.handleTouch(e, function(e) {
+        gridManager.onPointerMove(e);
+    });
+});
+document.querySelector('#tileCanvas').addEventListener('touchend', function(e) {
+    gridManager.handleTouch(e, function(e) {
+        gridManager.onPointerUp(e);
+    });
 });
 
 // Prevent right-click context menu on canvas
