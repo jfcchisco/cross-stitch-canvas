@@ -21,7 +21,20 @@ class GridManager {
         this.maxHeight = 50;
         this.minHeight = 10;
         this.defaultHeight = 20;
-
+        // Canvas parameters
+        this.tileSize = 30;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        this.maxZoom = 5.5;
+        this.minZoom = 0.5;
+        this.scrollSensitivity = 0.0005;
+        this.cameraZoom = this.minZoom;
+        this.isDragging = false;
+        this.dragStart = { x: 0, y: 0 };
+        this.mouseDown = { x: 0, y: 0 };
+        this.mouseUp = { x: 0, y: 0 };
+        this.canvasClick = { x: 0, y: 0 };
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
     }
 
     /**
@@ -66,7 +79,7 @@ class GridManager {
         }
         this.paintFlag = false;
         this.bucketFlag = false;
-        this.refreshGridDisplay();
+        this.refreshCanvas();
     }
 
     activateHighContrast() {
@@ -378,7 +391,7 @@ class GridManager {
         this.updateColorSelectorUI(colorCode, symbol);
             
             // Refresh grid to show highlighting
-        this.refreshGridDisplay();
+        this.refreshCanvas();
         this.uiManager.updateFootnote("Selected color: " + colorCode + " - " + this.getDMCValuesFromCode(colorCode).dmcName);
 
     }
@@ -443,7 +456,6 @@ class GridManager {
 
             //+1 to compensate for the vertical ruler
             let tile = row.children.item(stitch.X + 1);
-            // console.log(tile, stitch);
             if (tile) {
                 tile.setAttribute('data-tile-x', stitch.X);
                 tile.setAttribute('data-tile-y', stitch.Y);
@@ -523,13 +535,229 @@ class GridManager {
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
-        this.updateTileColors();
+        this.refreshCanvas();
         return this.contrastFlag;
     }
 
     /**
      * GRID DRAWING METHODS
      */
+
+    initializeCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = this.patternLoader.getCols() * this.tileSize;
+        canvas.height = this.patternLoader.getRows() * this.tileSize;
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.cameraZoom = this.minZoom;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    refreshCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        canvas.width = this.patternLoader.getCols() * this.tileSize;
+        canvas.height = this.patternLoader.getRows() * this.tileSize;
+        const ctx = canvas.getContext("2d");
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Set zoom and offset
+        ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
+        ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
+        
+        const currentPattern = this.patternLoader.getCurrentPattern();
+
+        this.drawTiles(ctx, currentPattern);
+        this.drawLines(ctx);
+    }
+
+    drawTiles(ctx, currentPattern) {
+        let spanColor = 'black';
+        let color = 'white';
+
+        for(let stitch in currentPattern.stitches) {
+            let stitchObj = currentPattern.stitches[stitch];
+            let x = stitchObj.X * this.tileSize;
+            let y = stitchObj.Y * this.tileSize;
+            let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
+            let R = colorData.R;
+            let G = colorData.G;
+            let B = colorData.B;
+            let code = stitchObj.dmcCode;
+            let alpha = 1;
+
+            // Check for high contrast mode
+            if (this.contrastFlag) {
+                if (code === "stitched") {
+                    spanColor = this.getContrastColor(R, G, B);
+                    color = `rgba(${R}, ${G}, ${B}, 1)`;
+                } else {
+                    if (this.highFlag) {
+                        if (this.highlightedColor === code) {
+                            spanColor = 'white';
+                            color = 'black';
+                        } else {
+                            alpha = 0.25;
+                            spanColor = 'silver';
+                            color = 'white';
+                        }
+                    }
+                }
+            } else {
+                spanColor = this.getContrastColor(R, G, B);
+                
+                if (this.highFlag && this.highlightedColor !== code) {
+                    alpha = 0.25;
+                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
+                }
+                
+                if (code === "stitched") {
+                    spanColor = this.getContrastColor(R, G, B);
+                    color = `rgba(${R}, ${G}, ${B}, 1)`;
+                    alpha = 1;
+                }
+
+                color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
+            }
+
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            // Draw symbol
+            ctx.fillStyle = spanColor;
+            ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            let symbol = colorData.symbol;
+            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+        }
+    }
+
+    drawLines(ctx) {
+        const cols = this.patternLoader.getCols();
+        const rows = this.patternLoader.getRows();
+        ctx.strokeStyle = 'silver';
+        ctx.lineWidth = 1;
+        // Draw vertical lines
+        for (let i = 0; i <= cols; i++) {
+            if(i % 10 === 0) {
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+            } else {
+                ctx.strokeStyle = 'gray';
+                ctx.lineWidth = 1;
+            }
+            ctx.beginPath();
+            ctx.moveTo(i * this.tileSize, 0);
+            ctx.lineTo(i * this.tileSize, rows * this.tileSize);
+            ctx.stroke();
+        }
+        // Draw horizontal lines
+        for (let j = 0; j <= rows; j++) {
+            if(j % 10 === 0) {
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+            } else {
+                ctx.strokeStyle = 'gray';
+                ctx.lineWidth = 1;
+            }
+            ctx.beginPath();
+            ctx.moveTo(0, j * this.tileSize);
+            ctx.lineTo(cols * this.tileSize, j * this.tileSize);
+            ctx.stroke();
+        }
+    }
+
+    drawRulers() {
+        // Ruler drawing logic can be implemented here if needed
+    }
+
+    adjustCanvasZoom(zoomAmount, zoomFactor, mouseEvent) {
+        const canvas = document.getElementById("tileCanvas");
+        const mousePos = this.getEventLocation(mouseEvent);
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        // Calculate current scale and translate
+        const scaleX = (canvas.width / canvas.clientWidth) * this.cameraZoom;
+        const scaleY = (canvas.height / canvas.clientHeight) * this.cameraZoom;
+        const tx = -window.innerWidth / 2 + this.cameraOffset.x;
+        const ty = -window.innerHeight / 2 + this.cameraOffset.y;
+        
+        // Mouse position in canvas display coordinates
+        const dx = mousePos.x - canvasRect.x;
+        const dy = mousePos.y - canvasRect.y;
+        
+        // World coordinates under the mouse
+        const worldX = dx / scaleX - tx;
+        const worldY = dy / scaleY - ty;
+        
+        // Apply zoom
+        if(!this.isDragging) {
+            if(zoomAmount) {
+                this.cameraZoom += zoomAmount;
+            }
+        } else if(zoomFactor) {
+            this.cameraZoom = zoomFactor * this.lastZoom;
+        }
+        if(this.cameraZoom > this.maxZoom) {
+            this.cameraZoom = this.maxZoom;
+        }
+        if(this.cameraZoom < this.minZoom) {
+            this.cameraZoom = this.minZoom;
+        }
+        
+        // New scale
+        const newScaleX = (canvas.width / canvas.clientWidth) * this.cameraZoom;
+        const newScaleY = (canvas.height / canvas.clientHeight) * this.cameraZoom;
+        
+        // Adjust offset so world point is still under mouse
+        const newTx = dx / newScaleX - worldX;
+        const newTy = dy / newScaleY - worldY;
+        
+        this.cameraOffset.x = newTx + window.innerWidth / 2;
+        this.cameraOffset.y = newTy + window.innerHeight / 2;
+
+        this.refreshCanvas();
+    }
+
+    resetCanvasZoom() {
+        this.cameraZoom = this.minZoom;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
+
+    getEventLocation(e) {
+        if (e.touches && e.touches.length == 1) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.clientX && e.clientY) {
+            return { x: e.clientX, y: e.clientY };
+        }
+    }
+        
+    onPointerDown(e) {
+        this.isDragging = true;
+        this.dragStart.x = e.clientX / this.cameraZoom - this.cameraOffset.x;
+        this.dragStart.y = e.clientY / this.cameraZoom - this.cameraOffset.y;
+        this.mouseDown.x = e.clientX;
+        this.mouseDown.y = e.clientY;
+    }
+
+    onPointerUp(e) {
+        this.isDragging = false;
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
+        this.mouseUp.x = e.clientX;
+        this.mouseUp.y = e.clientY;
+        const canvas = document.getElementById("tileCanvas");
+        this.canvasClick.x = (this.getEventLocation(e).x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
+        this.canvasClick.y = (this.getEventLocation(e).y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
+        console.log(`Canvas Click at X: ${this.canvasClick.x}, Y: ${this.canvasClick.y}`);
+    }
+
+    onPointerMove(e) {
+        if (this.isDragging) {
+            this.cameraOffset.x = this.getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
+            this.cameraOffset.y = this.getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
+            this.refreshCanvas();
+        }
+    }
 
     removeAllTiles() {
         while (this.tileContainer.firstChild) {

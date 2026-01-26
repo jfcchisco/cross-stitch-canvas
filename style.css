@@ -125,7 +125,8 @@ html, body
 }
 
 .tile-container {
-    overflow: scroll;
+    /*overflow: scroll;*/
+    overflow: hidden;
     height: 82vh;
     position: relative;
 }
