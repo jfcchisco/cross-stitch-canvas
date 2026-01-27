@@ -284,23 +284,54 @@ class GridManager {
     }
 
     zoomIn() {
-        const collection = document.getElementsByClassName("tile");
+        const zoomAmount = 100 * this.scrollSensitivity;
+        this.cameraZoom += zoomAmount;
+
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+        // this.adjustCanvasZoom(zoomAmount, null, null);
+        /* const collection = document.getElementsByClassName("tile");
         let height = collection[0].offsetHeight;
         if(height < this.maxHeight) {
             let newHeight = height + 2;
             this.setHeight(newHeight);
         }
-        this.uiManager.drawSVG();
+        this.uiManager.drawSVG(); */
     }
 
     zoomOut() {
-        const collection = document.getElementsByClassName("tile");
+        const zoomAmount = -100 * this.scrollSensitivity;
+        this.cameraZoom += zoomAmount;
+
+        if(this.cameraZoom > this.maxZoom) {
+            this.cameraZoom = this.maxZoom;
+        }
+        if(this.cameraZoom < this.minZoom) {
+            this.cameraZoom = this.minZoom;
+        }
+
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+        // this.adjustCanvasZoom(zoomAmount, null, null);
+        /* const collection = document.getElementsByClassName("tile");
         let height = collection[0].offsetHeight;
         if(height > this.minHeight) {
             let newHeight = height - 2;
             this.setHeight(newHeight);
         }
-        this.uiManager.drawSVG();
+        this.uiManager.drawSVG(); */
     }
 
     zoomReset() {
