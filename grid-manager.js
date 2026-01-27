@@ -35,6 +35,9 @@ class GridManager {
         this.canvasClick = { x: 0, y: 0 };
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
+        this.renderScheduled = false;
+        this.patternCanvas = document.createElement('canvas');
+        this.patternCacheDirty = true;
     }
 
     /**
@@ -553,6 +556,15 @@ class GridManager {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
+    cleanPatternCache(canvas) {
+        this.patternCanvas.width = canvas.width;
+        this.patternCanvas.height = canvas.height;
+        const patternCtx = this.patternCanvas.getContext("2d");
+        const currentPattern = this.patternLoader.getCurrentPattern();
+        this.drawTiles(patternCtx, currentPattern);
+        this.drawLines(patternCtx);
+    }
+
     refreshCanvas() {
         const canvas = document.getElementById("tileCanvas");
         canvas.width = this.patternLoader.getCols() * this.tileSize;
@@ -567,7 +579,29 @@ class GridManager {
 
         this.drawTiles(ctx, currentPattern);
         this.drawLines(ctx);
+        this.cleanPatternCache(canvas);
     }
+
+    renderCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        // Regenerate pattern cache only when needed
+        if (this.patternCacheDirty) {
+            this.cleanPatternCache(canvas);
+            this.patternCacheDirty = false;
+        }
+        
+        // Now just apply transformation to cached content
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
+        ctx.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
+        ctx.drawImage(this.patternCanvas, 0, 0);
+    }
+
+    
+    
 
     drawTiles(ctx, currentPattern) {
         let spanColor = 'black';
@@ -715,7 +749,14 @@ class GridManager {
         this.cameraOffset.x = newTx + window.innerWidth / 2;
         this.cameraOffset.y = newTy + window.innerHeight / 2;
 
-        this.refreshCanvas();
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
     }
 
     resetCanvasZoom() {
@@ -757,7 +798,15 @@ class GridManager {
         if (this.isDragging) {
             this.cameraOffset.x = this.getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
             this.cameraOffset.y = this.getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
-            this.refreshCanvas();
+            
+            // Schedule a single render instead of rendering on every move
+            if (!this.renderScheduled) {
+                this.renderScheduled = true;
+                requestAnimationFrame(() => {
+                    this.renderCanvas();
+                    this.renderScheduled = false;
+                });
+            }
         }
     }
 
