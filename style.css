@@ -9,7 +9,7 @@ html, body
     margin: 0;
     padding: 0px;
     overflow: hidden;
-
+    touch-action: none;
 }
 
 #canvas
@@ -17,6 +17,7 @@ html, body
   width: 100%;
   height: calc(100% - 115px);
   background: #111;
+  touch-action: manipulation;
 }
 
 .color, .tool {

@@ -820,6 +820,7 @@ class GridManager {
     }
 
     handlePinch(e) {
+        e.preventDefault();
         const touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         const touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
         const currentDistance = Math.hypot(touch2.x - touch1.x, touch2.y - touch1.y);
