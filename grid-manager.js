@@ -22,7 +22,7 @@ class GridManager {
         this.minHeight = 10;
         this.defaultHeight = 20;
         // Canvas parameters
-        this.tileSize = 50;
+        this.tileSize = 25;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         this.maxZoom = 1.5;
         this.minZoom = 0.5;
