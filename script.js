@@ -239,19 +239,19 @@ document.querySelector('#tileCanvas').addEventListener('touchstart', function(e)
     gridManager.handleTouch(e, function(e) {
         gridManager.onPointerDown(e);
     });
-});
+}, {passive: false});
 document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) {
     e.preventDefault();
     gridManager.handleTouch(e, function(e) {
         gridManager.onPointerMove(e);
     });
-});
+}, {passive: false});
 document.querySelector('#tileCanvas').addEventListener('touchend', function(e) {
     e.preventDefault();
     gridManager.handleTouch(e, function(e) {
         gridManager.onPointerUp(e);
     });
-});
+}, {passive: false});
 
 // Prevent right-click context menu on canvas
 document.querySelector('#tileCanvas').addEventListener('contextmenu', function(e) {
