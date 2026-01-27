@@ -765,7 +765,12 @@ class GridManager {
     }
 
     getEventLocation(e) {
-        if (e.touches && e.touches.length == 1) {
+        if (e.touches && e.touches.length == 2) {
+            // For pinch, return the midpoint between two touches
+            const x = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            return { x, y };
+        } else if (e.touches && e.touches.length == 1) {
             return { x: e.touches[0].clientX, y: e.touches[0].clientY };
         } else if (e.clientX && e.clientY) {
             return { x: e.clientX, y: e.clientY };
@@ -826,12 +831,13 @@ class GridManager {
     }
 
     handlePinch(e) {
-        e.preventDefault();
         const touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         const touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
         const currentDistance = Math.hypot(touch2.x - touch1.x, touch2.y - touch1.y);
+        
         if (this.initialPinchDistance == null) {
             this.initialPinchDistance = currentDistance;
+            this.lastZoom = this.cameraZoom;
         } else {
             const zoomFactor = currentDistance / this.initialPinchDistance;
             this.adjustCanvasZoom(null, zoomFactor, e);
