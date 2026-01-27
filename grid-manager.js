@@ -24,7 +24,7 @@ class GridManager {
         // Canvas parameters
         this.tileSize = 50;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        this.maxZoom = 5.5;
+        this.maxZoom = 1.5;
         this.minZoom = 0.5;
         this.scrollSensitivity = 0.0005;
         this.cameraZoom = this.minZoom;
@@ -852,9 +852,12 @@ class GridManager {
         } else if (e.touches.length == 2) {
             // Handle pinch on both touchstart and touchmove
             if (e.type == "touchstart") {
+                console.log("Two-finger touchstart detected");
                 this.isDragging = false;
                 this.initialPinchDistance = null;
+                this.lastZoom = this.cameraZoom;
             } else if (e.type == "touchmove") {
+                console.log("Two-finger touchmove detected");
                 this.isDragging = false;
                 this.handlePinch(e);
             }
@@ -868,9 +871,10 @@ class GridManager {
         
         if (this.initialPinchDistance == null) {
             this.initialPinchDistance = currentDistance;
-            this.lastZoom = this.cameraZoom;
+            console.log("Initial pinch distance set:", this.initialPinchDistance);
         } else {
             const zoomFactor = currentDistance / this.initialPinchDistance;
+            console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
             this.adjustCanvasZoom(null, zoomFactor, e);
         }
     }
