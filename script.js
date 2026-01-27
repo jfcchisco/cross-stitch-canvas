@@ -225,27 +225,33 @@ document.querySelector('#tileCanvas').addEventListener('wheel', function(e) {
     const zoomAmount = -e.deltaY * gridManager.scrollSensitivity;
     gridManager.adjustCanvasZoom(zoomAmount, null, e);
 });
+
 document.querySelector('#tileCanvas').addEventListener('mousedown', function(e) {
     gridManager.onPointerDown(e);
 });
+
 document.querySelector('#tileCanvas').addEventListener('mouseup', function(e) {
     gridManager.onPointerUp(e);
 });
+
 document.querySelector('#tileCanvas').addEventListener('mousemove', function(e) {
     gridManager.onPointerMove(e);
 });
+
 document.querySelector('#tileCanvas').addEventListener('touchstart', function(e) {
     e.preventDefault();
     gridManager.handleTouch(e, function(e) {
         gridManager.onPointerDown(e);
     });
 }, {passive: false});
+
 document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) {
     e.preventDefault();
     gridManager.handleTouch(e, function(e) {
         gridManager.onPointerMove(e);
     });
 }, {passive: false});
+
 document.querySelector('#tileCanvas').addEventListener('touchend', function(e) {
     e.preventDefault();
     gridManager.handleTouch(e, function(e) {
