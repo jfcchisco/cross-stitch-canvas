@@ -813,9 +813,15 @@ class GridManager {
     handleTouch(e, singleTouchHandler) {
         if (e.touches.length == 1) {
             singleTouchHandler(e);
-        } else if (e.type == "touchmove" && e.touches.length == 2) {
-            this.isDragging = false;
-            this.handlePinch(e);
+        } else if (e.touches.length == 2) {
+            // Handle pinch on both touchstart and touchmove
+            if (e.type == "touchstart") {
+                this.isDragging = false;
+                this.initialPinchDistance = null;
+            } else if (e.type == "touchmove") {
+                this.isDragging = false;
+                this.handlePinch(e);
+            }
         }
     }
 
