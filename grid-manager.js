@@ -22,7 +22,7 @@ class GridManager {
         this.minHeight = 10;
         this.defaultHeight = 20;
         // Canvas parameters
-        this.tileSize = 30;
+        this.tileSize = 50;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         this.maxZoom = 5.5;
         this.minZoom = 0.5;
@@ -791,7 +791,7 @@ class GridManager {
         const canvas = document.getElementById("tileCanvas");
         this.canvasClick.x = (eventLoc.x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
         this.canvasClick.y = (eventLoc.y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
-        console.log(`Canvas Click at X: ${this.canvasClick.x}, Y: ${this.canvasClick.y}`);
+        console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
     }
 
     onPointerMove(e) {
