@@ -18,7 +18,7 @@ html, body
   background: #111;
   touch-action: none;
 }
-}
+
 
 .color, .tool {
     width: 50px;
