@@ -96,58 +96,57 @@ class GridManager {
 
     // Main interaction handler
     handleTileClick(x, y) {
-        const tile = this.getTile(x, y);
-        if (!tile) return;
+        // const tile = this.getTile(x, y);
+        // if (!tile) return;
 
-        const tileCode = tile.getAttribute('data-tile-code');
-        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${tileCode} - ${this.getDMCValuesFromCode(tileCode).dmcName}`);
+        const code = this.getCoordinateColors(x, y);
+        if(!code) return;
+        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         if (this.paintFlag) {
-            if(this.highFlag && this.highlightedColor !== tileCode) {
+            if(this.highFlag && this.highlightedColor !== code) {
                 return; // Cannot paint non-highlighted colors
             }
-            return this.handlePaint(tile);
+            return this.handlePaint(x, y, code);
         } 
         else if (this.bucketFlag) {
-            if(this.highFlag && this.highlightedColor !== tileCode) {
+            if(this.highFlag && this.highlightedColor !== code) {
                 return; // Cannot bucket-fill non-highlighted colors
             }
-            return this.handleBucketFill(tile);
+            return this.handleBucketFill(x, y, code);
         } 
         else if (this.highFlag) {
-            return this.handleHighlight(tile);
+            return this.handleHighlight(code);
         }
 
     }
 
     // ===== IMPLEMENTATION DETAILS =====
 
-    handlePaint(tile) {
-        const tileCode = tile.getAttribute('data-tile-code');
-        if(tileCode === 'stitched') {
+    handlePaint(x, y, code) {
+        if(code === 'stitched' || code === 'empty') {
             return 0; // Tile already stitched
         }
         // Record change for undo functionality
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
+        this.patternLoader.recordChange(x, y, 'stitched', code);
+        this.updateColorStats(code, 1);
+        // console.log(this.patternLoader.changes);
+        this.refreshCanvas();
+        this.uiManager.updateFootnote("1 stitch painted");
         
-        // Apply paint to single tile
-        this.applyStitchToTile(tile, this.changeCounter);
-        
-        // Update color statistics
-        this.updateColorStats(tileCode, 1);
-        this.uiManager.updateFootnote("1 stitch painted");        
-        return 1; // Return number of tiles affected
+
+
     }
 
-    handleBucketFill(tile) {
-        const startX = Number(tile.getAttribute('data-tile-x'));
-        const startY = Number(tile.getAttribute('data-tile-y'));
-        const fillColor = tile.getAttribute('data-tile-code');
-        if(fillColor === 'stitched' || fillColor === '0') {
+    handleBucketFill(startX, startY, fillColor) {
+        console.log("Bucket fill at", startX, startY, "with color", fillColor);
+        if(fillColor === 'stitched' || fillColor === 'empty') {
             return 0; // Cannot fill stitched or empty areas
         }
         // Get all connected tiles of the same color
         const tilesToFill = this.getConnectedTiles(startX, startY, fillColor);
+        console.log(tilesToFill);
         
         // Safety check for large fills
         if (tilesToFill.length > 100) {
@@ -163,25 +162,25 @@ class GridManager {
         let tilesAffected = 0;
         tilesToFill.forEach(({x, y}) => {
             const connectedTile = this.getTile(x, y);
-            if (connectedTile) {
-                this.applyStitchToTile(connectedTile, this.changeCounter);
-                tilesAffected++;
-            }
+            this.patternLoader.recordChange(x, y, 'stitched', fillColor);
+            console.log(this.patternLoader.changes);
+            tilesAffected++;
+            
         });
         
         // Update color statistics
         this.updateColorStats(fillColor, tilesAffected);
+        this.refreshCanvas();
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
         
         return tilesAffected;
     }
 
-    handleHighlight(tile) {
-        const tileCode = tile.getAttribute('data-tile-code');
-        const tileSymbol = this.getTileSymbol(tileCode);
+    handleHighlight(code) {
+        const symbol = this.getTileSymbol(code);
         
         // Select the color 
-        this.selectColor(tileCode, tileSymbol);
+        this.selectColor(code, symbol);
         
         return 0; // No tiles directly modified
     }
@@ -190,82 +189,19 @@ class GridManager {
         if(this.patternLoader.changeCounter == 0) {
             return;
         }
-        let tiles = document.querySelectorAll(`[data-tile-change=${CSS.escape(this.patternLoader.changeCounter)}]`);
-        tiles.forEach(tile => {
-            let origCode = tile.getAttribute('data-tile-orig-code');
-            let origColor = this.getDMCValuesFromCode(origCode);
-            let R = origColor.R;
-            let G = origColor.G;
-            let B = origColor.B;
-
-            tile.children.item(0).innerText = origColor.symbol;
-            tile.removeAttribute('data-tile-change');
-            tile.setAttribute('data-tile-code', origColor.dmcCode);
-            tile.setAttribute('data-tile-r', origColor.R);
-            tile.setAttribute('data-tile-g', origColor.G);
-            tile.setAttribute('data-tile-b', origColor.B);
-            
-            let code = origCode;
-            let alpha = 1;
-            let spanColor = 'black';
-            let color = 'white';
-            
-            //Check for high contrast
-            if(this.contrastFlag) {
-                if(code == "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = "rgba(" + R + ", " + G + ", " + B + ",1)";
-                }
-                
-                else {
-                    if(this.highFlag) {
-                        if(this.highlightedColor == code) {
-                            spanColor = 'white';
-                            color = 'black';
-                        }
-                        else {
-                            alpha = 0.25;
-                            spanColor = 'silver';
-                        }
-                    }
-                }
+        for(let i=this.patternLoader.changes.length-1; i>=0; i--) {
+            let changeToUndo = this.patternLoader.changes[i];
+            if(changeToUndo.id == this.patternLoader.changeCounter) {
+                this.patternLoader.changes.splice(i, 1);
             }
-
-            else {
-                spanColor = this.getContrastColor(R, G, B);
-            
-                if(this.highFlag && this.highlightedColor != code) {
-                    alpha = 0.25;
-                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-                }
-                if(code == "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = "rgba(" + R + ", " + G + ", " + B + ",1)";
-                    alpha = 1;
-                }
-
-                color = "rgba(" + R + ", " + G + ", " + B + "," + alpha + ")";
-            }
-            
-            // Update stitch count and restore original count
-            let length = this.colorArray.length;
-            
-            for (let i = 0; i < length; i ++) {
-                
-                if(origCode == this.colorArray[i].code) {
-                    this.colorArray[i].count = this.colorArray[i].count + 1;
-                }
-
-                if(this.colorArray[i].code == 'stitched') {
-                    this.colorArray[i].count = this.colorArray[i].count - 1;
-                }
-            }
-            
-            tile.children.item(0).style.color = spanColor;
-            tile.style.backgroundColor = color;
-            
-        })
+        }
+        // console.log(changeToUndo);
+        // this.patternLoader.changes = this.patternLoader.changes.filter(function(el) { return el.id < this.patternLoader.changeCounter;});
         this.patternLoader.changeCounter--;
+        //this.patternLoader.changes.pop();
+        
+        this.refreshCanvas();
+        console.log(this.patternLoader.changes);
         this.uiManager.updateFootnote("Change undone");
         
     }
@@ -384,16 +320,20 @@ class GridManager {
         const visited = new Set();
         
         while (tilesToCheck.length > 0) {
+            console.log(tilesToCheck);
             const current = tilesToCheck.pop();
             const key = `${current.x},${current.y}`;
             
             if (visited.has(key)) continue;
             visited.add(key);
             
-            const tile = this.getTile(current.x, current.y);
-            if (!tile) continue;
+
+            // const tile = this.getTile(current.x, current.y);
+            //if (!tile) continue;
             
-            const tileColor = tile.getAttribute('data-tile-code');
+            const tileColor = this.getCoordinateColors(current.x, current.y);
+            if(!tileColor) continue;
+            // const tileColor = tile.getAttribute('data-tile-code');
             
             if (tileColor === targetColor) {
                 foundTiles.push(current);
@@ -437,6 +377,15 @@ class GridManager {
     }
 
     // ===== UTILITY METHODS =====
+
+    getCoordinateColors(x, y) {
+        for(let stitch of this.patternLoader.getCurrentPattern().stitches) {
+            if(stitch.X == x && stitch.Y == y) {
+                return stitch.dmcCode;
+            }
+        }
+        return null;
+    }
 
     getTile(x, y) {
         return document.querySelector(`[data-tile-x="${x}"][data-tile-y="${y}"]`);
@@ -581,8 +530,16 @@ class GridManager {
     initializeCanvas() {
         const canvas = document.getElementById("tileCanvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = this.patternLoader.getCols() * this.tileSize;
-        canvas.height = this.patternLoader.getRows() * this.tileSize;
+        // Adjust tile size based on pattern dimensions, max canvas size of 5000 pixels on the longest side, minimum tile size of 10 pixels, maximum of 50 pixels
+        const cols = this.patternLoader.getCols();
+        const rows = this.patternLoader.getRows();
+        const maxDimension = Math.max(cols, rows);
+        this.tileSize = Math.min(Math.max(Math.floor(5000 / maxDimension), 10), 50);
+        // Adjust max zoom based on tile size
+        this.maxZoom = 50 / this.tileSize;
+        
+        canvas.width = cols * this.tileSize;
+        canvas.height = rows * this.tileSize;
         this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
         this.cameraZoom = this.minZoom;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -693,6 +650,25 @@ class GridManager {
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             let symbol = colorData.symbol;
+            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+        }
+
+        for(let change in this.patternLoader.changes) {
+            let changeObj = this.patternLoader.changes[change];
+            let x = changeObj.X * this.tileSize;
+            let y = changeObj.Y * this.tileSize;
+            let code = changeObj.newCode;
+            let colorData = this.getDMCValuesFromCode(code);
+            color = `rgba(0, 255, 0, 1)`;
+            spanColor = 'white';
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            // Draw symbol
+            ctx.fillStyle = spanColor;
+            ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            let symbol = "×";
             ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
     }
@@ -828,7 +804,18 @@ class GridManager {
         const canvas = document.getElementById("tileCanvas");
         this.canvasClick.x = (eventLoc.x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
         this.canvasClick.y = (eventLoc.y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
-        console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+
+        if(this.mouseDown.x === this.mouseUp.x && this.mouseDown.y === this.mouseUp.y) {
+            if(this.canvasClick.x < 0 || this.canvasClick.y < 0) {
+                return;
+            } else if(this.canvasClick.x > canvas.width || this.canvasClick.y > canvas.height) {
+                return;
+            } else {
+                this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
+            }
+            
+            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+        }
     }
 
     onPointerMove(e) {

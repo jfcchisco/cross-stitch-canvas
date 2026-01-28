@@ -130,7 +130,7 @@ function previewOpen() {
 }
 
 function save() {
-    //mergeChanges();
+    patternLoader.mergeChanges();
     addChangesToJsonObject();
     uiManager.fillFlossUsage();
 
