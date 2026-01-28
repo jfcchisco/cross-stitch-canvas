@@ -286,6 +286,7 @@ class GridManager {
     zoomIn() {
         const zoomAmount = 100 * this.scrollSensitivity;
         this.cameraZoom += zoomAmount;
+        console.log(this.cameraZoom, zoomAmount);
 
         // Schedule a single render instead of rendering on every move
         if (!this.renderScheduled) {
@@ -875,7 +876,16 @@ class GridManager {
         } else {
             const zoomFactor = currentDistance / this.initialPinchDistance;
             console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
-            this.adjustCanvasZoom(null, zoomFactor, e);
+            this.cameraZoom = zoomAmount;
+
+            // Schedule a single render instead of rendering on every move
+            if (!this.renderScheduled) {
+                this.renderScheduled = true;
+                requestAnimationFrame(() => {
+                    this.renderCanvas();
+                    this.renderScheduled = false;
+                });
+            }
         }
     }
 
