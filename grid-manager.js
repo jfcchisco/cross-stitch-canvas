@@ -876,7 +876,7 @@ class GridManager {
         } else {
             const zoomFactor = currentDistance / this.initialPinchDistance;
             console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
-            this.cameraZoom = zoomAmount;
+            this.cameraZoom = zoomFactor;
 
             // Schedule a single render instead of rendering on every move
             if (!this.renderScheduled) {
