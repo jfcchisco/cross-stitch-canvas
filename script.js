@@ -256,7 +256,7 @@ document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) 
 document.querySelector('#tileCanvas').addEventListener('touchend', (e) => {
     console.log("Touch end detected");
     e.preventDefault();
-    gridManager.handleTouch(e, gridManager.onPointerUp.bind(gridManager));
+    gridManager.handleTouch(e, gridManager.onTouchEnd(e));
 }, {passive: false});
 
 
