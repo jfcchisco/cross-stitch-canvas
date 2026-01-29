@@ -129,6 +129,7 @@ function previewOpen() {
     modal.style.display = "block";
 }
 
+
 function save() {
     patternLoader.mergeChanges();
     addChangesToJsonObject();
@@ -252,12 +253,12 @@ document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) 
     });
 }, {passive: false});
 
-document.querySelector('#tileCanvas').addEventListener('touchend', function(e) {
+document.querySelector('#tileCanvas').addEventListener('touchend', (e) => {
+    console.log("Touch end detected");
     e.preventDefault();
-    gridManager.handleTouch(e, function(e) {
-        gridManager.onPointerUp(e);
-    });
+    gridManager.handleTouch(e, gridManager.onPointerUp.bind(gridManager));
 }, {passive: false});
+
 
 // Prevent right-click context menu on canvas
 document.querySelector('#tileCanvas').addEventListener('contextmenu', function(e) {

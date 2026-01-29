@@ -7,6 +7,7 @@
 class GridManager {
     constructor(patternLoader, uiManager) {
         this.tileContainer = document.getElementsByClassName("tile-container")[0];
+        this.tileCanvas = document.getElementById("tileCanvas");
         this.patternLoader = patternLoader;
         this.uiManager = uiManager;
         this.activeTool = null;
@@ -589,9 +590,6 @@ class GridManager {
         ctx.drawImage(this.patternCanvas, 0, 0);
     }
 
-    
-    
-
     drawTiles(ctx, currentPattern) {
         let spanColor = 'black';
         let color = 'white';
@@ -786,8 +784,10 @@ class GridManager {
     }
         
     onPointerDown(e) {
+        console.log("Pointer down detected");
         this.isDragging = true;
         const eventLoc = this.getEventLocation(e);
+        console.log(eventLoc);
         this.dragStart.x = eventLoc.x / this.cameraZoom - this.cameraOffset.x;
         this.dragStart.y = eventLoc.y / this.cameraZoom - this.cameraOffset.y;
         this.mouseDown.x = eventLoc.x;
@@ -795,6 +795,7 @@ class GridManager {
     }
 
     onPointerUp(e) {
+        console.log("Pointer up detected");
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -816,6 +817,31 @@ class GridManager {
             
             console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
+    }
+
+    onTouchEnd(e) {
+        console.log("Touch end detected", e);
+        this.isDragging = false;
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
+        this.mouseUp.x = e.changedTouches[0].clientX;
+        this.mouseUp.y = e.changedTouches[0].clientY;
+        
+        if(this.mouseDown.x === this.mouseUp.x && this.mouseDown.y === this.mouseUp.y) {
+            const canvas = document.getElementById("tileCanvas");
+            this.canvasClick.x = (e.changedTouches[0].clientX - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
+            this.canvasClick.y = (e.changedTouches[0].clientY - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know  
+            if(this.canvasClick.x < 0 || this.canvasClick.y < 0) {
+                return;
+            } else if(this.canvasClick.x > canvas.width || this.canvasClick.y > canvas.height) {
+                return;
+            } else {
+                this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
+            }
+            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+        }
+
+        
     }
 
     onPointerMove(e) {
@@ -1140,6 +1166,9 @@ class GridManager {
         }        
         return highlightedStitches;
     }
+
+    //this.tileCanvas.addEventListener('touchend', (e) => {
+    //    this.handleTouch(e, onPointerUp))
 
     
 }
