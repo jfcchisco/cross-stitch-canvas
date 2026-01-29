@@ -7,6 +7,7 @@
 class GridManager {
     constructor(patternLoader, uiManager) {
         this.tileContainer = document.getElementsByClassName("tile-container")[0];
+        this.tileCanvas = document.getElementById("tileCanvas");
         this.patternLoader = patternLoader;
         this.uiManager = uiManager;
         this.activeTool = null;
@@ -21,7 +22,23 @@ class GridManager {
         this.maxHeight = 50;
         this.minHeight = 10;
         this.defaultHeight = 20;
-
+        // Canvas parameters
+        this.tileSize = 15;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        this.maxZoom = 1.5;
+        this.minZoom = 0.5;
+        this.scrollSensitivity = 0.0005;
+        this.cameraZoom = this.minZoom;
+        this.isDragging = false;
+        this.dragStart = { x: 0, y: 0 };
+        this.mouseDown = { x: 0, y: 0 };
+        this.mouseUp = { x: 0, y: 0 };
+        this.canvasClick = { x: 0, y: 0 };
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
+        this.renderScheduled = false;
+        this.patternCanvas = document.createElement('canvas');
+        this.patternCacheDirty = true;
     }
 
     /**
@@ -66,7 +83,7 @@ class GridManager {
         }
         this.paintFlag = false;
         this.bucketFlag = false;
-        this.refreshGridDisplay();
+        this.refreshCanvas();
     }
 
     activateHighContrast() {
@@ -80,58 +97,57 @@ class GridManager {
 
     // Main interaction handler
     handleTileClick(x, y) {
-        const tile = this.getTile(x, y);
-        if (!tile) return;
+        // const tile = this.getTile(x, y);
+        // if (!tile) return;
 
-        const tileCode = tile.getAttribute('data-tile-code');
-        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${tileCode} - ${this.getDMCValuesFromCode(tileCode).dmcName}`);
+        const code = this.getCoordinateColors(x, y);
+        if(!code) return;
+        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         if (this.paintFlag) {
-            if(this.highFlag && this.highlightedColor !== tileCode) {
+            if(this.highFlag && this.highlightedColor !== code) {
                 return; // Cannot paint non-highlighted colors
             }
-            return this.handlePaint(tile);
+            return this.handlePaint(x, y, code);
         } 
         else if (this.bucketFlag) {
-            if(this.highFlag && this.highlightedColor !== tileCode) {
+            if(this.highFlag && this.highlightedColor !== code) {
                 return; // Cannot bucket-fill non-highlighted colors
             }
-            return this.handleBucketFill(tile);
+            return this.handleBucketFill(x, y, code);
         } 
         else if (this.highFlag) {
-            return this.handleHighlight(tile);
+            return this.handleHighlight(code);
         }
 
     }
 
     // ===== IMPLEMENTATION DETAILS =====
 
-    handlePaint(tile) {
-        const tileCode = tile.getAttribute('data-tile-code');
-        if(tileCode === 'stitched') {
+    handlePaint(x, y, code) {
+        if(code === 'stitched' || code === 'empty') {
             return 0; // Tile already stitched
         }
         // Record change for undo functionality
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
+        this.patternLoader.recordChange(x, y, 'stitched', code);
+        this.updateColorStats(code, 1);
+        // console.log(this.patternLoader.changes);
+        this.refreshCanvas();
+        this.uiManager.updateFootnote("1 stitch painted");
         
-        // Apply paint to single tile
-        this.applyStitchToTile(tile, this.changeCounter);
-        
-        // Update color statistics
-        this.updateColorStats(tileCode, 1);
-        this.uiManager.updateFootnote("1 stitch painted");        
-        return 1; // Return number of tiles affected
+
+
     }
 
-    handleBucketFill(tile) {
-        const startX = Number(tile.getAttribute('data-tile-x'));
-        const startY = Number(tile.getAttribute('data-tile-y'));
-        const fillColor = tile.getAttribute('data-tile-code');
-        if(fillColor === 'stitched' || fillColor === '0') {
+    handleBucketFill(startX, startY, fillColor) {
+        console.log("Bucket fill at", startX, startY, "with color", fillColor);
+        if(fillColor === 'stitched' || fillColor === 'empty') {
             return 0; // Cannot fill stitched or empty areas
         }
         // Get all connected tiles of the same color
         const tilesToFill = this.getConnectedTiles(startX, startY, fillColor);
+        console.log(tilesToFill);
         
         // Safety check for large fills
         if (tilesToFill.length > 100) {
@@ -147,25 +163,25 @@ class GridManager {
         let tilesAffected = 0;
         tilesToFill.forEach(({x, y}) => {
             const connectedTile = this.getTile(x, y);
-            if (connectedTile) {
-                this.applyStitchToTile(connectedTile, this.changeCounter);
-                tilesAffected++;
-            }
+            this.patternLoader.recordChange(x, y, 'stitched', fillColor);
+            console.log(this.patternLoader.changes);
+            tilesAffected++;
+            
         });
         
         // Update color statistics
         this.updateColorStats(fillColor, tilesAffected);
+        this.refreshCanvas();
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
         
         return tilesAffected;
     }
 
-    handleHighlight(tile) {
-        const tileCode = tile.getAttribute('data-tile-code');
-        const tileSymbol = this.getTileSymbol(tileCode);
+    handleHighlight(code) {
+        const symbol = this.getTileSymbol(code);
         
         // Select the color 
-        this.selectColor(tileCode, tileSymbol);
+        this.selectColor(code, symbol);
         
         return 0; // No tiles directly modified
     }
@@ -174,82 +190,19 @@ class GridManager {
         if(this.patternLoader.changeCounter == 0) {
             return;
         }
-        let tiles = document.querySelectorAll(`[data-tile-change=${CSS.escape(this.patternLoader.changeCounter)}]`);
-        tiles.forEach(tile => {
-            let origCode = tile.getAttribute('data-tile-orig-code');
-            let origColor = this.getDMCValuesFromCode(origCode);
-            let R = origColor.R;
-            let G = origColor.G;
-            let B = origColor.B;
-
-            tile.children.item(0).innerText = origColor.symbol;
-            tile.removeAttribute('data-tile-change');
-            tile.setAttribute('data-tile-code', origColor.dmcCode);
-            tile.setAttribute('data-tile-r', origColor.R);
-            tile.setAttribute('data-tile-g', origColor.G);
-            tile.setAttribute('data-tile-b', origColor.B);
-            
-            let code = origCode;
-            let alpha = 1;
-            let spanColor = 'black';
-            let color = 'white';
-            
-            //Check for high contrast
-            if(this.contrastFlag) {
-                if(code == "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = "rgba(" + R + ", " + G + ", " + B + ",1)";
-                }
-                
-                else {
-                    if(this.highFlag) {
-                        if(this.highlightedColor == code) {
-                            spanColor = 'white';
-                            color = 'black';
-                        }
-                        else {
-                            alpha = 0.25;
-                            spanColor = 'silver';
-                        }
-                    }
-                }
+        for(let i=this.patternLoader.changes.length-1; i>=0; i--) {
+            let changeToUndo = this.patternLoader.changes[i];
+            if(changeToUndo.id == this.patternLoader.changeCounter) {
+                this.patternLoader.changes.splice(i, 1);
             }
-
-            else {
-                spanColor = this.getContrastColor(R, G, B);
-            
-                if(this.highFlag && this.highlightedColor != code) {
-                    alpha = 0.25;
-                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-                }
-                if(code == "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = "rgba(" + R + ", " + G + ", " + B + ",1)";
-                    alpha = 1;
-                }
-
-                color = "rgba(" + R + ", " + G + ", " + B + "," + alpha + ")";
-            }
-            
-            // Update stitch count and restore original count
-            let length = this.colorArray.length;
-            
-            for (let i = 0; i < length; i ++) {
-                
-                if(origCode == this.colorArray[i].code) {
-                    this.colorArray[i].count = this.colorArray[i].count + 1;
-                }
-
-                if(this.colorArray[i].code == 'stitched') {
-                    this.colorArray[i].count = this.colorArray[i].count - 1;
-                }
-            }
-            
-            tile.children.item(0).style.color = spanColor;
-            tile.style.backgroundColor = color;
-            
-        })
+        }
+        // console.log(changeToUndo);
+        // this.patternLoader.changes = this.patternLoader.changes.filter(function(el) { return el.id < this.patternLoader.changeCounter;});
         this.patternLoader.changeCounter--;
+        //this.patternLoader.changes.pop();
+        
+        this.refreshCanvas();
+        console.log(this.patternLoader.changes);
         this.uiManager.updateFootnote("Change undone");
         
     }
@@ -268,23 +221,55 @@ class GridManager {
     }
 
     zoomIn() {
-        const collection = document.getElementsByClassName("tile");
+        const zoomAmount = 100 * this.scrollSensitivity;
+        this.cameraZoom += zoomAmount;
+        console.log(this.cameraZoom, zoomAmount);
+
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+        // this.adjustCanvasZoom(zoomAmount, null, null);
+        /* const collection = document.getElementsByClassName("tile");
         let height = collection[0].offsetHeight;
         if(height < this.maxHeight) {
             let newHeight = height + 2;
             this.setHeight(newHeight);
         }
-        this.uiManager.drawSVG();
+        this.uiManager.drawSVG(); */
     }
 
     zoomOut() {
-        const collection = document.getElementsByClassName("tile");
+        const zoomAmount = -100 * this.scrollSensitivity;
+        this.cameraZoom += zoomAmount;
+
+        if(this.cameraZoom > this.maxZoom) {
+            this.cameraZoom = this.maxZoom;
+        }
+        if(this.cameraZoom < this.minZoom) {
+            this.cameraZoom = this.minZoom;
+        }
+
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+        // this.adjustCanvasZoom(zoomAmount, null, null);
+        /* const collection = document.getElementsByClassName("tile");
         let height = collection[0].offsetHeight;
         if(height > this.minHeight) {
             let newHeight = height - 2;
             this.setHeight(newHeight);
         }
-        this.uiManager.drawSVG();
+        this.uiManager.drawSVG(); */
     }
 
     zoomReset() {
@@ -336,16 +321,20 @@ class GridManager {
         const visited = new Set();
         
         while (tilesToCheck.length > 0) {
+            console.log(tilesToCheck);
             const current = tilesToCheck.pop();
             const key = `${current.x},${current.y}`;
             
             if (visited.has(key)) continue;
             visited.add(key);
             
-            const tile = this.getTile(current.x, current.y);
-            if (!tile) continue;
+
+            // const tile = this.getTile(current.x, current.y);
+            //if (!tile) continue;
             
-            const tileColor = tile.getAttribute('data-tile-code');
+            const tileColor = this.getCoordinateColors(current.x, current.y);
+            if(!tileColor) continue;
+            // const tileColor = tile.getAttribute('data-tile-code');
             
             if (tileColor === targetColor) {
                 foundTiles.push(current);
@@ -378,7 +367,7 @@ class GridManager {
         this.updateColorSelectorUI(colorCode, symbol);
             
             // Refresh grid to show highlighting
-        this.refreshGridDisplay();
+        this.refreshCanvas();
         this.uiManager.updateFootnote("Selected color: " + colorCode + " - " + this.getDMCValuesFromCode(colorCode).dmcName);
 
     }
@@ -389,6 +378,15 @@ class GridManager {
     }
 
     // ===== UTILITY METHODS =====
+
+    getCoordinateColors(x, y) {
+        for(let stitch of this.patternLoader.getCurrentPattern().stitches) {
+            if(stitch.X == x && stitch.Y == y) {
+                return stitch.dmcCode;
+            }
+        }
+        return null;
+    }
 
     getTile(x, y) {
         return document.querySelector(`[data-tile-x="${x}"][data-tile-y="${y}"]`);
@@ -443,7 +441,6 @@ class GridManager {
 
             //+1 to compensate for the vertical ruler
             let tile = row.children.item(stitch.X + 1);
-            // console.log(tile, stitch);
             if (tile) {
                 tile.setAttribute('data-tile-x', stitch.X);
                 tile.setAttribute('data-tile-y', stitch.Y);
@@ -523,13 +520,387 @@ class GridManager {
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
-        this.updateTileColors();
+        this.refreshCanvas();
         return this.contrastFlag;
     }
 
     /**
      * GRID DRAWING METHODS
      */
+
+    initializeCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        const ctx = canvas.getContext("2d");
+        // Adjust tile size based on pattern dimensions, max canvas size of 5000 pixels on the longest side, minimum tile size of 10 pixels, maximum of 50 pixels
+        const cols = this.patternLoader.getCols();
+        const rows = this.patternLoader.getRows();
+        const maxDimension = Math.max(cols, rows);
+        this.tileSize = Math.min(Math.max(Math.floor(5000 / maxDimension), 10), 50);
+        // Adjust max zoom based on tile size
+        this.maxZoom = 50 / this.tileSize;
+        
+        canvas.width = cols * this.tileSize;
+        canvas.height = rows * this.tileSize;
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.cameraZoom = this.minZoom;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    cleanPatternCache(canvas) {
+        this.patternCanvas.width = canvas.width;
+        this.patternCanvas.height = canvas.height;
+        const patternCtx = this.patternCanvas.getContext("2d");
+        const currentPattern = this.patternLoader.getCurrentPattern();
+        this.drawTiles(patternCtx, currentPattern);
+        this.drawLines(patternCtx);
+    }
+
+    refreshCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        canvas.width = this.patternLoader.getCols() * this.tileSize;
+        canvas.height = this.patternLoader.getRows() * this.tileSize;
+        const ctx = canvas.getContext("2d");
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Set zoom and offset
+        ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
+        ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
+        
+        const currentPattern = this.patternLoader.getCurrentPattern();
+
+        this.drawTiles(ctx, currentPattern);
+        this.drawLines(ctx);
+        this.cleanPatternCache(canvas);
+    }
+
+    renderCanvas() {
+        const canvas = document.getElementById("tileCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        // Regenerate pattern cache only when needed
+        if (this.patternCacheDirty) {
+            this.cleanPatternCache(canvas);
+            this.patternCacheDirty = false;
+        }
+        
+        // Now just apply transformation to cached content
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
+        ctx.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
+        ctx.drawImage(this.patternCanvas, 0, 0);
+    }
+
+    drawTiles(ctx, currentPattern) {
+        let spanColor = 'black';
+        let color = 'white';
+
+        for(let stitch in currentPattern.stitches) {
+            let stitchObj = currentPattern.stitches[stitch];
+            let x = stitchObj.X * this.tileSize;
+            let y = stitchObj.Y * this.tileSize;
+            let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
+            let R = colorData.R;
+            let G = colorData.G;
+            let B = colorData.B;
+            let code = stitchObj.dmcCode;
+            let alpha = 1;
+
+            // Check for high contrast mode
+            if (this.contrastFlag) {
+                if (code === "stitched") {
+                    spanColor = this.getContrastColor(R, G, B);
+                    color = `rgba(${R}, ${G}, ${B}, 1)`;
+                } else {
+                    if (this.highFlag) {
+                        if (this.highlightedColor === code) {
+                            spanColor = 'white';
+                            color = 'black';
+                        } else {
+                            alpha = 0.25;
+                            spanColor = 'silver';
+                            color = 'white';
+                        }
+                    }
+                }
+            } else {
+                spanColor = this.getContrastColor(R, G, B);
+                
+                if (this.highFlag && this.highlightedColor !== code) {
+                    alpha = 0.25;
+                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
+                }
+                
+                if (code === "stitched") {
+                    spanColor = this.getContrastColor(R, G, B);
+                    color = `rgba(${R}, ${G}, ${B}, 1)`;
+                    alpha = 1;
+                }
+
+                color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
+            }
+
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            // Draw symbol
+            ctx.fillStyle = spanColor;
+            ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            let symbol = colorData.symbol;
+            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+        }
+
+        for(let change in this.patternLoader.changes) {
+            let changeObj = this.patternLoader.changes[change];
+            let x = changeObj.X * this.tileSize;
+            let y = changeObj.Y * this.tileSize;
+            let code = changeObj.newCode;
+            let colorData = this.getDMCValuesFromCode(code);
+            color = `rgba(0, 255, 0, 1)`;
+            spanColor = 'white';
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, this.tileSize, this.tileSize);
+            // Draw symbol
+            ctx.fillStyle = spanColor;
+            ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            let symbol = "×";
+            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+        }
+    }
+
+    drawLines(ctx) {
+        const cols = this.patternLoader.getCols();
+        const rows = this.patternLoader.getRows();
+        ctx.strokeStyle = 'silver';
+        ctx.lineWidth = 1;
+        // Draw vertical lines
+        for (let i = 0; i <= cols; i++) {
+            if(i % 10 === 0) {
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+            } else {
+                ctx.strokeStyle = 'gray';
+                ctx.lineWidth = 1;
+            }
+            ctx.beginPath();
+            ctx.moveTo(i * this.tileSize, 0);
+            ctx.lineTo(i * this.tileSize, rows * this.tileSize);
+            ctx.stroke();
+        }
+        // Draw horizontal lines
+        for (let j = 0; j <= rows; j++) {
+            if(j % 10 === 0) {
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+            } else {
+                ctx.strokeStyle = 'gray';
+                ctx.lineWidth = 1;
+            }
+            ctx.beginPath();
+            ctx.moveTo(0, j * this.tileSize);
+            ctx.lineTo(cols * this.tileSize, j * this.tileSize);
+            ctx.stroke();
+        }
+    }
+
+    drawRulers() {
+        // Ruler drawing logic can be implemented here if needed
+    }
+
+    adjustCanvasZoom(zoomAmount, zoomFactor, mouseEvent) {
+        const canvas = document.getElementById("tileCanvas");
+        const mousePos = this.getEventLocation(mouseEvent);
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        // Calculate current scale and translate
+        const scaleX = (canvas.width / canvas.clientWidth) * this.cameraZoom;
+        const scaleY = (canvas.height / canvas.clientHeight) * this.cameraZoom;
+        const tx = -window.innerWidth / 2 + this.cameraOffset.x;
+        const ty = -window.innerHeight / 2 + this.cameraOffset.y;
+        
+        // Mouse position in canvas display coordinates
+        const dx = mousePos.x - canvasRect.x;
+        const dy = mousePos.y - canvasRect.y;
+        
+        // World coordinates under the mouse
+        const worldX = dx / scaleX - tx;
+        const worldY = dy / scaleY - ty;
+        
+        // Apply zoom
+        if(!this.isDragging) {
+            if(zoomAmount) {
+                this.cameraZoom += zoomAmount;
+            }
+        } else if(zoomFactor) {
+            this.cameraZoom = zoomFactor * this.lastZoom;
+        }
+        if(this.cameraZoom > this.maxZoom) {
+            this.cameraZoom = this.maxZoom;
+        }
+        if(this.cameraZoom < this.minZoom) {
+            this.cameraZoom = this.minZoom;
+        }
+        
+        // New scale
+        const newScaleX = (canvas.width / canvas.clientWidth) * this.cameraZoom;
+        const newScaleY = (canvas.height / canvas.clientHeight) * this.cameraZoom;
+        
+        // Adjust offset so world point is still under mouse
+        const newTx = dx / newScaleX - worldX;
+        const newTy = dy / newScaleY - worldY;
+        
+        this.cameraOffset.x = newTx + window.innerWidth / 2;
+        this.cameraOffset.y = newTy + window.innerHeight / 2;
+
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+    }
+
+    resetCanvasZoom() {
+        this.cameraZoom = this.minZoom;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
+
+    getEventLocation(e) {
+        if (e.touches && e.touches.length == 2) {
+            // For pinch, return the midpoint between two touches
+            const x = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            return { x, y };
+        } else if (e.touches && e.touches.length == 1) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.clientX && e.clientY) {
+            return { x: e.clientX, y: e.clientY };
+        }
+    }
+        
+    onPointerDown(e) {
+        console.log("Pointer down detected");
+        this.isDragging = true;
+        const eventLoc = this.getEventLocation(e);
+        console.log(eventLoc);
+        this.dragStart.x = eventLoc.x / this.cameraZoom - this.cameraOffset.x;
+        this.dragStart.y = eventLoc.y / this.cameraZoom - this.cameraOffset.y;
+        this.mouseDown.x = eventLoc.x;
+        this.mouseDown.y = eventLoc.y;
+    }
+
+    onPointerUp(e) {
+        console.log("Pointer up detected");
+        this.isDragging = false;
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
+        const eventLoc = this.getEventLocation(e);
+        this.mouseUp.x = eventLoc.x;
+        this.mouseUp.y = eventLoc.y;
+        const canvas = document.getElementById("tileCanvas");
+        this.canvasClick.x = (eventLoc.x - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
+        this.canvasClick.y = (eventLoc.y - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know
+
+        if(this.mouseDown.x === this.mouseUp.x && this.mouseDown.y === this.mouseUp.y) {
+            if(this.canvasClick.x < 0 || this.canvasClick.y < 0) {
+                return;
+            } else if(this.canvasClick.x > canvas.width || this.canvasClick.y > canvas.height) {
+                return;
+            } else {
+                this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
+            }
+            
+            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+        }
+    }
+
+    onTouchEnd(e) {
+        console.log("Touch end detected", e);
+        this.isDragging = false;
+        this.initialPinchDistance = null;
+        this.lastZoom = this.cameraZoom;
+        this.mouseUp.x = e.changedTouches[0].clientX;
+        this.mouseUp.y = e.changedTouches[0].clientY;
+        
+        if(this.mouseDown.x === this.mouseUp.x && this.mouseDown.y === this.mouseUp.y) {
+            const canvas = document.getElementById("tileCanvas");
+            this.canvasClick.x = (e.changedTouches[0].clientX - canvas.getBoundingClientRect().x) / this.cameraZoom - (this.cameraOffset.x - canvas.parentElement.offsetWidth / 2);
+            this.canvasClick.y = (e.changedTouches[0].clientY - canvas.getBoundingClientRect().y) / this.cameraZoom - (this.cameraOffset.y - canvas.parentElement.offsetHeight / 2) + 77.5; // Why 77.5 you ask? Hell I don't know  
+            if(this.canvasClick.x < 0 || this.canvasClick.y < 0) {
+                return;
+            } else if(this.canvasClick.x > canvas.width || this.canvasClick.y > canvas.height) {
+                return;
+            } else {
+                this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
+            }
+            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+        }
+
+        
+    }
+
+    onPointerMove(e) {
+        if (this.isDragging) {
+            this.cameraOffset.x = this.getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
+            this.cameraOffset.y = this.getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
+            
+            // Schedule a single render instead of rendering on every move
+            if (!this.renderScheduled) {
+                this.renderScheduled = true;
+                requestAnimationFrame(() => {
+                    this.renderCanvas();
+                    this.renderScheduled = false;
+                });
+            }
+        }
+    }
+
+    handleTouch(e, singleTouchHandler) {
+        if (e.touches.length == 1) {
+            singleTouchHandler(e);
+        } else if (e.touches.length == 2) {
+            // Handle pinch on both touchstart and touchmove
+            if (e.type == "touchstart") {
+                console.log("Two-finger touchstart detected");
+                this.isDragging = false;
+                this.initialPinchDistance = null;
+                this.lastZoom = this.cameraZoom;
+            } else if (e.type == "touchmove") {
+                console.log("Two-finger touchmove detected");
+                this.isDragging = false;
+                this.handlePinch(e);
+            }
+        }
+    }
+
+    handlePinch(e) {
+        const touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        const touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+        const currentDistance = Math.hypot(touch2.x - touch1.x, touch2.y - touch1.y);
+        
+        if (this.initialPinchDistance == null) {
+            this.initialPinchDistance = currentDistance;
+            console.log("Initial pinch distance set:", this.initialPinchDistance);
+        } else {
+            const zoomFactor = currentDistance / this.initialPinchDistance;
+            console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
+            this.cameraZoom = zoomFactor + this.lastZoom - 1;
+
+            // Schedule a single render instead of rendering on every move
+            if (!this.renderScheduled) {
+                this.renderScheduled = true;
+                requestAnimationFrame(() => {
+                    this.renderCanvas();
+                    this.renderScheduled = false;
+                });
+            }
+        }
+    }
 
     removeAllTiles() {
         while (this.tileContainer.firstChild) {
@@ -795,6 +1166,9 @@ class GridManager {
         }        
         return highlightedStitches;
     }
+
+    //this.tileCanvas.addEventListener('touchend', (e) => {
+    //    this.handleTouch(e, onPointerUp))
 
     
 }

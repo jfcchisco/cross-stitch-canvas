@@ -19,16 +19,6 @@ let rows = 0;
 let jsonFiles = ['json/cubs.json', 'json/liverpool.json', 'json/japan.json', 'json/northern.json', 'json/cuphead.json', 'json/dino.json', 'json/amsterdam.json', 'json/african.json', 'json/messi.json'];
 let currIndex = 0;
 
-/* // Spinner functions
-function showSpinner(message='Loading pattern...') {
-    document.getElementById('loadingSpinner').style.display = 'flex';
-    document.getElementById('spinnerMessage').textContent = message;
-}
-
-function hideSpinner() {
-    document.getElementById('loadingSpinner').style.display = 'none';
-} */
-
 window.onload = async function() {
     try {
         uiManager.showSpinner();
@@ -90,16 +80,19 @@ function loadJSON(data) {
     cols = processedData.stitches[processedData.stitches.length-1].X+1
     rows = processedData.stitches[processedData.stitches.length-1].Y+1
 
+    gridManager.initializeCanvas();
+    gridManager.resetCanvasZoom();
+    gridManager.refreshCanvas();
+
+/*     
     gridManager.initializeGrid(cols, rows);
 
     gridManager.updateTileAttributes(processedData.stitches);
     gridManager.refreshGridDisplay();
-    gridManager.drawGridLines();
+    gridManager.drawGridLines(); */
 
     // Adjust tile container height
-    var body = document.body;
-    var height = body.offsetHeight - 130 - 25; // total minus the 2 toolbars and some margin
-    tileContainer.style.height = height+"px";
+    tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
 
     uiManager.updateFootnote("Loaded pattern"); 
 }
@@ -136,8 +129,9 @@ function previewOpen() {
     modal.style.display = "block";
 }
 
+
 function save() {
-    //mergeChanges();
+    patternLoader.mergeChanges();
     addChangesToJsonObject();
     uiManager.fillFlossUsage();
 
@@ -227,3 +221,46 @@ window.zoomReset = () => gridManager.zoomReset();
 window.selectColor = selectColor;
 window.tileClick = tileClick;
 
+// Tile canvas event listeners
+document.querySelector('#tileCanvas').addEventListener('wheel', function(e) {
+    const zoomAmount = -e.deltaY * gridManager.scrollSensitivity;
+    gridManager.adjustCanvasZoom(zoomAmount, null, e);
+});
+
+document.querySelector('#tileCanvas').addEventListener('mousedown', function(e) {
+    gridManager.onPointerDown(e);
+});
+
+document.querySelector('#tileCanvas').addEventListener('mouseup', function(e) {
+    gridManager.onPointerUp(e);
+});
+
+document.querySelector('#tileCanvas').addEventListener('mousemove', function(e) {
+    gridManager.onPointerMove(e);
+});
+
+document.querySelector('#tileCanvas').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    gridManager.handleTouch(e, function(e) {
+        gridManager.onPointerDown(e);
+    });
+}, {passive: false});
+
+document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    gridManager.handleTouch(e, function(e) {
+        gridManager.onPointerMove(e);
+    });
+}, {passive: false});
+
+document.querySelector('#tileCanvas').addEventListener('touchend', (e) => {
+    console.log("Touch end detected");
+    e.preventDefault();
+    gridManager.handleTouch(e, gridManager.onTouchEnd(e));
+}, {passive: false});
+
+
+// Prevent right-click context menu on canvas
+document.querySelector('#tileCanvas').addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});

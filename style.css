@@ -9,7 +9,6 @@ html, body
     margin: 0;
     padding: 0px;
     overflow: hidden;
-
 }
 
 #canvas
@@ -17,7 +16,9 @@ html, body
   width: 100%;
   height: calc(100% - 115px);
   background: #111;
+  touch-action: none;
 }
+
 
 .color, .tool {
     width: 50px;
@@ -125,7 +126,8 @@ html, body
 }
 
 .tile-container {
-    overflow: scroll;
+    /*overflow: scroll;*/
+    overflow: hidden;
     height: 82vh;
     position: relative;
 }
