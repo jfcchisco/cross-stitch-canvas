@@ -133,7 +133,7 @@ class GridManager {
         this.patternLoader.recordChange(x, y, 'stitched', code);
         this.updateColorStats(code, 1);
         // console.log(this.patternLoader.changes);
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("1 stitch painted");
         
 
@@ -162,7 +162,7 @@ class GridManager {
         // Apply paint to all connected tiles
         let tilesAffected = 0;
         tilesToFill.forEach(({x, y}) => {
-            const connectedTile = this.getTile(x, y);
+            //const connectedTile = this.getTile(x, y);
             this.patternLoader.recordChange(x, y, 'stitched', fillColor);
             console.log(this.patternLoader.changes);
             tilesAffected++;
@@ -171,7 +171,7 @@ class GridManager {
         
         // Update color statistics
         this.updateColorStats(fillColor, tilesAffected);
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
         
         return tilesAffected;
@@ -535,7 +535,7 @@ class GridManager {
         const cols = this.patternLoader.getCols();
         const rows = this.patternLoader.getRows();
         const maxDimension = Math.max(cols, rows);
-        this.tileSize = Math.min(Math.max(Math.floor(5000 / maxDimension), 10), 50);
+        this.tileSize = Math.min(Math.max(Math.floor(4000 / maxDimension), 10), 50);
         // Adjust max zoom based on tile size
         this.maxZoom = 50 / this.tileSize;
         
@@ -555,7 +555,7 @@ class GridManager {
         this.drawLines(patternCtx);
     }
 
-    refreshCanvas() {
+    refreshCanvas(visibleFlag=false) {
         const canvas = document.getElementById("tileCanvas");
         canvas.width = this.patternLoader.getCols() * this.tileSize;
         canvas.height = this.patternLoader.getRows() * this.tileSize;
@@ -567,7 +567,7 @@ class GridManager {
         
         const currentPattern = this.patternLoader.getCurrentPattern();
 
-        this.drawTiles(ctx, currentPattern);
+        this.drawTiles(ctx, currentPattern, visibleFlag);
         this.drawLines(ctx);
         this.cleanPatternCache(canvas);
     }
@@ -590,12 +590,39 @@ class GridManager {
         ctx.drawImage(this.patternCanvas, 0, 0);
     }
 
-    drawTiles(ctx, currentPattern) {
+    drawTiles(ctx, currentPattern, visibleFlag) {
+        // Get viewport bounds in world coordinates
+        const canvas = document.getElementById("tileCanvas");
+        const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+        const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+        
+        // Viewport bounds
+        const minX = (-this.cameraOffset.x * scaleX) / scaleX;
+        const minY = (-this.cameraOffset.y * scaleY) / scaleY;
+        const maxX = minX + (canvas.clientWidth / scaleX);
+        const maxY = minY + (canvas.clientHeight / scaleY);
+        
+        const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
+        const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
+        const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
+        const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
+        console.log(minTileX, maxTileX, minTileY, maxTileY);
+
         let spanColor = 'black';
         let color = 'white';
 
+        // Draw only visible tiles
         for(let stitch in currentPattern.stitches) {
             let stitchObj = currentPattern.stitches[stitch];
+            if (stitchObj.X < minTileX || stitchObj.X >= maxTileX || 
+                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY) {
+                    if(visibleFlag)
+                        continue;
+            }
+            
+            // ... rest of drawing code
+        
+            //let stitchObj = currentPattern.stitches[stitch];
             let x = stitchObj.X * this.tileSize;
             let y = stitchObj.Y * this.tileSize;
             let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
@@ -669,6 +696,7 @@ class GridManager {
             let symbol = "×";
             ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
+        
     }
 
     drawLines(ctx) {
@@ -760,9 +788,11 @@ class GridManager {
             this.renderScheduled = true;
             requestAnimationFrame(() => {
                 this.renderCanvas();
+                
                 this.renderScheduled = false;
             });
         }
+        console.log(this.lastZoom, this.cameraZoom, canvas.width, canvas.height);
     }
 
     resetCanvasZoom() {
@@ -817,6 +847,9 @@ class GridManager {
             
             console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
+        if(this.cameraZoom > 1.25) {
+            this.refreshCanvas(true);
+        }
     }
 
     onTouchEnd(e) {
@@ -840,7 +873,9 @@ class GridManager {
             }
             console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
-
+        if(this.cameraZoom > 1.25) {
+            this.refreshCanvas(true);
+        }
         
     }
 
