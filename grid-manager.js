@@ -131,8 +131,9 @@ class GridManager {
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
         this.patternLoader.recordChange(x, y, 'stitched', code);
-        this.updateColorStats(code, 1);
+        // this.updateColorStats(code, 1);
         // console.log(this.patternLoader.changes);
+        // this.updateColorStats();
         this.refreshCanvas(true);
         this.uiManager.updateFootnote("1 stitch painted");
         
@@ -147,7 +148,7 @@ class GridManager {
         }
         // Get all connected tiles of the same color
         const tilesToFill = this.getConnectedTiles(startX, startY, fillColor);
-        console.log(tilesToFill);
+        // console.log(tilesToFill);
         
         // Safety check for large fills
         if (tilesToFill.length > 100) {
@@ -170,7 +171,8 @@ class GridManager {
         });
         
         // Update color statistics
-        this.updateColorStats(fillColor, tilesAffected);
+        // this.updateColorStats(fillColor, tilesAffected);
+        // this.updateColorStats();
         this.refreshCanvas(true);
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
         
@@ -321,7 +323,7 @@ class GridManager {
         const visited = new Set();
         
         while (tilesToCheck.length > 0) {
-            console.log(tilesToCheck);
+            //console.log(tilesToCheck);
             const current = tilesToCheck.pop();
             const key = `${current.x},${current.y}`;
             
@@ -372,10 +374,22 @@ class GridManager {
 
     }
 
-    updateColorStats(origCode, count) {
+    updateColorStats() {
         // Update the GridManager's colorArray
-        this.updateColorAfterPaint(origCode, count);
+        for(let change of this.patternLoader.changes) {
+            for(let color of this.colorArray) {
+                console.log(change, color);
+                if(color.code === change.originalCode) {
+                    color.count--;
+                } else if(color.code === 'stitched') {
+                    color.count++;
+                }
+            }
+        }
+        // this.updateColorAfterPaint(origCode, count);
     }
+
+    
 
     // ===== UTILITY METHODS =====
 
@@ -544,6 +558,7 @@ class GridManager {
         this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
         this.cameraZoom = this.minZoom;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
     }
 
     cleanPatternCache(canvas) {
@@ -1170,9 +1185,19 @@ class GridManager {
         return this.colorArray;
     }
 
+    getChangeCount(code) {
+        let count = 0;
+        for(let change of this.patternLoader.changes) {
+            if(change.originalCode === code) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     getStitchedCount() {
         const stitchedColor = this.colorArray.find(color => color.code === "stitched");
-        return stitchedColor ? stitchedColor.count : 0;
+        return stitchedColor ? (stitchedColor.count + this.patternLoader.changes.length) : 0;
     }
 
     getContrastColor(r, g, b) {

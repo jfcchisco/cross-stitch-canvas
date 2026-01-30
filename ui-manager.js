@@ -45,6 +45,7 @@ class UIManager {
 
         // Get color array from GridManager
         const colorArray = this.gridManager.getColorArray();
+
         //Sort for table 
         colorArray.sort(function(a, b) {
             if(a.count < b.count) return 1;
@@ -57,7 +58,7 @@ class UIManager {
         let toStitch = 0;
         colorArray.forEach(obj => {
             if(obj.code == "stitched") {
-                stitched = obj.count;
+                stitched = obj.count - this.gridManager.getChangeCount(obj.code);
             }
             else if(obj.code != "empty") {
                 toStitch += obj.count;
@@ -85,7 +86,7 @@ class UIManager {
         // Aida 14 is 5.4 stitches per cm (0.185 mm per stitch)
         let hCM = (hS * 0.185).toFixed(1);
         let wCM = (wS * 0.185).toFixed(1);
-        par.innerHTML = hS + "h x " + wS + "w (" + hCM + "cm x " + wCM + "cm). " + stitched + "/" + toStitch + " stitched (" + percentage + "%)";
+        par.innerHTML = `${hS}h x ${wS}w (${hCM}cm x ${wCM}cm). ${stitched}/${toStitch} stitched (${percentage}%)`;
 
         //Fill floss count
         let flossCountPar = document.getElementById("flossCount");
@@ -134,7 +135,12 @@ class UIManager {
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
-                newCell.textContent = color.count;
+                if(color.code == "stitched") {
+                    newCell.textContent = color.count + this.patternLoader.changes.length;
+                }
+                else {
+                    newCell.textContent = color.count - this.gridManager.getChangeCount(color.code);
+                }
                 newCell.setAttribute('style', 'text-align: right');
                 newRow.appendChild(newCell);
                 table.appendChild(newRow);

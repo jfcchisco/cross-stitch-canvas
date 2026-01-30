@@ -83,6 +83,7 @@ function loadJSON(data) {
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas();
+    console.log(gridManager.colorArray)
 
 /*     
     gridManager.initializeGrid(cols, rows);
@@ -132,8 +133,9 @@ function previewOpen() {
 
 function save() {
     patternLoader.mergeChanges();
-    addChangesToJsonObject();
+    // addChangesToJsonObject();
     uiManager.fillFlossUsage();
+    console.log(gridManager.colorArray);
 
     const exportData = patternLoader.exportPattern();
     var text2write = JSON.stringify(exportData);
