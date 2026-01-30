@@ -917,7 +917,7 @@ class GridManager {
         if (this.initialPinchDistance == null) {
             this.initialPinchDistance = currentDistance;
         } else {
-            const zoomFactor = currentDistance * 0.5 / this.initialPinchDistance;
+            const zoomFactor = currentDistance / this.initialPinchDistance;
             this.cameraZoom = zoomFactor + this.lastZoom - 1;
             // Adjust zoom limits
             if(this.cameraZoom > this.maxZoom) {
@@ -928,7 +928,7 @@ class GridManager {
             }
 
             // Adjust camera offset to keep midpoint stable
-            /* const midX = (touch1.x + touch2.x) / 2;
+            const midX = (touch1.x + touch2.x) / 2;
             const midY = (touch1.y + touch2.y) / 2;
             const canvas = document.getElementById("tileCanvas");
             const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
@@ -944,7 +944,7 @@ class GridManager {
             const newTx = dx / newScaleX - worldX;
             const newTy = dy / newScaleY - worldY;
             this.cameraOffset.x = newTx + window.innerWidth / 2;
-            this.cameraOffset.y = newTy + window.innerHeight / 2; */
+            this.cameraOffset.y = newTy + window.innerHeight / 2; 
 
             // Schedule a single render instead of rendering on every move
             if (!this.renderScheduled) {
