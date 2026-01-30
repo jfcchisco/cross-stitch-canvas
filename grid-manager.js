@@ -25,7 +25,7 @@ class GridManager {
         // Canvas parameters
         this.tileSize = 15;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        this.maxZoom = 1.5;
+        this.maxZoom = 1.25;
         this.minZoom = 0.5;
         this.scrollSensitivity = 0.0005;
         this.cameraZoom = this.minZoom;
@@ -601,18 +601,18 @@ class GridManager {
         const canvas = document.getElementById("tileCanvas");
         const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
         const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
-        
+        console.log(this.cameraZoom, scaleX, scaleY);
         // Viewport bounds
         const minX = (-this.cameraOffset.x * scaleX) / scaleX;
         const minY = (-this.cameraOffset.y * scaleY) / scaleY;
         const maxX = minX + (canvas.clientWidth / scaleX);
         const maxY = minY + (canvas.clientHeight / scaleY);
-        
+        console.log(this.cameraOffset, minX, minY, maxX, maxY);
         const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
         const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
         const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
         const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
-        
+        console.log(minTileX, minTileY, maxTileX, maxTileY);
         let spanColor = 'black';
         let color = 'white';
 
@@ -928,7 +928,7 @@ class GridManager {
             }
 
             // Adjust camera offset to keep midpoint stable
-            const midX = (touch1.x + touch2.x) / 2;
+            /* const midX = (touch1.x + touch2.x) / 2;
             const midY = (touch1.y + touch2.y) / 2;
             const canvas = document.getElementById("tileCanvas");
             const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
@@ -944,7 +944,7 @@ class GridManager {
             const newTx = dx / newScaleX - worldX;
             const newTy = dy / newScaleY - worldY;
             this.cameraOffset.x = newTx + window.innerWidth / 2;
-            this.cameraOffset.y = newTy + window.innerHeight / 2;
+            this.cameraOffset.y = newTy + window.innerHeight / 2; */
 
             // Schedule a single render instead of rendering on every move
             if (!this.renderScheduled) {
