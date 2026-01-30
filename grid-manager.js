@@ -132,7 +132,6 @@ class GridManager {
         this.patternLoader.changeCounter = this.changeCounter;
         this.patternLoader.recordChange(x, y, 'stitched', code);
         // this.updateColorStats(code, 1);
-        // console.log(this.patternLoader.changes);
         // this.updateColorStats();
         this.refreshCanvas(true);
         this.uiManager.updateFootnote("1 stitch painted");
@@ -142,13 +141,11 @@ class GridManager {
     }
 
     handleBucketFill(startX, startY, fillColor) {
-        console.log("Bucket fill at", startX, startY, "with color", fillColor);
         if(fillColor === 'stitched' || fillColor === 'empty') {
             return 0; // Cannot fill stitched or empty areas
         }
         // Get all connected tiles of the same color
         const tilesToFill = this.getConnectedTiles(startX, startY, fillColor);
-        // console.log(tilesToFill);
         
         // Safety check for large fills
         if (tilesToFill.length > 100) {
@@ -165,7 +162,6 @@ class GridManager {
         tilesToFill.forEach(({x, y}) => {
             //const connectedTile = this.getTile(x, y);
             this.patternLoader.recordChange(x, y, 'stitched', fillColor);
-            console.log(this.patternLoader.changes);
             tilesAffected++;
             
         });
@@ -198,13 +194,11 @@ class GridManager {
                 this.patternLoader.changes.splice(i, 1);
             }
         }
-        // console.log(changeToUndo);
         // this.patternLoader.changes = this.patternLoader.changes.filter(function(el) { return el.id < this.patternLoader.changeCounter;});
         this.patternLoader.changeCounter--;
         //this.patternLoader.changes.pop();
         
         this.refreshCanvas();
-        console.log(this.patternLoader.changes);
         this.uiManager.updateFootnote("Change undone");
         
     }
@@ -225,8 +219,7 @@ class GridManager {
     zoomIn() {
         const zoomAmount = 100 * this.scrollSensitivity;
         this.cameraZoom += zoomAmount;
-        console.log(this.cameraZoom, zoomAmount);
-
+        
         // Schedule a single render instead of rendering on every move
         if (!this.renderScheduled) {
             this.renderScheduled = true;
@@ -323,7 +316,6 @@ class GridManager {
         const visited = new Set();
         
         while (tilesToCheck.length > 0) {
-            //console.log(tilesToCheck);
             const current = tilesToCheck.pop();
             const key = `${current.x},${current.y}`;
             
@@ -378,7 +370,6 @@ class GridManager {
         // Update the GridManager's colorArray
         for(let change of this.patternLoader.changes) {
             for(let color of this.colorArray) {
-                console.log(change, color);
                 if(color.code === change.originalCode) {
                     color.count--;
                 } else if(color.code === 'stitched') {
@@ -621,8 +612,7 @@ class GridManager {
         const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
         const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
         const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
-        console.log(minTileX, maxTileX, minTileY, maxTileY);
-
+        
         let spanColor = 'black';
         let color = 'white';
 
@@ -807,7 +797,6 @@ class GridManager {
                 this.renderScheduled = false;
             });
         }
-        console.log(this.lastZoom, this.cameraZoom, canvas.width, canvas.height);
     }
 
     resetCanvasZoom() {
@@ -829,10 +818,8 @@ class GridManager {
     }
         
     onPointerDown(e) {
-        console.log("Pointer down detected");
         this.isDragging = true;
         const eventLoc = this.getEventLocation(e);
-        console.log(eventLoc);
         this.dragStart.x = eventLoc.x / this.cameraZoom - this.cameraOffset.x;
         this.dragStart.y = eventLoc.y / this.cameraZoom - this.cameraOffset.y;
         this.mouseDown.x = eventLoc.x;
@@ -840,7 +827,6 @@ class GridManager {
     }
 
     onPointerUp(e) {
-        console.log("Pointer up detected");
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -860,7 +846,6 @@ class GridManager {
                 this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
             }
             
-            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
         if(this.cameraZoom > 1.25) {
             this.refreshCanvas(true);
@@ -868,7 +853,6 @@ class GridManager {
     }
 
     onTouchEnd(e) {
-        console.log("Touch end detected", e);
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -886,7 +870,6 @@ class GridManager {
             } else {
                 this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
             }
-            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
         if(this.cameraZoom > 1.25) {
             this.refreshCanvas(true);
@@ -916,12 +899,10 @@ class GridManager {
         } else if (e.touches.length == 2) {
             // Handle pinch on both touchstart and touchmove
             if (e.type == "touchstart") {
-                console.log("Two-finger touchstart detected");
                 this.isDragging = false;
                 this.initialPinchDistance = null;
                 this.lastZoom = this.cameraZoom;
             } else if (e.type == "touchmove") {
-                console.log("Two-finger touchmove detected");
                 this.isDragging = false;
                 this.handlePinch(e);
             }
@@ -935,11 +916,35 @@ class GridManager {
         
         if (this.initialPinchDistance == null) {
             this.initialPinchDistance = currentDistance;
-            console.log("Initial pinch distance set:", this.initialPinchDistance);
         } else {
-            const zoomFactor = currentDistance / this.initialPinchDistance;
-            console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
+            const zoomFactor = currentDistance * 0.5 / this.initialPinchDistance;
             this.cameraZoom = zoomFactor + this.lastZoom - 1;
+            // Adjust zoom limits
+            if(this.cameraZoom > this.maxZoom) {
+                this.cameraZoom = this.maxZoom;
+            }
+            if(this.cameraZoom < this.minZoom) {
+                this.cameraZoom = this.minZoom;
+            }
+
+            // Adjust camera offset to keep midpoint stable
+            const midX = (touch1.x + touch2.x) / 2;
+            const midY = (touch1.y + touch2.y) / 2;
+            const canvas = document.getElementById("tileCanvas");
+            const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+            const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+            const tx = -window.innerWidth / 2 + this.cameraOffset.x;
+            const ty = -window.innerHeight / 2 + this.cameraOffset.y;
+            const dx = midX - canvas.getBoundingClientRect().x;
+            const dy = midY - canvas.getBoundingClientRect().y;
+            const worldX = dx / scaleX - tx;
+            const worldY = dy / scaleY - ty;
+            const newScaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+            const newScaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+            const newTx = dx / newScaleX - worldX;
+            const newTy = dy / newScaleY - worldY;
+            this.cameraOffset.x = newTx + window.innerWidth / 2;
+            this.cameraOffset.y = newTy + window.innerHeight / 2;
 
             // Schedule a single render instead of rendering on every move
             if (!this.renderScheduled) {
