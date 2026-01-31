@@ -13,12 +13,23 @@ html, body
 
 #canvas
 {
-  width: 100%;
-  height: calc(100% - 115px);
-  background: #111;
-  touch-action: none;
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 115px);
+    background: #111;
+    touch-action: none;
 }
 
+canvas {
+    position: absolute;
+}
+
+#rulerCanvas {
+    top: 0;
+    left: 0;
+    z-index: 2;
+    pointer-events: none;
+}
 
 .color, .tool {
     width: 50px;
