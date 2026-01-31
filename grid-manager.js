@@ -596,23 +596,50 @@ class GridManager {
         ctx.drawImage(this.patternCanvas, 0, 0);
     }
 
+    DEBUGPrintZoomInfo() {
+        console.log("-----------------------");
+        console.log("--- Zoom Debug Info ---");
+        console.log("-----------------------");
+        console.log(`Zoom: ${this.cameraZoom}, MinZoom: ${this.minZoom}, MaxZoom: ${this.maxZoom}`);
+        console.log(`OffsetX: ${this.cameraOffset.x}, OffsetY: ${this.cameraOffset.y}`);
+        console.log(`TileSize: ${this.tileSize}`);
+        console.log(`CanvasWidth: ${this.tileCanvas.width}, CanvasHeight: ${this.tileCanvas.height}`);
+        console.log(`ClientWidth: ${this.tileCanvas.clientWidth}, ClientHeight: ${this.tileCanvas.clientHeight}`);
+        console.log(`Canvas ClientBoundingRect: `, this.tileCanvas.getBoundingClientRect());
+        console.log(`ContainerWidth: ${this.tileContainer.offsetWidth}, ContainerHeight: ${this.tileContainer.offsetHeight}`);
+        console.log(`WindowWidth: ${window.innerWidth}, WindowHeight: ${window.innerHeight}`);
+        console.log("-----------------------");
+        console.log("--- Viewport bounds ---");
+        console.log("-----------------------");
+        const minX = -this.cameraOffset.x + window.innerWidth / 2;
+        const minY = -this.cameraOffset.y + window.innerHeight / 2;
+        const maxX = minX + this.tileContainer.offsetWidth / this.cameraZoom;
+        const maxY = minY + this.tileContainer.offsetHeight / this.cameraZoom;
+        const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
+        const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
+        const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
+        const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
+        console.log(`Viewport Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
+        console.log(`Tile Bounds - minTileX: ${minTileX}, minTileY: ${minTileY}, maxTileX: ${maxTileX}, maxTileY: ${maxTileY}`);
+        console.log("-----------------------");
+        
+    }
+
     drawTiles(ctx, currentPattern, visibleFlag) {
         // Get viewport bounds in world coordinates
         const canvas = document.getElementById("tileCanvas");
         const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
         const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
-        console.log(this.cameraZoom, scaleX, scaleY);
         // Viewport bounds
-        const minX = (-this.cameraOffset.x * scaleX) / scaleX;
-        const minY = (-this.cameraOffset.y * scaleY) / scaleY;
-        const maxX = minX + (canvas.clientWidth / scaleX);
-        const maxY = minY + (canvas.clientHeight / scaleY);
-        console.log(this.cameraOffset, minX, minY, maxX, maxY);
+        const minX = -this.cameraOffset.x + window.innerWidth / 2;
+        const minY = -this.cameraOffset.y + window.innerHeight / 2;
+        const maxX = minX + this.tileContainer.offsetWidth / this.cameraZoom;
+        const maxY = minY + this.tileContainer.offsetHeight / this.cameraZoom;
+        console.log(`Viewport Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
         const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
         const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
         const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
         const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
-        console.log(minTileX, minTileY, maxTileX, maxTileY);
         let spanColor = 'black';
         let color = 'white';
 
@@ -827,6 +854,7 @@ class GridManager {
     }
 
     onPointerUp(e) {
+        this.DEBUGPrintZoomInfo();
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -848,6 +876,7 @@ class GridManager {
             
         }
         if(this.cameraZoom > 1.25) {
+            this.renderCanvas();
             this.refreshCanvas(true);
         }
     }
