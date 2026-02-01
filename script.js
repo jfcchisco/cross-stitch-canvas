@@ -83,7 +83,7 @@ function loadJSON(data) {
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas();
-    console.log(gridManager.colorArray)
+    // console.log(gridManager.colorArray)
 
 /*     
     gridManager.initializeGrid(cols, rows);

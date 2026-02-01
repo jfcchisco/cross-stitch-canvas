@@ -1088,7 +1088,7 @@ class GridManager {
             }
         }
     }
-
+/* 
     removeAllTiles() {
         while (this.tileContainer.firstChild) {
             this.tileContainer.removeChild(this.tileContainer.firstChild);
@@ -1229,7 +1229,7 @@ class GridManager {
         this.drawVerticalLines();
         this.drawMiddleLines();
     }
-
+ */
 
     // ===== COLOR MANAGEMENT METHODS =====
 
