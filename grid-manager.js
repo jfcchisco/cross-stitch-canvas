@@ -600,13 +600,13 @@ class GridManager {
     }
 
     DEBUGPrintZoomInfo() {
-/*         console.log("-----------------------");
+        console.log("-----------------------");
         console.log("--- Zoom Debug Info ---");
         console.log("-----------------------");
         console.log(`Zoom: ${this.cameraZoom}, MinZoom: ${this.minZoom}, MaxZoom: ${this.maxZoom}`);
         console.log(`OffsetX: ${this.cameraOffset.x}, OffsetY: ${this.cameraOffset.y}`);
         console.log(`TileSize: ${this.tileSize}`);
-        console.log(`CanvasWidth: ${this.tileCanvas.width}, CanvasHeight: ${this.tileCanvas.height}`);
+        /* console.log(`CanvasWidth: ${this.tileCanvas.width}, CanvasHeight: ${this.tileCanvas.height}`);
         console.log(`ClientWidth: ${this.tileCanvas.clientWidth}, ClientHeight: ${this.tileCanvas.clientHeight}`);
         console.log(`Canvas ClientBoundingRect: `, this.tileCanvas.getBoundingClientRect());
         console.log(`ContainerWidth: ${this.tileContainer.offsetWidth}, ContainerHeight: ${this.tileContainer.offsetHeight}`);
@@ -624,7 +624,7 @@ class GridManager {
         const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
         console.log(`Viewport Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
         console.log(`Tile Bounds - minTileX: ${minTileX}, minTileY: ${minTileY}, maxTileX: ${maxTileX}, maxTileY: ${maxTileY}`);
-        console.log("-----------------------"); */
+        console.log("-----------------------"); 
         const absMinX = (this.cameraOffset.x - window.innerWidth / 2) * this.cameraZoom;
         const absMinY = (this.cameraOffset.y - window.innerHeight / 2) * this.cameraZoom;
         const rulerminX = Math.max(0, absMinX);
@@ -635,7 +635,7 @@ class GridManager {
         console.log(`Abs Max: ${absMaxX}, ${absMaxY}`);
         const rulermaxX = Math.min(this.tileContainer.offsetWidth, absMaxX);
         const rulermaxY = Math.min(this.tileContainer.offsetHeight, absMaxY);
-        console.log(`Ruler Draw Bounds - minX: ${rulerminX}, maxX: ${rulermaxX}, minY: ${rulerminY}, maxY: ${rulermaxY}`);
+        console.log(`Ruler Draw Bounds - minX: ${rulerminX}, maxX: ${rulermaxX}, minY: ${rulerminY}, maxY: ${rulermaxY}`) */;
         
     }
 
@@ -782,27 +782,25 @@ class GridManager {
 
     drawRulers() {
         const rulerWidth = 25;
+        const tileCountPrint = ((this.cameraZoom * this.tileSize) < 4) ? 50 : 10;
         const absMinX = (this.cameraOffset.x - window.innerWidth / 2) * this.cameraZoom;
         const absMinY = (this.cameraOffset.y - window.innerHeight / 2) * this.cameraZoom;
         const minX = Math.max(0, absMinX);
         const minY = Math.max(0, absMinY);
-        //console.log(`Abs Mins: ${absMinX}, ${absMinY}`);
         const absMaxX = absMinX + this.patternLoader.getCols() * this.tileSize * this.cameraZoom;
         const absMaxY = absMinY + this.patternLoader.getRows() * this.tileSize * this.cameraZoom;
-        //console.log(`Abs Max: ${absMaxX}, ${absMaxY}`);
         const maxX = Math.min(this.tileContainer.offsetWidth, absMaxX);
         const maxY = Math.min(this.tileContainer.offsetHeight, absMaxY);
-        //console.log(`Ruler Draw Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
-
+        
         const rulerCanvas = document.getElementById("rulerCanvas");
         const ctx = rulerCanvas.getContext("2d");
         rulerCanvas.width = this.tileContainer.offsetWidth;
         rulerCanvas.height = this.tileContainer.offsetHeight;
         ctx.clearRect(0, 0, rulerCanvas.width, rulerCanvas.height);
         // Draw vertical ruler
-        ctx.fillStyle = "rgba(200, 200, 200, 0.8)";
+        ctx.fillStyle = "rgba(200, 200, 200, 0.9)";
         ctx.fillRect(0, minY, rulerWidth, maxY - minY);
-        // Draw horizontal lines
+        // Draw vertical lines
         let tileCount = 0;
         for(let y=absMinY; y<=absMaxY; y=y+this.tileSize*this.cameraZoom) {
             
@@ -813,14 +811,18 @@ class GridManager {
                 if(tileCount%10 == 0) {
                     ctx.lineWidth = 1.5;
                     ctx.moveTo(rulerWidth-10, y);
+                } else if(tileCount%5 == 0) {
+                    ctx.moveTo(rulerWidth-8, y);
+                
                 } else {
-                    ctx.moveTo(rulerWidth-5, y);
+                    ctx.moveTo(rulerWidth-4, y);
                 }
                 
                 ctx.lineTo(rulerWidth, y);
                 ctx.stroke();
             }
-            if(tileCount % 10 == 0 && tileCount > 0 && tileCount < this.patternLoader.getRows()) {
+            
+            if(tileCount % tileCountPrint == 0 && tileCount > 0 && tileCount < this.patternLoader.getRows()) {
                 ctx.fillStyle = 'darkblue';
                 ctx.font = `15px Arial`;
                 ctx.textAlign = "center";
@@ -833,7 +835,7 @@ class GridManager {
         }
         
         // Draw horizontal ruler
-        ctx.fillStyle = "rgba(200, 200, 200, 0.8)";
+        ctx.fillStyle = "rgba(200, 200, 200, 0.9)";
         // console.log(maxX);
         ctx.fillRect(minX, 0, maxX - minX, rulerWidth);
         // Draw horizontal lines
@@ -847,14 +849,17 @@ class GridManager {
                 if(tileCount%10 == 0) {
                     ctx.lineWidth = 1.5;
                     ctx.moveTo(x, rulerWidth-10);
+                } else if(tileCount%5 == 0) {
+                    ctx.moveTo(x, rulerWidth-8);
+                
                 } else {
-                    ctx.moveTo(x, rulerWidth-5);
+                    ctx.moveTo(x, rulerWidth-4);
                 }
                 
                 ctx.lineTo(x, rulerWidth);
                 ctx.stroke();
             }
-            if(tileCount % 10 == 0 && tileCount > 0 && tileCount < this.patternLoader.getCols()) {
+            if(tileCount % tileCountPrint == 0 && tileCount > 0 && tileCount < this.patternLoader.getCols()) {
                 ctx.fillStyle = 'darkblue';
                 ctx.font = `15px Arial`;
                 ctx.textAlign = "right";
