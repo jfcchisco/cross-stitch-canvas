@@ -83,14 +83,6 @@ function loadJSON(data) {
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas();
-    // console.log(gridManager.colorArray)
-
-/*     
-    gridManager.initializeGrid(cols, rows);
-
-    gridManager.updateTileAttributes(processedData.stitches);
-    gridManager.refreshGridDisplay();
-    gridManager.drawGridLines(); */
 
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
@@ -125,7 +117,7 @@ function previewClose() {
 
 function previewOpen() {
     const currentPattern = patternLoader.getCurrentPattern();
-    uiManager.preview(currentPattern.stitches, currentPattern.properties.width, currentPattern.properties.height);
+    uiManager.preview();
     let modal = document.getElementById("previewModal");
     modal.style.display = "block";
 }

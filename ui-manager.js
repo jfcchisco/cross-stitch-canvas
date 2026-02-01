@@ -218,54 +218,120 @@ class UIManager {
         argCtx.stroke();
     }
 
-    preview(data, cols, rows) {
-        let canvas = document.getElementById("canvas")
-        let ctx = canvas.getContext('2d')
-
-        let modal = document.getElementById("previewModal");
-
-        let box = Math.max(1, (Math.min(Math.floor(document.body.offsetHeight/rows), Math.floor(document.body.offsetWidth/cols))));
-        canvas.height = box * rows;
-        canvas.width =  box * cols;
-
-        let modalHeight = box * rows + 30;
-        let modalWidth =  box * cols + 30;
-
-        modal.style.height = modalHeight+"px";
-        modal.style.width = modalWidth+"px";
-
-        ctx.clearRect(0,0, canvas.width, canvas.height)
-        ctx.fillStyle = "#ffffff"
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    preview() {
+        this.showSpinner('Generating preview...');
         
-        for (let i = 0; i < data.length; i++) {
-            let tileValues = data[i];
-            //Adding offset due to ruler and svg-container
-            let row = this.gridManager.tileContainer.children.item(tileValues.Y + 2);
-            let tile = row.children.item(tileValues.X + 1)
+        // Use setTimeout to allow the spinner to render before heavy computation
+        setTimeout(() => {
+            const canvas = document.getElementById("previewCanvas")
+            const ctx = canvas.getContext('2d')
+            const tileContainer = document.getElementsByClassName('tile-container')[0];
 
-            let backColor = tile.style.backgroundColor;
-            if(!backColor.match('rgba')) {
-                ctx.fillStyle = backColor;
-                ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
+            const cols = this.patternLoader.getCols();
+            const rows = this.patternLoader.getRows();
+
+            let modal = document.getElementById("previewModal");
+
+            const box = Math.max(1, (Math.min(Math.floor(tileContainer.offsetHeight/rows), Math.floor(tileContainer.offsetWidth/cols))));
+            canvas.height = box * rows;
+            canvas.width =  box * cols;
+
+            let modalHeight = box * rows + 30;
+            let modalWidth =  box * cols + 30;
+
+            modal.style.height = window.offsetHeight + "px";
+            modal.style.width = window.offsetWidth + "px";
+
+            ctx.clearRect(0,0, canvas.width, canvas.height)
+            ctx.fillStyle = "#ffffff"
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let spanColor = 'black';
+            let color = 'white';
+            // Draw tiles
+            for(let stitch in this.patternLoader.currentPattern.stitches) {
+                let stitchObj = this.patternLoader.currentPattern.stitches[stitch];
+                
+                let x = stitchObj.X * box;
+                let y = stitchObj.Y * box;
+                let colorData = this.gridManager.getDMCValuesFromCode(stitchObj.dmcCode);
+                let R = colorData.R;
+                let G = colorData.G;
+                let B = colorData.B;
+                let code = stitchObj.dmcCode;
+                let alpha = 1;
+
+                // Check for high contrast mode
+                if (this.gridManager.contrastFlag) {
+                    if (code === "stitched") {
+                        spanColor = this.gridManager.getContrastColor(R, G, B);
+                        color = `rgba(${R}, ${G}, ${B}, 1)`;
+                    } else {
+                        if (this.gridManager.highFlag) {
+                            if (this.gridManager.highlightedColor === code) {
+                                spanColor = 'white';
+                                color = 'black';
+                            } else {
+                                alpha = 0.25;
+                                spanColor = 'silver';
+                                color = 'white';
+                            }
+                        }
+                    }
+                } else {
+                    spanColor = this.gridManager.getContrastColor(R, G, B);
+                    
+                    if (this.gridManager.highFlag && this.gridManager.highlightedColor !== code) {
+                        alpha = 0.25;
+                        spanColor = this.gridManager.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
+                    }
+                    
+                    if (code === "stitched") {
+                        spanColor = this.gridManager.getContrastColor(R, G, B);
+                        color = `rgba(${R}, ${G}, ${B}, 1)`;
+                        alpha = 1;
+                    }
+
+                    color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
+                }
+
+                // console.log(x, y, box)
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, box, box);
             }
-            else {
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
+
+            
+    /*         for (let i = 0; i < data.length; i++) {
+                let tileValues = data[i];
+                //Adding offset due to ruler and svg-container
+                let row = this.gridManager.tileContainer.children.item(tileValues.Y + 2);
+                let tile = row.children.item(tileValues.X + 1)
+
+                let backColor = tile.style.backgroundColor;
+                if(!backColor.match('rgba')) {
+                    ctx.fillStyle = backColor;
+                    ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
+                }
+                else {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
+                }
+            } */
+
+                
+
+            // this.drawPreviewGridLines(box, ctx, cols, rows);
+
+            let createPathDiv = document.getElementsByClassName("pathButtons")[0];
+            let inputFields = document.getElementsByClassName("inputFields")[0];
+            inputFields.style.display = "none";
+            createPathDiv.style.display = "none";
+            if(this.gridManager.highFlag && this.gridManager.highlightedColor != 0) {
+                createPathDiv.style.display = "grid";
+                inputFields.style.display = "grid";
             }
-        }
-
-        this.drawPreviewGridLines(box, ctx, cols, rows);
-
-        let createPathDiv = document.getElementsByClassName("pathButtons")[0];
-        let inputFields = document.getElementsByClassName("inputFields")[0];
-        inputFields.style.display = "none";
-        createPathDiv.style.display = "none";
-        if(this.gridManager.highFlag && this.gridManager.highlightedColor != 0) {
-            createPathDiv.style.display = "grid";
-            inputFields.style.display = "grid";
-        }
+            this.hideSpinner();
+        }, 0);
     }
 
     createMarkers() {

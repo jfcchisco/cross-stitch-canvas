@@ -194,10 +194,7 @@ class GridManager {
                 this.patternLoader.changes.splice(i, 1);
             }
         }
-        // this.patternLoader.changes = this.patternLoader.changes.filter(function(el) { return el.id < this.patternLoader.changeCounter;});
         this.patternLoader.changeCounter--;
-        //this.patternLoader.changes.pop();
-        
         this.refreshCanvas();
         this.uiManager.updateFootnote("Change undone");
         
@@ -228,14 +225,6 @@ class GridManager {
                 this.renderScheduled = false;
             });
         }
-        // this.adjustCanvasZoom(zoomAmount, null, null);
-        /* const collection = document.getElementsByClassName("tile");
-        let height = collection[0].offsetHeight;
-        if(height < this.maxHeight) {
-            let newHeight = height + 2;
-            this.setHeight(newHeight);
-        }
-        this.uiManager.drawSVG(); */
     }
 
     zoomOut() {
@@ -257,14 +246,6 @@ class GridManager {
                 this.renderScheduled = false;
             });
         }
-        // this.adjustCanvasZoom(zoomAmount, null, null);
-        /* const collection = document.getElementsByClassName("tile");
-        let height = collection[0].offsetHeight;
-        if(height > this.minHeight) {
-            let newHeight = height - 2;
-            this.setHeight(newHeight);
-        }
-        this.uiManager.drawSVG(); */
     }
 
     zoomReset() {
@@ -282,18 +263,7 @@ class GridManager {
             });
         }
 
-
-/*         this.zoomResetFlag = !this.zoomResetFlag;
-        if(this.zoomResetFlag) {
-            this.setHeight(Math.round(this.tileContainer.offsetHeight/this.tileContainer.children.length) - 1);
-        }
-        else {
-            this.setHeight(this.defaultHeight);
-        }
-        this.uiManager.drawSVG(); */
     }
-
-
 
     // ===== HELPER METHODS =====
 
@@ -446,7 +416,7 @@ class GridManager {
             }
         });
     }
-
+/* 
     refreshGridDisplay() {
         // Trigger a full grid visual refresh
         this.updateTileColors();
@@ -536,7 +506,7 @@ class GridManager {
         // Apply the calculated colors
         tile.children[0].style.color = spanColor;
         tile.style.backgroundColor = color;
-    }
+    } */
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
