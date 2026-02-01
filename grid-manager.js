@@ -268,14 +268,29 @@ class GridManager {
     }
 
     zoomReset() {
-        this.zoomResetFlag = !this.zoomResetFlag;
+        const canvas = document.getElementById('tileCanvas');
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.cameraZoom = this.minZoom;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                
+                this.renderScheduled = false;
+            });
+        }
+
+
+/*         this.zoomResetFlag = !this.zoomResetFlag;
         if(this.zoomResetFlag) {
             this.setHeight(Math.round(this.tileContainer.offsetHeight/this.tileContainer.children.length) - 1);
         }
         else {
             this.setHeight(this.defaultHeight);
         }
-        this.uiManager.drawSVG();
+        this.uiManager.drawSVG(); */
     }
 
 
@@ -1088,149 +1103,6 @@ class GridManager {
             }
         }
     }
-/* 
-    removeAllTiles() {
-        while (this.tileContainer.firstChild) {
-            this.tileContainer.removeChild(this.tileContainer.firstChild);
-        }
-    }
-
-    createSVGContainer() {
-        // Create and append SVG container for grid lines
-        const svgContainer = document.createElement("div");
-        svgContainer.setAttribute("class", "svg-container");
-        const newSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgContainer.append(newSVG);
-        this.tileContainer.append(svgContainer);
-    }
-
-    createTilesAndRulers(cols, rows) {
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        const width = currentPattern.properties.width;
-        const height = currentPattern.properties.height;
-        // Create rows with tiles and rulers
-        const rowTemplate = document.querySelector("[data-row-template]");
-        const tileTemplate = document.querySelector("[data-tile-template]");
-
-        // Add one vertical ruler div to the horizontal ruler row
-        const rulerRow = rowTemplate.content.cloneNode(true).children[0];
-        const rulerDiv = tileTemplate.content.cloneNode(true).children[0];
-        rulerDiv.classList.add("vertRulerDiv");
-        rulerRow.append(rulerDiv);
-
-        // Add the rest of the horizontal ruler tiles
-        for (let i = 1; i <= cols; i++)  {
-            const tileDiv = tileTemplate.content.cloneNode(true).children[0];
-            tileDiv.classList.add("horRulerRow");
-            if(i%10 == 0) {
-                tileDiv.children.item(0).innerText = i/10;
-                tileDiv.children.item(0).setAttribute('style', "float: right;");
-            }
-            if(i%10 == 1 && i > 1) {
-                tileDiv.children.item(0).innerText = 0;
-                tileDiv.children.item(0).setAttribute('style', "float: left;");
-            }
-            rulerRow.append(tileDiv);
-        }
-        rulerRow.classList.add("horRulerRow");
-        this.tileContainer.append(rulerRow);
-
-        // Add the rest of the rows with vertical rulers and tiles
-        for (let j = 1; j <= rows; j++) {
-            const newRow = rowTemplate.content.cloneNode(true).children[0];
-
-            //Adding vertical ruler div
-            const rulerDiv = tileTemplate.content.cloneNode(true).children[0];
-            rulerDiv.classList.add("vertRulerDiv");
-            if(j%10 == 0) {
-                rulerDiv.children.item(0).innerText = j/10;
-            }
-            if(j%10 == 1 && j > 1) {
-                rulerDiv.children.item(0).innerText = 0;
-            }
-            newRow.append(rulerDiv);
-
-            // Add color tiles, alternating colors for visibility
-            for (let i = 1; i <= cols; i++)  {
-                const tileDiv = tileTemplate.content.cloneNode(true).children[0];
-                if(i%2==0) {
-                    tileDiv.setAttribute('style', "background-color: white");
-                }
-                else {
-                    tileDiv.setAttribute('style', "background-color: yellow");
-                }
-                newRow.append(tileDiv);
-            }
-            this.tileContainer.append(newRow)
-        }
-    }
-
-    initializeGrid(cols, rows) {
-        //
-        this.removeAllTiles();
-        this.createSVGContainer();
-        this.createTilesAndRulers(cols, rows);
-    }
-
-    drawHorizontalLines() {
-        // Draw horizontal grid lines
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                if ((i - 1) % 10 === 0) {
-                    tile.classList.add('horBorder');
-                }
-            }
-        }
-    }
-
-    drawVerticalLines() {
-        // Draw vertical grid lines
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                if (j % 10 === 0) {
-                    tile.classList.add('borderRight');
-                }
-                if (j % 10 == 1 && j < row.children.length-1 && j > 1) {
-                    tile.classList.add("borderLeft");
-                }
-            }
-        }
-    }
-
-    drawMiddleLines() {
-        // Draw horizontal middle line
-        let rows = document.getElementsByClassName("tile-container")[0];
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        let midRowIndex = Math.round(currentPattern.properties.height / 2)
-        let midRowTop = rows.children[midRowIndex];
-        let midRowBot = rows.children[midRowIndex + 1];
-        for (let i = 0; i < midRowTop.children.length; i ++) {
-            midRowTop.children.item(i).classList.add("midRowTop");
-        }
-        for (let i = 0; i < midRowBot.children.length; i ++) {
-            midRowBot.children.item(i).classList.add("midRowBot");
-        }
-        
-        // Draw vertical middle line
-        let midColIndex = Math.round(currentPattern.properties.width / 2)
-        for (let i = 1; i < rows.children.length; i++) {
-            let curRow = rows.children.item(i);
-            curRow.children.item(midColIndex).classList.add("midColLeft");
-            curRow.children.item(midColIndex + 1).classList.add("midColRight");
-        }
-    }
-
-    drawGridLines() {
-        this.drawHorizontalLines();
-        this.drawVerticalLines();
-        this.drawMiddleLines();
-    }
- */
-
     // ===== COLOR MANAGEMENT METHODS =====
 
     initializeColorArray(pattern) {
