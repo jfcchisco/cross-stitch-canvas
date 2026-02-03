@@ -83,7 +83,9 @@
     </div>
     <div class="colors" data-color-container></div>
     <div class="tile-container" data-tile-container>
+        
         <canvas id="tileCanvas"></canvas>
+        <canvas id="rulerCanvas"></canvas>
     </div>
     <div class="footnote">
         <div class="footLeft">LEFT</div>
@@ -95,6 +97,7 @@
         <div class="modal-content">
             <span class="close" onclick="flossUsageClose()">&times;</span>
             <p id="properties"></p>
+            <p id="progress"></p>
             <p id="flossCount"></p>
             <div id="modalList"></div>
         </div>
@@ -104,7 +107,7 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="previewClose()">&times;</span>
-            <canvas id="canvas"></canvas>
+            <canvas id="previewCanvas"></canvas>
             <div class="pathButtons">
                 <span class="pathButton" onclick="previewPath(0)">FIRST</span>
                 <span class="pathButton" onclick="previewPath(1)">CENTER</span>

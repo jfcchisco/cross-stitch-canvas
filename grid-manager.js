@@ -25,7 +25,7 @@ class GridManager {
         // Canvas parameters
         this.tileSize = 15;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        this.maxZoom = 1.5;
+        this.maxZoom = 1.25;
         this.minZoom = 0.5;
         this.scrollSensitivity = 0.0005;
         this.cameraZoom = this.minZoom;
@@ -131,9 +131,9 @@ class GridManager {
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
         this.patternLoader.recordChange(x, y, 'stitched', code);
-        this.updateColorStats(code, 1);
-        // console.log(this.patternLoader.changes);
-        this.refreshCanvas();
+        // this.updateColorStats(code, 1);
+        // this.updateColorStats();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("1 stitch painted");
         
 
@@ -141,13 +141,11 @@ class GridManager {
     }
 
     handleBucketFill(startX, startY, fillColor) {
-        console.log("Bucket fill at", startX, startY, "with color", fillColor);
         if(fillColor === 'stitched' || fillColor === 'empty') {
             return 0; // Cannot fill stitched or empty areas
         }
         // Get all connected tiles of the same color
         const tilesToFill = this.getConnectedTiles(startX, startY, fillColor);
-        console.log(tilesToFill);
         
         // Safety check for large fills
         if (tilesToFill.length > 100) {
@@ -162,16 +160,16 @@ class GridManager {
         // Apply paint to all connected tiles
         let tilesAffected = 0;
         tilesToFill.forEach(({x, y}) => {
-            const connectedTile = this.getTile(x, y);
+            //const connectedTile = this.getTile(x, y);
             this.patternLoader.recordChange(x, y, 'stitched', fillColor);
-            console.log(this.patternLoader.changes);
             tilesAffected++;
             
         });
         
         // Update color statistics
-        this.updateColorStats(fillColor, tilesAffected);
-        this.refreshCanvas();
+        // this.updateColorStats(fillColor, tilesAffected);
+        // this.updateColorStats();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
         
         return tilesAffected;
@@ -196,13 +194,8 @@ class GridManager {
                 this.patternLoader.changes.splice(i, 1);
             }
         }
-        // console.log(changeToUndo);
-        // this.patternLoader.changes = this.patternLoader.changes.filter(function(el) { return el.id < this.patternLoader.changeCounter;});
         this.patternLoader.changeCounter--;
-        //this.patternLoader.changes.pop();
-        
         this.refreshCanvas();
-        console.log(this.patternLoader.changes);
         this.uiManager.updateFootnote("Change undone");
         
     }
@@ -223,8 +216,7 @@ class GridManager {
     zoomIn() {
         const zoomAmount = 100 * this.scrollSensitivity;
         this.cameraZoom += zoomAmount;
-        console.log(this.cameraZoom, zoomAmount);
-
+        
         // Schedule a single render instead of rendering on every move
         if (!this.renderScheduled) {
             this.renderScheduled = true;
@@ -233,14 +225,6 @@ class GridManager {
                 this.renderScheduled = false;
             });
         }
-        // this.adjustCanvasZoom(zoomAmount, null, null);
-        /* const collection = document.getElementsByClassName("tile");
-        let height = collection[0].offsetHeight;
-        if(height < this.maxHeight) {
-            let newHeight = height + 2;
-            this.setHeight(newHeight);
-        }
-        this.uiManager.drawSVG(); */
     }
 
     zoomOut() {
@@ -262,28 +246,24 @@ class GridManager {
                 this.renderScheduled = false;
             });
         }
-        // this.adjustCanvasZoom(zoomAmount, null, null);
-        /* const collection = document.getElementsByClassName("tile");
-        let height = collection[0].offsetHeight;
-        if(height > this.minHeight) {
-            let newHeight = height - 2;
-            this.setHeight(newHeight);
-        }
-        this.uiManager.drawSVG(); */
     }
 
     zoomReset() {
-        this.zoomResetFlag = !this.zoomResetFlag;
-        if(this.zoomResetFlag) {
-            this.setHeight(Math.round(this.tileContainer.offsetHeight/this.tileContainer.children.length) - 1);
+        const canvas = document.getElementById('tileCanvas');
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.cameraZoom = this.minZoom;
+        this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        // Schedule a single render instead of rendering on every move
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                
+                this.renderScheduled = false;
+            });
         }
-        else {
-            this.setHeight(this.defaultHeight);
-        }
-        this.uiManager.drawSVG();
+
     }
-
-
 
     // ===== HELPER METHODS =====
 
@@ -310,6 +290,15 @@ class GridManager {
         this.patternLoader.recordChange(x, y, 'stitched', origCode);
     }
 
+    isTileChanged(x, y) {
+        for(let change of this.patternLoader.changes) {
+            if(change.X == x && change.Y == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     getConnectedTiles(startX, startY, targetColor) {
         // Prevent filling stitched or empty areas
         if (targetColor === 'stitched' || targetColor === '0') {
@@ -321,7 +310,6 @@ class GridManager {
         const visited = new Set();
         
         while (tilesToCheck.length > 0) {
-            console.log(tilesToCheck);
             const current = tilesToCheck.pop();
             const key = `${current.x},${current.y}`;
             
@@ -349,7 +337,7 @@ class GridManager {
                 
                 neighbors.forEach(neighbor => {
                     const neighborKey = `${neighbor.x},${neighbor.y}`;
-                    if (!visited.has(neighborKey)) {
+                    if (!visited.has(neighborKey) && !this.isTileChanged(neighbor.x, neighbor.y)) {
                         tilesToCheck.push(neighbor);
                     }
                 });
@@ -372,10 +360,21 @@ class GridManager {
 
     }
 
-    updateColorStats(origCode, count) {
+    updateColorStats() {
         // Update the GridManager's colorArray
-        this.updateColorAfterPaint(origCode, count);
+        for(let change of this.patternLoader.changes) {
+            for(let color of this.colorArray) {
+                if(color.code === change.originalCode) {
+                    color.count--;
+                } else if(color.code === 'stitched') {
+                    color.count++;
+                }
+            }
+        }
+        // this.updateColorAfterPaint(origCode, count);
     }
+
+    
 
     // ===== UTILITY METHODS =====
 
@@ -386,10 +385,6 @@ class GridManager {
             }
         }
         return null;
-    }
-
-    getTile(x, y) {
-        return document.querySelector(`[data-tile-x="${x}"][data-tile-y="${y}"]`);
     }
 
     getTileSymbol(colorCode) {
@@ -427,97 +422,6 @@ class GridManager {
         });
     }
 
-    refreshGridDisplay() {
-        // Trigger a full grid visual refresh
-        this.updateTileColors();
-    }
-
-    updateTileAttributes(stitches) {
-        // Update tile data based on the provided stitches
-        stitches.forEach(stitch => {
-
-            //+2 to compensate for the horizontal ruler
-            let row = this.tileContainer.children.item(stitch.Y + 2);
-
-            //+1 to compensate for the vertical ruler
-            let tile = row.children.item(stitch.X + 1);
-            if (tile) {
-                tile.setAttribute('data-tile-x', stitch.X);
-                tile.setAttribute('data-tile-y', stitch.Y);
-                const code = stitch.dmcCode || "empty";
-                tile.setAttribute('data-tile-code', stitch.dmcCode);
-                const colorData = this.getDMCValuesFromCode(stitch.dmcCode);
-                tile.setAttribute('data-tile-r', colorData.R);
-                tile.setAttribute('data-tile-g', colorData.G);
-                tile.setAttribute('data-tile-b', colorData.B);
-                tile.children[0].innerText = colorData.symbol;
-                tile.setAttribute('title', `(X: ${stitch.X+1}, Y: ${stitch.Y+1}) - ${colorData.dmcName} (${stitch.dmcCode})`);
-                // onsole.log(code);
-                if(code !== "empty") {
-                    tile.setAttribute('onclick', `tileClick(this)`);
-                }
-            }
-        });
-    }
-
-    updateTileColors() {
-        // Iterate through all tiles and update their visual appearance
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                this.updateSingleTileColor(tile);
-            }
-        }
-    }
-
-    updateSingleTileColor(tile) {
-        const code = tile.getAttribute('data-tile-code');
-        const R = parseInt(tile.getAttribute('data-tile-r')) || 0;
-        const G = parseInt(tile.getAttribute('data-tile-g')) || 0;
-        const B = parseInt(tile.getAttribute('data-tile-b')) || 0;
-        let alpha = 1;
-        let spanColor = 'black';
-        let color = 'white';
-        
-        // Check for high contrast mode
-        if (this.contrastFlag) {
-            if (code === "stitched") {
-                spanColor = this.getContrastColor(R, G, B);
-                color = `rgba(${R}, ${G}, ${B}, 1)`;
-            } else {
-                if (this.highFlag) {
-                    if (this.highlightedColor === code) {
-                        spanColor = 'white';
-                        color = 'black';
-                    } else {
-                        alpha = 0.25;
-                        spanColor = 'silver';
-                    }
-                }
-            }
-        } else {
-            spanColor = this.getContrastColor(R, G, B);
-            
-            if (this.highFlag && this.highlightedColor !== code) {
-                alpha = 0.25;
-                spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-            }
-            
-            if (code === "stitched") {
-                spanColor = this.getContrastColor(R, G, B);
-                color = `rgba(${R}, ${G}, ${B}, 1)`;
-                alpha = 1;
-            }
-
-            color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
-        }
-        
-        // Apply the calculated colors
-        tile.children[0].style.color = spanColor;
-        tile.style.backgroundColor = color;
-    }
-
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
         this.refreshCanvas();
@@ -535,7 +439,7 @@ class GridManager {
         const cols = this.patternLoader.getCols();
         const rows = this.patternLoader.getRows();
         const maxDimension = Math.max(cols, rows);
-        this.tileSize = Math.min(Math.max(Math.floor(5000 / maxDimension), 10), 50);
+        this.tileSize = Math.min(Math.max(Math.floor(4000 / maxDimension), 10), 50);
         // Adjust max zoom based on tile size
         this.maxZoom = 50 / this.tileSize;
         
@@ -544,6 +448,7 @@ class GridManager {
         this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
         this.cameraZoom = this.minZoom;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
     }
 
     cleanPatternCache(canvas) {
@@ -553,9 +458,10 @@ class GridManager {
         const currentPattern = this.patternLoader.getCurrentPattern();
         this.drawTiles(patternCtx, currentPattern);
         this.drawLines(patternCtx);
+        this.drawRulers();
     }
 
-    refreshCanvas() {
+    refreshCanvas(visibleFlag=false) {
         const canvas = document.getElementById("tileCanvas");
         canvas.width = this.patternLoader.getCols() * this.tileSize;
         canvas.height = this.patternLoader.getRows() * this.tileSize;
@@ -567,8 +473,9 @@ class GridManager {
         
         const currentPattern = this.patternLoader.getCurrentPattern();
 
-        this.drawTiles(ctx, currentPattern);
+        this.drawTiles(ctx, currentPattern, visibleFlag);
         this.drawLines(ctx);
+        this.drawRulers();
         this.cleanPatternCache(canvas);
     }
 
@@ -588,14 +495,79 @@ class GridManager {
         ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
         ctx.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
         ctx.drawImage(this.patternCanvas, 0, 0);
+        this.drawRulers();
     }
 
-    drawTiles(ctx, currentPattern) {
+    DEBUGPrintZoomInfo() {
+        console.log("-----------------------");
+        console.log("--- Zoom Debug Info ---");
+        console.log("-----------------------");
+        console.log(`Zoom: ${this.cameraZoom}, MinZoom: ${this.minZoom}, MaxZoom: ${this.maxZoom}`);
+        console.log(`OffsetX: ${this.cameraOffset.x}, OffsetY: ${this.cameraOffset.y}`);
+        console.log(`TileSize: ${this.tileSize}`);
+        /* console.log(`CanvasWidth: ${this.tileCanvas.width}, CanvasHeight: ${this.tileCanvas.height}`);
+        console.log(`ClientWidth: ${this.tileCanvas.clientWidth}, ClientHeight: ${this.tileCanvas.clientHeight}`);
+        console.log(`Canvas ClientBoundingRect: `, this.tileCanvas.getBoundingClientRect());
+        console.log(`ContainerWidth: ${this.tileContainer.offsetWidth}, ContainerHeight: ${this.tileContainer.offsetHeight}`);
+        console.log(`WindowWidth: ${window.innerWidth}, WindowHeight: ${window.innerHeight}`);
+        console.log("-----------------------");
+        console.log("--- Viewport bounds ---");
+        console.log("-----------------------");
+        const minX = -this.cameraOffset.x + window.innerWidth / 2;
+        const minY = -this.cameraOffset.y + window.innerHeight / 2;
+        const maxX = minX + this.tileContainer.offsetWidth / this.cameraZoom;
+        const maxY = minY + this.tileContainer.offsetHeight / this.cameraZoom;
+        const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
+        const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
+        const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
+        const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
+        console.log(`Viewport Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
+        console.log(`Tile Bounds - minTileX: ${minTileX}, minTileY: ${minTileY}, maxTileX: ${maxTileX}, maxTileY: ${maxTileY}`);
+        console.log("-----------------------"); 
+        const absMinX = (this.cameraOffset.x - window.innerWidth / 2) * this.cameraZoom;
+        const absMinY = (this.cameraOffset.y - window.innerHeight / 2) * this.cameraZoom;
+        const rulerminX = Math.max(0, absMinX);
+        const rulerminY = Math.max(0, absMinY);
+        console.log(`Abs Mins: ${absMinX}, ${absMinY}`);
+        const absMaxX = absMinX + this.patternLoader.getCols() * this.tileSize * this.cameraZoom;
+        const absMaxY = absMinY + this.patternLoader.getRows() * this.tileSize * this.cameraZoom;
+        console.log(`Abs Max: ${absMaxX}, ${absMaxY}`);
+        const rulermaxX = Math.min(this.tileContainer.offsetWidth, absMaxX);
+        const rulermaxY = Math.min(this.tileContainer.offsetHeight, absMaxY);
+        console.log(`Ruler Draw Bounds - minX: ${rulerminX}, maxX: ${rulermaxX}, minY: ${rulerminY}, maxY: ${rulermaxY}`) */;
+        
+    }
+
+    drawTiles(ctx, currentPattern, visibleFlag) {
+        // Get viewport bounds in world coordinates
+        const canvas = document.getElementById("tileCanvas");
+        const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+        const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+        // Viewport bounds
+        const minX = -this.cameraOffset.x + window.innerWidth / 2;
+        const minY = -this.cameraOffset.y + window.innerHeight / 2;
+        const maxX = minX + this.tileContainer.offsetWidth / this.cameraZoom;
+        const maxY = minY + this.tileContainer.offsetHeight / this.cameraZoom;
+        // console.log(`Viewport Bounds - minX: ${minX}, minY: ${minY}, maxX: ${maxX}, maxY: ${maxY}`);
+        const minTileX = Math.max(0, Math.floor(minX / this.tileSize));
+        const maxTileX = Math.min(this.patternLoader.getCols(), Math.ceil(maxX / this.tileSize));
+        const minTileY = Math.max(0, Math.floor(minY / this.tileSize));
+        const maxTileY = Math.min(this.patternLoader.getRows(), Math.ceil(maxY / this.tileSize));
         let spanColor = 'black';
         let color = 'white';
 
+        // Draw only visible tiles
         for(let stitch in currentPattern.stitches) {
             let stitchObj = currentPattern.stitches[stitch];
+            if (stitchObj.X < minTileX || stitchObj.X >= maxTileX || 
+                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY) {
+                    if(visibleFlag)
+                        continue;
+            }
+            
+            // ... rest of drawing code
+        
+            //let stitchObj = currentPattern.stitches[stitch];
             let x = stitchObj.X * this.tileSize;
             let y = stitchObj.Y * this.tileSize;
             let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
@@ -669,6 +641,7 @@ class GridManager {
             let symbol = "×";
             ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
+        
     }
 
     drawLines(ctx) {
@@ -707,6 +680,95 @@ class GridManager {
     }
 
     drawRulers() {
+        const rulerWidth = 25;
+        const tileCountPrint = ((this.cameraZoom * this.tileSize) < 4) ? 50 : 10;
+        const absMinX = (this.cameraOffset.x - window.innerWidth / 2) * this.cameraZoom;
+        const absMinY = (this.cameraOffset.y - window.innerHeight / 2) * this.cameraZoom;
+        const minX = Math.max(0, absMinX);
+        const minY = Math.max(0, absMinY);
+        const absMaxX = absMinX + this.patternLoader.getCols() * this.tileSize * this.cameraZoom;
+        const absMaxY = absMinY + this.patternLoader.getRows() * this.tileSize * this.cameraZoom;
+        const maxX = Math.min(this.tileContainer.offsetWidth, absMaxX);
+        const maxY = Math.min(this.tileContainer.offsetHeight, absMaxY);
+        
+        const rulerCanvas = document.getElementById("rulerCanvas");
+        const ctx = rulerCanvas.getContext("2d");
+        rulerCanvas.width = this.tileContainer.offsetWidth;
+        rulerCanvas.height = this.tileContainer.offsetHeight;
+        ctx.clearRect(0, 0, rulerCanvas.width, rulerCanvas.height);
+        // Draw vertical ruler
+        ctx.fillStyle = "rgba(200, 200, 200, 0.9)";
+        ctx.fillRect(0, minY, rulerWidth, maxY - minY);
+        // Draw vertical lines
+        let tileCount = 0;
+        for(let y=absMinY; y<=absMaxY; y=y+this.tileSize*this.cameraZoom) {
+            
+            if(y > minY && y < maxY) {
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                if(tileCount%10 == 0) {
+                    ctx.lineWidth = 1.5;
+                    ctx.moveTo(rulerWidth-10, y);
+                } else if(tileCount%5 == 0) {
+                    ctx.moveTo(rulerWidth-8, y);
+                
+                } else {
+                    ctx.moveTo(rulerWidth-4, y);
+                }
+                
+                ctx.lineTo(rulerWidth, y);
+                ctx.stroke();
+            }
+            
+            if(tileCount % tileCountPrint == 0 && tileCount > 0 && tileCount < this.patternLoader.getRows()) {
+                ctx.fillStyle = 'darkblue';
+                ctx.font = `15px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(tileCount / 10 , rulerWidth - 15, y - 10);
+                ctx.textAlign = "center";
+                ctx.fillText(0, rulerWidth - 15, y + 6);
+            }
+            tileCount++;
+        }
+        
+        // Draw horizontal ruler
+        ctx.fillStyle = "rgba(200, 200, 200, 0.9)";
+        // console.log(maxX);
+        ctx.fillRect(minX, 0, maxX - minX, rulerWidth);
+        // Draw horizontal lines
+        tileCount = 0;
+        for(let x=absMinX; x<=absMaxX; x=x+this.tileSize*this.cameraZoom) {
+            
+            if(x > minX && x < maxX) {
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                if(tileCount%10 == 0) {
+                    ctx.lineWidth = 1.5;
+                    ctx.moveTo(x, rulerWidth-10);
+                } else if(tileCount%5 == 0) {
+                    ctx.moveTo(x, rulerWidth-8);
+                
+                } else {
+                    ctx.moveTo(x, rulerWidth-4);
+                }
+                
+                ctx.lineTo(x, rulerWidth);
+                ctx.stroke();
+            }
+            if(tileCount % tileCountPrint == 0 && tileCount > 0 && tileCount < this.patternLoader.getCols()) {
+                ctx.fillStyle = 'darkblue';
+                ctx.font = `15px Arial`;
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+                ctx.fillText(tileCount / 10 , x, rulerWidth - 15);
+                ctx.textAlign = "center";
+                ctx.fillText(0, x + 6, rulerWidth - 15);
+            }
+            tileCount++;
+        }
         // Ruler drawing logic can be implemented here if needed
     }
 
@@ -760,6 +822,7 @@ class GridManager {
             this.renderScheduled = true;
             requestAnimationFrame(() => {
                 this.renderCanvas();
+                
                 this.renderScheduled = false;
             });
         }
@@ -784,10 +847,8 @@ class GridManager {
     }
         
     onPointerDown(e) {
-        console.log("Pointer down detected");
         this.isDragging = true;
         const eventLoc = this.getEventLocation(e);
-        console.log(eventLoc);
         this.dragStart.x = eventLoc.x / this.cameraZoom - this.cameraOffset.x;
         this.dragStart.y = eventLoc.y / this.cameraZoom - this.cameraOffset.y;
         this.mouseDown.x = eventLoc.x;
@@ -795,7 +856,7 @@ class GridManager {
     }
 
     onPointerUp(e) {
-        console.log("Pointer up detected");
+        this.DEBUGPrintZoomInfo();
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -815,12 +876,14 @@ class GridManager {
                 this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
             }
             
-            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
+        }
+        if(this.cameraZoom > 1.25) {
+            this.renderCanvas();
+            this.refreshCanvas(true);
         }
     }
 
     onTouchEnd(e) {
-        console.log("Touch end detected", e);
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -838,9 +901,10 @@ class GridManager {
             } else {
                 this.handleTileClick(Math.floor(this.canvasClick.x / this.tileSize), Math.floor(this.canvasClick.y / this.tileSize));
             }
-            console.log(`Canvas Click at X: ${Math.floor(this.canvasClick.x / this.tileSize)}, Y: ${Math.floor(this.canvasClick.y / this.tileSize)}`);
         }
-
+        if(this.cameraZoom > 1.25) {
+            this.refreshCanvas(true);
+        }
         
     }
 
@@ -866,12 +930,10 @@ class GridManager {
         } else if (e.touches.length == 2) {
             // Handle pinch on both touchstart and touchmove
             if (e.type == "touchstart") {
-                console.log("Two-finger touchstart detected");
                 this.isDragging = false;
                 this.initialPinchDistance = null;
                 this.lastZoom = this.cameraZoom;
             } else if (e.type == "touchmove") {
-                console.log("Two-finger touchmove detected");
                 this.isDragging = false;
                 this.handlePinch(e);
             }
@@ -885,11 +947,35 @@ class GridManager {
         
         if (this.initialPinchDistance == null) {
             this.initialPinchDistance = currentDistance;
-            console.log("Initial pinch distance set:", this.initialPinchDistance);
         } else {
+            const midX = (touch1.x + touch2.x) / 2;
+            const midY = (touch1.y + touch2.y) / 2;
+            const canvas = document.getElementById("tileCanvas");
+            const scaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+            const scaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+            const tx = -window.innerWidth / 2 + this.cameraOffset.x;
+            const ty = -window.innerHeight / 2 + this.cameraOffset.y;
+            const dx = midX - canvas.getBoundingClientRect().x;
+            const dy = midY - canvas.getBoundingClientRect().y;
+            const worldX = dx / scaleX - tx;
+            const worldY = dy / scaleY - ty;
             const zoomFactor = currentDistance / this.initialPinchDistance;
-            console.log("Current distance:", currentDistance, "Zoom factor:", zoomFactor);
             this.cameraZoom = zoomFactor + this.lastZoom - 1;
+            // Adjust zoom limits
+            if(this.cameraZoom > this.maxZoom) {
+                this.cameraZoom = this.maxZoom;
+            }
+            if(this.cameraZoom < this.minZoom) {
+                this.cameraZoom = this.minZoom;
+            }
+
+            // Adjust camera offset to keep midpoint stable
+            const newScaleX = (canvas.width/canvas.clientWidth)*this.cameraZoom;
+            const newScaleY = (canvas.height/canvas.clientHeight)*this.cameraZoom;
+            const newTx = dx / newScaleX - worldX;
+            const newTy = dy / newScaleY - worldY;
+            this.cameraOffset.x = newTx + window.innerWidth / 2;
+            this.cameraOffset.y = newTy + window.innerHeight / 2; 
 
             // Schedule a single render instead of rendering on every move
             if (!this.renderScheduled) {
@@ -901,149 +987,6 @@ class GridManager {
             }
         }
     }
-
-    removeAllTiles() {
-        while (this.tileContainer.firstChild) {
-            this.tileContainer.removeChild(this.tileContainer.firstChild);
-        }
-    }
-
-    createSVGContainer() {
-        // Create and append SVG container for grid lines
-        const svgContainer = document.createElement("div");
-        svgContainer.setAttribute("class", "svg-container");
-        const newSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgContainer.append(newSVG);
-        this.tileContainer.append(svgContainer);
-    }
-
-    createTilesAndRulers(cols, rows) {
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        const width = currentPattern.properties.width;
-        const height = currentPattern.properties.height;
-        // Create rows with tiles and rulers
-        const rowTemplate = document.querySelector("[data-row-template]");
-        const tileTemplate = document.querySelector("[data-tile-template]");
-
-        // Add one vertical ruler div to the horizontal ruler row
-        const rulerRow = rowTemplate.content.cloneNode(true).children[0];
-        const rulerDiv = tileTemplate.content.cloneNode(true).children[0];
-        rulerDiv.classList.add("vertRulerDiv");
-        rulerRow.append(rulerDiv);
-
-        // Add the rest of the horizontal ruler tiles
-        for (let i = 1; i <= cols; i++)  {
-            const tileDiv = tileTemplate.content.cloneNode(true).children[0];
-            tileDiv.classList.add("horRulerRow");
-            if(i%10 == 0) {
-                tileDiv.children.item(0).innerText = i/10;
-                tileDiv.children.item(0).setAttribute('style', "float: right;");
-            }
-            if(i%10 == 1 && i > 1) {
-                tileDiv.children.item(0).innerText = 0;
-                tileDiv.children.item(0).setAttribute('style', "float: left;");
-            }
-            rulerRow.append(tileDiv);
-        }
-        rulerRow.classList.add("horRulerRow");
-        this.tileContainer.append(rulerRow);
-
-        // Add the rest of the rows with vertical rulers and tiles
-        for (let j = 1; j <= rows; j++) {
-            const newRow = rowTemplate.content.cloneNode(true).children[0];
-
-            //Adding vertical ruler div
-            const rulerDiv = tileTemplate.content.cloneNode(true).children[0];
-            rulerDiv.classList.add("vertRulerDiv");
-            if(j%10 == 0) {
-                rulerDiv.children.item(0).innerText = j/10;
-            }
-            if(j%10 == 1 && j > 1) {
-                rulerDiv.children.item(0).innerText = 0;
-            }
-            newRow.append(rulerDiv);
-
-            // Add color tiles, alternating colors for visibility
-            for (let i = 1; i <= cols; i++)  {
-                const tileDiv = tileTemplate.content.cloneNode(true).children[0];
-                if(i%2==0) {
-                    tileDiv.setAttribute('style', "background-color: white");
-                }
-                else {
-                    tileDiv.setAttribute('style', "background-color: yellow");
-                }
-                newRow.append(tileDiv);
-            }
-            this.tileContainer.append(newRow)
-        }
-    }
-
-    initializeGrid(cols, rows) {
-        //
-        this.removeAllTiles();
-        this.createSVGContainer();
-        this.createTilesAndRulers(cols, rows);
-    }
-
-    drawHorizontalLines() {
-        // Draw horizontal grid lines
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                if ((i - 1) % 10 === 0) {
-                    tile.classList.add('horBorder');
-                }
-            }
-        }
-    }
-
-    drawVerticalLines() {
-        // Draw vertical grid lines
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                if (j % 10 === 0) {
-                    tile.classList.add('borderRight');
-                }
-                if (j % 10 == 1 && j < row.children.length-1 && j > 1) {
-                    tile.classList.add("borderLeft");
-                }
-            }
-        }
-    }
-
-    drawMiddleLines() {
-        // Draw horizontal middle line
-        let rows = document.getElementsByClassName("tile-container")[0];
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        let midRowIndex = Math.round(currentPattern.properties.height / 2)
-        let midRowTop = rows.children[midRowIndex];
-        let midRowBot = rows.children[midRowIndex + 1];
-        for (let i = 0; i < midRowTop.children.length; i ++) {
-            midRowTop.children.item(i).classList.add("midRowTop");
-        }
-        for (let i = 0; i < midRowBot.children.length; i ++) {
-            midRowBot.children.item(i).classList.add("midRowBot");
-        }
-        
-        // Draw vertical middle line
-        let midColIndex = Math.round(currentPattern.properties.width / 2)
-        for (let i = 1; i < rows.children.length; i++) {
-            let curRow = rows.children.item(i);
-            curRow.children.item(midColIndex).classList.add("midColLeft");
-            curRow.children.item(midColIndex + 1).classList.add("midColRight");
-        }
-    }
-
-    drawGridLines() {
-        this.drawHorizontalLines();
-        this.drawVerticalLines();
-        this.drawMiddleLines();
-    }
-
-
     // ===== COLOR MANAGEMENT METHODS =====
 
     initializeColorArray(pattern) {
@@ -1135,9 +1078,19 @@ class GridManager {
         return this.colorArray;
     }
 
+    getChangeCount(code) {
+        let count = 0;
+        for(let change of this.patternLoader.changes) {
+            if(change.originalCode === code) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     getStitchedCount() {
         const stitchedColor = this.colorArray.find(color => color.code === "stitched");
-        return stitchedColor ? stitchedColor.count : 0;
+        return stitchedColor ? (stitchedColor.count + this.patternLoader.changes.length) : 0;
     }
 
     getContrastColor(r, g, b) {
@@ -1167,6 +1120,16 @@ class GridManager {
         return highlightedStitches;
     }
 
+    getColorCount() {
+        let colorCount = 0
+        for(let color of this.colorArray) {
+            if(color.code === "stitched" || color.code === "empty") { 
+                continue;
+            }
+            colorCount++;
+        }
+        return colorCount;
+    }
     //this.tileCanvas.addEventListener('touchend', (e) => {
     //    this.handleTouch(e, onPointerUp))
 

@@ -84,13 +84,6 @@ function loadJSON(data) {
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas();
 
-/*     
-    gridManager.initializeGrid(cols, rows);
-
-    gridManager.updateTileAttributes(processedData.stitches);
-    gridManager.refreshGridDisplay();
-    gridManager.drawGridLines(); */
-
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
 
@@ -124,7 +117,7 @@ function previewClose() {
 
 function previewOpen() {
     const currentPattern = patternLoader.getCurrentPattern();
-    uiManager.preview(currentPattern.stitches, currentPattern.properties.width, currentPattern.properties.height);
+    uiManager.preview();
     let modal = document.getElementById("previewModal");
     modal.style.display = "block";
 }
@@ -132,8 +125,9 @@ function previewOpen() {
 
 function save() {
     patternLoader.mergeChanges();
-    addChangesToJsonObject();
+    // addChangesToJsonObject();
     uiManager.fillFlossUsage();
+    console.log(gridManager.colorArray);
 
     const exportData = patternLoader.exportPattern();
     var text2write = JSON.stringify(exportData);
