@@ -290,6 +290,15 @@ class GridManager {
         this.patternLoader.recordChange(x, y, 'stitched', origCode);
     }
 
+    isTileChanged(x, y) {
+        for(let change of this.patternLoader.changes) {
+            if(change.X == x && change.Y == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     getConnectedTiles(startX, startY, targetColor) {
         // Prevent filling stitched or empty areas
         if (targetColor === 'stitched' || targetColor === '0') {
@@ -328,7 +337,7 @@ class GridManager {
                 
                 neighbors.forEach(neighbor => {
                     const neighborKey = `${neighbor.x},${neighbor.y}`;
-                    if (!visited.has(neighborKey)) {
+                    if (!visited.has(neighborKey) && !this.isTileChanged(neighbor.x, neighbor.y)) {
                         tilesToCheck.push(neighbor);
                     }
                 });
@@ -378,10 +387,6 @@ class GridManager {
         return null;
     }
 
-    getTile(x, y) {
-        return document.querySelector(`[data-tile-x="${x}"][data-tile-y="${y}"]`);
-    }
-
     getTileSymbol(colorCode) {
         const currentPattern = this.patternLoader.getCurrentPattern();
         const colorObj = currentPattern.colors.find(c => c.dmcCode === colorCode);
@@ -416,97 +421,6 @@ class GridManager {
             }
         });
     }
-/* 
-    refreshGridDisplay() {
-        // Trigger a full grid visual refresh
-        this.updateTileColors();
-    }
-
-    updateTileAttributes(stitches) {
-        // Update tile data based on the provided stitches
-        stitches.forEach(stitch => {
-
-            //+2 to compensate for the horizontal ruler
-            let row = this.tileContainer.children.item(stitch.Y + 2);
-
-            //+1 to compensate for the vertical ruler
-            let tile = row.children.item(stitch.X + 1);
-            if (tile) {
-                tile.setAttribute('data-tile-x', stitch.X);
-                tile.setAttribute('data-tile-y', stitch.Y);
-                const code = stitch.dmcCode || "empty";
-                tile.setAttribute('data-tile-code', stitch.dmcCode);
-                const colorData = this.getDMCValuesFromCode(stitch.dmcCode);
-                tile.setAttribute('data-tile-r', colorData.R);
-                tile.setAttribute('data-tile-g', colorData.G);
-                tile.setAttribute('data-tile-b', colorData.B);
-                tile.children[0].innerText = colorData.symbol;
-                tile.setAttribute('title', `(X: ${stitch.X+1}, Y: ${stitch.Y+1}) - ${colorData.dmcName} (${stitch.dmcCode})`);
-                // onsole.log(code);
-                if(code !== "empty") {
-                    tile.setAttribute('onclick', `tileClick(this)`);
-                }
-            }
-        });
-    }
-
-    updateTileColors() {
-        // Iterate through all tiles and update their visual appearance
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                this.updateSingleTileColor(tile);
-            }
-        }
-    }
-
-    updateSingleTileColor(tile) {
-        const code = tile.getAttribute('data-tile-code');
-        const R = parseInt(tile.getAttribute('data-tile-r')) || 0;
-        const G = parseInt(tile.getAttribute('data-tile-g')) || 0;
-        const B = parseInt(tile.getAttribute('data-tile-b')) || 0;
-        let alpha = 1;
-        let spanColor = 'black';
-        let color = 'white';
-        
-        // Check for high contrast mode
-        if (this.contrastFlag) {
-            if (code === "stitched") {
-                spanColor = this.getContrastColor(R, G, B);
-                color = `rgba(${R}, ${G}, ${B}, 1)`;
-            } else {
-                if (this.highFlag) {
-                    if (this.highlightedColor === code) {
-                        spanColor = 'white';
-                        color = 'black';
-                    } else {
-                        alpha = 0.25;
-                        spanColor = 'silver';
-                    }
-                }
-            }
-        } else {
-            spanColor = this.getContrastColor(R, G, B);
-            
-            if (this.highFlag && this.highlightedColor !== code) {
-                alpha = 0.25;
-                spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-            }
-            
-            if (code === "stitched") {
-                spanColor = this.getContrastColor(R, G, B);
-                color = `rgba(${R}, ${G}, ${B}, 1)`;
-                alpha = 1;
-            }
-
-            color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
-        }
-        
-        // Apply the calculated colors
-        tile.children[0].style.color = spanColor;
-        tile.style.backgroundColor = color;
-    } */
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
@@ -1206,6 +1120,16 @@ class GridManager {
         return highlightedStitches;
     }
 
+    getColorCount() {
+        let colorCount = 0
+        for(let color of this.colorArray) {
+            if(color.code === "stitched" || color.code === "empty") { 
+                continue;
+            }
+            colorCount++;
+        }
+        return colorCount;
+    }
     //this.tileCanvas.addEventListener('touchend', (e) => {
     //    this.handleTouch(e, onPointerUp))
 

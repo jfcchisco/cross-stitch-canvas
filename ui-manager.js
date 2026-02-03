@@ -66,6 +66,8 @@ class UIManager {
         })
 
         toStitch += stitched;
+        // Add changed stitches
+        stitched += this.patternLoader.changes.length;
         let percentage = ((stitched * 100)/ toStitch).toFixed(2);
 
         //Sort for table 
@@ -86,11 +88,14 @@ class UIManager {
         // Aida 14 is 5.4 stitches per cm (0.185 mm per stitch)
         let hCM = (hS * 0.185).toFixed(1);
         let wCM = (wS * 0.185).toFixed(1);
-        par.innerHTML = `${hS}h x ${wS}w (${hCM}cm x ${wCM}cm). ${stitched}/${toStitch} stitched (${percentage}%)`;
+        par.innerHTML = `<b>Dimensions:</b>&nbsp${hS}h x ${wS}w (${hCM}cm x ${wCM}cm)`;
 
+        // Fill progress
+        const progressPar = document.getElementById("progress");
+        progressPar.innerHTML = `<b>Progress:</b>&nbsp${stitched}/${toStitch} stitched (${percentage}%)`;
         //Fill floss count
         let flossCountPar = document.getElementById("flossCount");
-        flossCountPar.innerHTML = colorArray.length + " colors";
+        flossCountPar.innerHTML = `<b>Color count:</b>&nbsp${this.gridManager.getColorCount()}`;
 
         //Fill table
         
@@ -462,7 +467,7 @@ class UIManager {
         }
         return retCluster;
     }
-
+    
     previewPath(type) {
         // This function should be called only when there is already a created canvas
         // with the highlighted color and highlight flag activated
