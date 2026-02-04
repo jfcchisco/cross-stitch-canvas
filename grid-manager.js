@@ -461,22 +461,40 @@ class GridManager {
         this.drawRulers();
     }
 
+    ensureCanvasSize(canvas) {
+        const expectedWidth = this.patternLoader.getCols() * this.tileSize;
+        const expectedHeight = this.patternLoader.getRows() * this.tileSize;
+        // Only resize if sizes differ to avoid clearing the canvas unnecessarily
+        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+            canvas.width = expectedWidth;
+            canvas.height = expectedHeight;
+            // Keep pattern cache in sync
+            this.patternCanvas.width = expectedWidth;
+            this.patternCanvas.height = expectedHeight;
+            this.patternCacheDirty = true;
+        }
+    }
+
     refreshCanvas(visibleFlag=false) {
         const canvas = document.getElementById("tileCanvas");
-        canvas.width = this.patternLoader.getCols() * this.tileSize;
-        canvas.height = this.patternLoader.getRows() * this.tileSize;
         const ctx = canvas.getContext("2d");
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Set zoom and offset
+
+        // Ensure canvas and pattern cache sizes only when necessary
+        this.ensureCanvasSize(canvas);
+
+        // Rebuild pattern cache only when dirty or when explicitly requested
+        if (this.patternCacheDirty || visibleFlag) {
+            this.cleanPatternCache(canvas);
+            this.patternCacheDirty = false;
+        }
+
+        // Composite the cached pattern into the visible canvas with the current transform
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
         ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
-        
-        const currentPattern = this.patternLoader.getCurrentPattern();
-
-        this.drawTiles(ctx, currentPattern, visibleFlag);
-        this.drawLines(ctx);
+        ctx.drawImage(this.patternCanvas, 0, 0);
         this.drawRulers();
-        this.cleanPatternCache(canvas);
     }
 
     renderCanvas() {
@@ -856,7 +874,7 @@ class GridManager {
     }
 
     onPointerUp(e) {
-        this.DEBUGPrintZoomInfo();
+        // this.DEBUGPrintZoomInfo();
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;

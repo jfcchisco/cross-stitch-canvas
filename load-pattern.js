@@ -176,27 +176,6 @@ class PatternLoader {
             }
         }
 
-        /* for (let i = 0; i < data.stitches.length; i++) {
-            const stitch = data.stitches[i];
-            const code = stitch.dmcCode;
-
-            if (code !== currentCode) {
-                // Write previous group if exists
-                if (currentCode) {
-                    if (newStitches) newStitches += ",";
-                    newStitches += `${i-1}-${this.getIDFromCode(data, currentCode)}`;
-                }
-                currentCode = code;
-                startId = i;
-            }
-        }
-
-        // Write final group
-        if (currentCode) {
-            if (newStitches) newStitches += ",";
-            newStitches += `${startId}-${this.getIDFromCode(data, currentCode)}`;
-        } */
-
         return {
             stitches: newStitches,
             properties: data.properties,
