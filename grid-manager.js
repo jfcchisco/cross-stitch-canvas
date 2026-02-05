@@ -83,7 +83,7 @@ class GridManager {
         }
         this.paintFlag = false;
         this.bucketFlag = false;
-        this.refreshCanvas();
+        this.refreshCanvas(true);
     }
 
     activateHighContrast() {
@@ -195,7 +195,7 @@ class GridManager {
             }
         }
         this.patternLoader.changeCounter--;
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("Change undone");
         
     }
@@ -355,7 +355,7 @@ class GridManager {
         this.updateColorSelectorUI(colorCode, symbol);
             
             // Refresh grid to show highlighting
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("Selected color: " + colorCode + " - " + this.getDMCValuesFromCode(colorCode).dmcName);
 
     }
@@ -379,6 +379,7 @@ class GridManager {
     // ===== UTILITY METHODS =====
 
     getCoordinateColors(x, y) {
+        if(this.isTileChanged(x, y)) return "stitched";
         for(let stitch of this.patternLoader.getCurrentPattern().stitches) {
             if(stitch.X == x && stitch.Y == y) {
                 return stitch.dmcCode;
@@ -424,7 +425,7 @@ class GridManager {
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         return this.contrastFlag;
     }
 
@@ -578,7 +579,9 @@ class GridManager {
         for(let stitch in currentPattern.stitches) {
             let stitchObj = currentPattern.stitches[stitch];
             if (stitchObj.X < minTileX || stitchObj.X >= maxTileX || 
-                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY) {
+                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY ||
+                this.isTileChanged(stitchObj.X, stitchObj.Y)) {
+                    if(this.isTileChanged(stitchObj.X, stitchObj.Y)) console.log("Skipped due to change");
                     if(visibleFlag)
                         continue;
             }
@@ -588,7 +591,9 @@ class GridManager {
             //let stitchObj = currentPattern.stitches[stitch];
             let x = stitchObj.X * this.tileSize;
             let y = stitchObj.Y * this.tileSize;
-            let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
+            // console.log(stitchObj);
+            let colorData = (stitchObj.dmcCode === "stitched") ? this.getDMCValuesFromCode(stitchObj.origCode) : this.getDMCValuesFromCode(stitchObj.dmcCode);
+            if(stitchObj.dmcCode === "stitched") console.log(colorData);
             let R = colorData.R;
             let G = colorData.G;
             let B = colorData.B;
@@ -599,7 +604,11 @@ class GridManager {
             if (this.contrastFlag) {
                 if (code === "stitched") {
                     spanColor = this.getContrastColor(R, G, B);
-                    color = `rgba(${R}, ${G}, ${B}, 1)`;
+                    if(this.highlightedColor != "stitched") {
+                        spanColor = (spanColor === "black") ? "silver" : "white";
+                    } 
+                    alpha = (this.highlightedColor == "stitched") ? 1 : 0.25;
+                    color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
                 } else {
                     if (this.highFlag) {
                         if (this.highlightedColor === code) {
@@ -610,21 +619,28 @@ class GridManager {
                             spanColor = 'silver';
                             color = 'white';
                         }
+                    } else {
+                        spanColor = 'black';
+                        color = 'white'
                     }
                 }
+                //color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
             } else {
                 spanColor = this.getContrastColor(R, G, B);
-                
+                // console.log(this.highFlag, this.highlightedColor);
                 if (this.highFlag && this.highlightedColor !== code) {
+                    alpha = 0.25;
+                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
+                } else if (!this.highFlag && stitchObj.dmcCode === "stitched") {
                     alpha = 0.25;
                     spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
                 }
                 
-                if (code === "stitched") {
+                /* if (code === "stitched") {
                     spanColor = this.getContrastColor(R, G, B);
-                    color = `rgba(${R}, ${G}, ${B}, 1)`;
-                    alpha = 1;
-                }
+                    // color = `rgba(${R}, ${G}, ${B}, 0.25)`;
+                    alpha = 0.25;
+                } */
 
                 color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
             }
@@ -637,7 +653,13 @@ class GridManager {
             ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
+            
             let symbol = colorData.symbol;
+            
+            if(stitchObj.dmcCode === "stitched"){
+                symbol = "×";
+                console.log(stitchObj.dmcCode);
+            } 
             ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
 
@@ -645,11 +667,22 @@ class GridManager {
             let changeObj = this.patternLoader.changes[change];
             let x = changeObj.X * this.tileSize;
             let y = changeObj.Y * this.tileSize;
-            let code = changeObj.newCode;
-            let colorData = this.getDMCValuesFromCode(code);
-            color = `rgba(0, 255, 0, 1)`;
-            spanColor = 'white';
+            let colorData = this.getDMCValuesFromCode(changeObj.originalCode);
+            console.log(colorData, changeObj);
+            let R = colorData.R;
+            let G = colorData.G;
+            let B = colorData.B;
+            let alpha = 1;
+            
+            
+            spanColor = this.getContrastColor(R, G, B);
+            if (this.highlightedColor !== "stitched" || !this.highFlag) {
+                alpha = 0.25;
+                spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
+            }
+            color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
             ctx.fillStyle = color;
+            ctx.clearRect(x, y, this.tileSize, this.tileSize);
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
             // Draw symbol
             ctx.fillStyle = spanColor;

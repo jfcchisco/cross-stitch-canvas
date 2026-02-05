@@ -106,6 +106,7 @@ class PatternLoader {
      */
     convertFileToStitches(data) {
         const newStitches = [];
+        let dmcCode, origCode;
 
         // New format:
         //   - Rows separated by ":"
@@ -118,13 +119,24 @@ class PatternLoader {
                 if(stitch.trim() === "") continue;
                 const [countStr, dmcID] = stitch.split("-");
                 const count = parseInt(countStr);
+                // Check if stitched
+                const pattern = /(S)(\d+)/;
+                let result = dmcID.match(pattern);
+                if(result) {
+                    dmcCode = this.getCodeFromId(data, result[1]);
+                    origCode = this.getCodeFromId(data, result[2]);
+                } else {
+                    dmcCode = this.getCodeFromId(data, dmcID);
+                    origCode = null;
+                }
                 for (let i = 0; i < count; i++) {
                     const x = stitchIndex % data.properties.width;
                     const y = Math.floor(stitchIndex / data.properties.width);
                     newStitches.push({
                         "X": x,
                         "Y": y,
-                        "dmcCode": this.getCodeFromId(data, dmcID)
+                        "dmcCode": dmcCode,
+                        "origCode": origCode
                     });
                     stitchIndex++;
                 }
@@ -155,24 +167,27 @@ class PatternLoader {
             if (y > 0) newStitches += ":";
             let count = 0;
             let lastCode = null;
+            let lastOrigCode = null;
             for (let x = 0; x < data.properties.width; x++) {
                 const stitch = data.stitches[y * data.properties.width + x];
                 const code = stitch.dmcCode;
-                if (code === lastCode) {
+                const origCode = stitch.origCode;
+                if (code === lastCode && origCode === lastOrigCode) {
                     count++;
                 } else {
                     if (lastCode !== null) {
                         if (newStitches) newStitches += ",";
-                        newStitches += `${count}-${this.getIDFromCode(data, lastCode)}`;
+                        newStitches += `${count}-${this.getIDFromCode(data, lastCode)}${this.getIDFromCode(data, lastOrigCode)}`;
                     }
                     lastCode = code;
+                    lastOrigCode = origCode;
                     count = 1;
                 }
             }
             // Write remaining stitches in the row
             if (lastCode !== null) {
                 if (newStitches) newStitches += ",";
-                newStitches += `${count}-${this.getIDFromCode(data, lastCode)}`;
+                newStitches += `${count}-${this.getIDFromCode(data, lastCode)}${this.getIDFromCode(data, lastOrigCode)}`;
             }
         }
 
@@ -217,6 +232,7 @@ class PatternLoader {
             );
             if (stitchIndex !== -1) {
                 merged.stitches[stitchIndex].dmcCode = change.dmcCode;
+                merged.stitches[stitchIndex].origCode = change.originalCode;
             }
         }
 
@@ -329,7 +345,7 @@ class PatternLoader {
                 return color.dmcCode;
             }
         }
-        return null;
+        return "";
     }
 
     getIDFromCode(data, dmcCode) {
@@ -338,7 +354,7 @@ class PatternLoader {
                 return color.id;
             }
         }
-        return null;
+        return "";
     }
 }
 

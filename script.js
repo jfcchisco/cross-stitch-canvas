@@ -82,7 +82,7 @@ function loadJSON(data) {
 
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
-    gridManager.refreshCanvas();
+    gridManager.refreshCanvas(true);
 
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
