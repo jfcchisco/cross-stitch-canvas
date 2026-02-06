@@ -127,7 +127,7 @@ function save() {
     patternLoader.mergeChanges();
     // addChangesToJsonObject();
     uiManager.fillFlossUsage();
-    console.log(gridManager.colorArray);
+    // console.log(gridManager.colorArray);
 
     const exportData = patternLoader.exportPattern();
     var text2write = JSON.stringify(exportData);
