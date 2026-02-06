@@ -131,6 +131,7 @@ class GridManager {
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
         this.patternLoader.recordChange(x, y, 'stitched', code);
+        this.updateChangesToColorArray(code, 1);
         // this.updateColorStats(code, 1);
         // this.updateColorStats();
         this.refreshCanvas(true);
@@ -162,6 +163,7 @@ class GridManager {
         tilesToFill.forEach(({x, y}) => {
             //const connectedTile = this.getTile(x, y);
             this.patternLoader.recordChange(x, y, 'stitched', fillColor);
+            this.updateChangesToColorArray(fillColor, 1);
             tilesAffected++;
             
         });
@@ -192,12 +194,21 @@ class GridManager {
             let changeToUndo = this.patternLoader.changes[i];
             if(changeToUndo.id == this.patternLoader.changeCounter) {
                 this.patternLoader.changes.splice(i, 1);
+                this.updateChangesToColorArray(changeToUndo.originalCode, -1);
             }
         }
         this.patternLoader.changeCounter--;
         this.refreshCanvas(true);
         this.uiManager.updateFootnote("Change undone");
         
+    }
+
+    updateChangesToColorArray(origCode, totalChanges) {
+        let colorArray = this.getColorArray();
+        colorArray.map(color => {
+            if(color.code === origCode) color.count -= totalChanges;
+            if(color.code === "stitched") color.count += totalChanges;
+        })
     }
 
     setHeight(newHeight) {
@@ -371,7 +382,6 @@ class GridManager {
                 }
             }
         }
-        // this.updateColorAfterPaint(origCode, count);
     }
 
     
@@ -1145,25 +1155,6 @@ class GridManager {
         };
     }
 
-    updateColorAfterPaint(origCode, total) {
-        // Decrease count of original color
-        for (let i = 0; i < this.colorArray.length; i++) {
-            if (this.colorArray[i].code === origCode) {
-                this.colorArray[i].count -= Number(total);
-                break;
-            }
-        }
-
-        // Increase count of stitched color
-        for (let i = 0; i < this.colorArray.length; i++) {
-            if (this.colorArray[i].code === 'stitched') {
-                this.colorArray[i].count += Number(total);
-                break;
-            }
-        }
-        return this.colorArray;
-    }
-
     getColorArray() {
         return this.colorArray;
     }
@@ -1187,27 +1178,6 @@ class GridManager {
         // Calculate luminance for contrast
         const luminance = (r * 0.299 + g * 0.587 + b * 0.114);
         return luminance > 186 ? 'black' : 'white';
-    }
-
-    getHighlightedStitches() {
-        // Return a collection of objects representing highlighted stitches
-        const highlightedStitches = [];
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                const code = tile.getAttribute('data-tile-code');
-                if (this.highlightedColor === code) {
-                    highlightedStitches.push({
-                        X: Number(tile.getAttribute('data-tile-x')),
-                        Y: Number(tile.getAttribute('data-tile-y')),
-                        code: code,
-                        cluster: 0 // Initialize cluster to 0
-                    });
-                }
-            }
-        }        
-        return highlightedStitches;
     }
 
     getColorCount() {

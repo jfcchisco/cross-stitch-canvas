@@ -45,6 +45,15 @@ class UIManager {
 
         // Get color array from GridManager
         const colorArray = this.gridManager.getColorArray();
+        // console.log(colorArray);
+/*         let localColorArray = [...this.gridManager.getColorArray()];
+        localColorArray.map(color => {
+            if(color.code === "stitched") {
+                color.count = 10;
+            }
+        })
+        console.log(colorArray);
+        console.log(localColorArray); */
 
         //Sort for table 
         colorArray.sort(function(a, b) {
@@ -58,7 +67,8 @@ class UIManager {
         let toStitch = 0;
         colorArray.forEach(obj => {
             if(obj.code == "stitched") {
-                stitched = obj.count - this.gridManager.getChangeCount(obj.code);
+                // stitched = obj.count - this.gridManager.getChangeCount(obj.code);
+                stitched = obj.count;
             }
             else if(obj.code != "empty") {
                 toStitch += obj.count;
@@ -67,15 +77,15 @@ class UIManager {
 
         toStitch += stitched;
         // Add changed stitches
-        stitched += this.patternLoader.changes.length;
+        // stitched += this.patternLoader.changes.length;
         let percentage = ((stitched * 100)/ toStitch).toFixed(2);
 
         //Sort for table 
-        colorArray.sort(function(a, b) {
+        /* colorArray.sort(function(a, b) {
             if(a.count < b.count) return 1;
             if(a.count > b.count) return -1;
             return 0;
-        });
+        }); */
 
         // Fill color selectors
         this.refreshColorSelectors(colorContainer, colorArray);
@@ -140,11 +150,13 @@ class UIManager {
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
+                // newCell.textContext = color.count;
+                // console.log(color.count);
                 if(color.code == "stitched") {
-                    newCell.textContent = color.count + this.patternLoader.changes.length;
+                    newCell.textContent = color.count;
                 }
                 else {
-                    newCell.textContent = color.count - this.gridManager.getChangeCount(color.code);
+                    newCell.textContent = color.count;
                 }
                 newCell.setAttribute('style', 'text-align: right');
                 newRow.appendChild(newCell);
@@ -178,7 +190,7 @@ class UIManager {
 
         colorArray.map(color =>  {
             // Fill color selectors
-            if(color.code!="empty" && color.count > 0) {
+            if((color.code!="empty" && color.count > 0) || color.code === "stitched") {
                 const colorDiv = this.colorTemplate.content.cloneNode(true).children[0];
                 const colorBack = colorDiv.querySelector("[data-color-back]");
                 const colorFront = colorDiv.querySelector("[data-color]");
