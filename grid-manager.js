@@ -1171,7 +1171,7 @@ class GridManager {
 
     getStitchedCount() {
         const stitchedColor = this.colorArray.find(color => color.code === "stitched");
-        return stitchedColor ? (stitchedColor.count + this.patternLoader.changes.length) : 0;
+        return stitchedColor ? (stitchedColor.count) : 0;
     }
 
     getContrastColor(r, g, b) {
