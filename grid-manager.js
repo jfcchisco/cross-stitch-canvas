@@ -261,7 +261,7 @@ class GridManager {
 
     zoomReset() {
         const canvas = document.getElementById('tileCanvas');
-        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width) * 0.95;
         this.cameraZoom = this.minZoom;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         // Schedule a single render instead of rendering on every move
@@ -456,7 +456,7 @@ class GridManager {
         
         canvas.width = cols * this.tileSize;
         canvas.height = rows * this.tileSize;
-        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width) * 0.95;
         this.cameraZoom = this.minZoom;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
