@@ -250,14 +250,14 @@ table, th, td {
     border-left: 1px dashed black;
 }
 
-.pathButtons {
+.pathButtons, .drawPathButtons {
     border: 2px solid gray;
     border-radius: 3px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
 }
 
-.pathButton {
+.pathButton, .drawPathButton {
     background-color: lightgray;
     border: 1px solid gray;
     border-radius: 3px;

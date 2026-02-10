@@ -18,6 +18,7 @@ class GridManager {
         this.paintFlag = false; // Paint mode flag
         this.bucketFlag = false; // Bucket mode flag
         this.highFlag = false; // Highlight mode flag
+        this.pathFlag = false; // Path visibility flag
         this.zoomResetFlag = false; 
         this.maxHeight = 50;
         this.minHeight = 10;
@@ -83,6 +84,11 @@ class GridManager {
         }
         this.paintFlag = false;
         this.bucketFlag = false;
+        this.refreshCanvas(true);
+    }
+
+    pathToggle() {
+        this.pathFlag = !this.pathFlag;
         this.refreshCanvas(true);
     }
 
@@ -469,6 +475,7 @@ class GridManager {
         const currentPattern = this.patternLoader.getCurrentPattern();
         this.drawTiles(patternCtx, currentPattern);
         this.drawLines(patternCtx);
+        if(this.pathFlag) this.uiManager.drawPreviewPath(patternCtx);
         this.drawRulers();
     }
 
@@ -505,6 +512,7 @@ class GridManager {
         ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
         ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
         ctx.drawImage(this.patternCanvas, 0, 0);
+
         this.drawRulers();
     }
 
@@ -1192,6 +1200,22 @@ class GridManager {
     }
     //this.tileCanvas.addEventListener('touchend', (e) => {
     //    this.handleTouch(e, onPointerUp))
+
+    getHighlightedStitches() {
+        const highlightedStitches = [];
+        const currentPattern = this.patternLoader.getCurrentPattern();
+        for(let stitch of currentPattern.stitches) {
+            if(stitch.dmcCode === this.highlightedColor && !this.isTileChanged(stitch.X, stitch.Y)) {
+                highlightedStitches.push({
+                    X: stitch.X,
+                    Y: stitch.Y,
+                    code: stitch.dmcCode,
+                    cluster: 0
+                });
+            }
+        }
+        return highlightedStitches;
+    }
 
     
 }

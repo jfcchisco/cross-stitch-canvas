@@ -200,7 +200,7 @@ window.previewClose = previewClose;
 window.flossUsageOpen = () => uiManager.flossUsageOpen();
 window.flossUsageClose = () => uiManager.flossUsageClose();
 window.previewPath = (type) => uiManager.previewPath(type);
-window.drawSVG = () => uiManager.drawSVG();
+window.drawPath = () => uiManager.drawPath();
 
 // Grid manager tool functions
 window.highlight = () => gridManager.activateHighlight();
@@ -211,6 +211,7 @@ window.highContrast = () => gridManager.activateHighContrast();
 window.zoomIn = () => gridManager.zoomIn();
 window.zoomOut = () => gridManager.zoomOut();
 window.zoomReset = () => gridManager.zoomReset();
+window.pathToggle = () => gridManager.pathToggle();
 
 window.selectColor = selectColor;
 window.tileClick = tileClick;

@@ -70,6 +70,11 @@
                 <img src="./img/contrast.png" class="toolImage">
             </div>
         </div>
+        <div id="pathTool" onclick="pathToggle()">
+            <div title="Show path" class="tool">
+                <img src="./img/path.png" class="toolImage">
+            </div>
+        </div>
         <div id="nextTool" onclick="loadNextFile()">
             <div title="Next Design" class="tool">
                 <img src="./img/arrow.png" class="toolImage">
@@ -128,8 +133,8 @@
                     <input type="number" id="pathYInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" />
                 </div>
             </div>
-            <div class="pathButtons">
-                <span class="pathButton" onclick="drawSVG()">DRAW SVG</span>
+            <div class="drawPathButtons">
+                <span class="drawPathButton" onclick="drawPath()">DRAW PATH</span>
             </div>
         </div>
     </div>
