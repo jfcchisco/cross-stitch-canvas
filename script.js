@@ -80,6 +80,12 @@ function loadJSON(data) {
     cols = processedData.stitches[processedData.stitches.length-1].X+1
     rows = processedData.stitches[processedData.stitches.length-1].Y+1
 
+    // Reset flags
+    gridManager.paintFlag = false;
+    gridManager.bucketFlag = false;
+    gridManager.highFlag = false;
+    gridManager.pathFlag = false;
+
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas(true);

@@ -475,7 +475,7 @@ class UIManager {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for(let stitch of this.patternLoader.currentPattern.stitches) {
-                if(stitch.dmcCode == this.gridManager.highlightedColor) {
+                if(stitch.dmcCode == this.gridManager.highlightedColor && !this.gridManager.isTileChanged(stitch.X, stitch.Y)) {
                     ctx.fillStyle = "#000000";
                     ctx.fillRect(stitch.X * box, stitch.Y * box, box, box);
                 }
