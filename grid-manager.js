@@ -284,7 +284,7 @@ class GridManager {
 
     // ===== HELPER METHODS =====
 
-    applyStitchToTile(tile, changeCounter) {
+    /* applyStitchToTile(tile, changeCounter) {
         
         const origCode = tile.getAttribute('data-tile-code');
         
@@ -305,7 +305,7 @@ class GridManager {
         const x = Number(tile.getAttribute('data-tile-x'));
         const y = Number(tile.getAttribute('data-tile-y'));
         this.patternLoader.recordChange(x, y, 'stitched', origCode);
-    }
+    } */
 
     isTileChanged(x, y) {
         for(let change of this.patternLoader.changes) {
@@ -630,10 +630,18 @@ class GridManager {
             let symbol = colorData.symbol;
             
             if(stitchObj.dmcCode === "stitched"){
-                symbol = "×";
-                // console.log(stitchObj.dmcCode);
-            } 
-            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+                ctx.beginPath();
+                ctx.strokeStyle = spanColor;
+                ctx.lineWidth = 2;
+                ctx.moveTo(x + 3, y + 3);
+                ctx.lineTo(x + this.tileSize - 3, y + this.tileSize - 3);
+                ctx.moveTo(x + this.tileSize - 3, y + 3);
+                ctx.lineTo(x + 3, y + this.tileSize - 3);
+                ctx.stroke();
+            } else {
+                ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+            }
+            
         }
 
         for(let change in this.patternLoader.changes) {
@@ -657,8 +665,16 @@ class GridManager {
             ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            let symbol = "×";
-            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+            // Draw two lines accross the tile for stitched changes
+            ctx.beginPath();
+            ctx.strokeStyle = spanColor;
+            ctx.lineWidth = 2;
+            ctx.moveTo(x + 3, y + 3);
+            ctx.lineTo(x + this.tileSize - 3, y + this.tileSize - 3);
+            ctx.moveTo(x + this.tileSize - 3, y + 3);
+            ctx.lineTo(x + 3, y + this.tileSize - 3);
+            ctx.stroke();
+            // ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
         
     }
