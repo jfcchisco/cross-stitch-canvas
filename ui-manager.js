@@ -45,15 +45,6 @@ class UIManager {
 
         // Get color array from GridManager
         const colorArray = this.gridManager.getColorArray();
-        // console.log(colorArray);
-/*         let localColorArray = [...this.gridManager.getColorArray()];
-        localColorArray.map(color => {
-            if(color.code === "stitched") {
-                color.count = 10;
-            }
-        })
-        console.log(colorArray);
-        console.log(localColorArray); */
 
         //Sort for table 
         colorArray.sort(function(a, b) {
@@ -77,15 +68,7 @@ class UIManager {
 
         toStitch += stitched;
         // Add changed stitches
-        // stitched += this.patternLoader.changes.length;
         let percentage = ((stitched * 100)/ toStitch).toFixed(2);
-
-        //Sort for table 
-        /* colorArray.sort(function(a, b) {
-            if(a.count < b.count) return 1;
-            if(a.count > b.count) return -1;
-            return 0;
-        }); */
 
         // Fill color selectors
         this.refreshColorSelectors(colorContainer, colorArray);
@@ -138,27 +121,32 @@ class UIManager {
                 newCell = document.createElement('td');
                 newCell.textContent = color.symbol;
                 newCell.setAttribute('style', 'text-align: center');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
                 newCell.textContent = color.code;
                 newCell.setAttribute('style', 'text-align: right');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
                 newCell.textContent = color.name;
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
-                // newCell.textContext = color.count;
-                // console.log(color.count);
-                if(color.code == "stitched") {
-                    newCell.textContent = color.count;
-                }
-                else {
-                    newCell.textContent = color.count;
-                }
+                newCell.textContent = color.count;
                 newCell.setAttribute('style', 'text-align: right');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
                 table.appendChild(newRow);
             }

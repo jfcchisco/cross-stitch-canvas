@@ -122,7 +122,7 @@ class GridManager {
             return this.handleBucketFill(x, y, code);
         } 
         else if (this.highFlag) {
-            return this.handleHighlight(code);
+            return this.handleHighlight(x, y, code);
         }
 
     }
@@ -183,12 +183,12 @@ class GridManager {
         return tilesAffected;
     }
 
-    handleHighlight(code) {
+    handleHighlight(x, y, code) {
         const symbol = this.getTileSymbol(code);
         
         // Select the color 
         this.selectColor(code, symbol);
-        
+        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         return 0; // No tiles directly modified
     }
 
