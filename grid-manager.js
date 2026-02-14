@@ -368,6 +368,9 @@ class GridManager {
         patternCtx.moveTo(x + this.tileSize - 3, y + 3);
         patternCtx.lineTo(x + 3, y + this.tileSize - 3);
         patternCtx.stroke();
+
+        // Refresh lines and rulers in case they were affected
+        this.drawLines(patternCtx);
     }
 
     getConnectedTiles(startX, startY, targetColor) {
