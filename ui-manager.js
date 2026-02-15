@@ -623,7 +623,7 @@ class UIManager {
         if(this.CLUSTER_SEQUENCE.length === 0) {
             return;
         }
-        console.log("Drawing path...");
+        // console.log("Drawing path...");
         const box = this.gridManager.tileSize;
 
         // Draw circle on the initial point

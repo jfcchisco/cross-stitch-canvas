@@ -307,29 +307,6 @@ class GridManager {
 
     // ===== HELPER METHODS =====
 
-    /* applyStitchToTile(tile, changeCounter) {
-        
-        const origCode = tile.getAttribute('data-tile-code');
-        
-        // Update tile attributes
-        tile.setAttribute('data-tile-code', 'stitched');
-        tile.setAttribute('data-tile-orig-code', origCode);
-        tile.setAttribute('data-tile-change', changeCounter);
-        tile.setAttribute('data-tile-r', 0);
-        tile.setAttribute('data-tile-g', 255);
-        tile.setAttribute('data-tile-b', 0);
-        
-        // Update visual appearance
-        tile.style.backgroundColor = "rgba(0, 255, 0, 1)"; // Green background
-        tile.children[0].style.color = 'white';
-        tile.children[0].innerText = '×'; // Stitched symbol
-        
-        // Record change in PatternLoader
-        const x = Number(tile.getAttribute('data-tile-x'));
-        const y = Number(tile.getAttribute('data-tile-y'));
-        this.patternLoader.recordChange(x, y, 'stitched', origCode);
-    } */
-
     isTileChanged(x, y) {
         return this.changedTiles.has(`${x},${y}`);
     }
@@ -339,7 +316,9 @@ class GridManager {
         // Ensure pattern cache exists and is in-sync
         const canvas = document.getElementById('tileCanvas');
         this.ensureCanvasSize(canvas);
+        // console.log(this.patternCacheDirty, this.patternCanvas.width, canvas.width, this.patternCanvas.height, canvas.height);
         if (this.patternCacheDirty || this.patternCanvas.width !== canvas.width || this.patternCanvas.height !== canvas.height) {
+            // console.log("Pattern cache out of sync, rebuilding...");
             this.cleanPatternCache(canvas);
             this.patternCacheDirty = false;
         }
@@ -526,6 +505,7 @@ class GridManager {
     }
 
     cleanPatternCache(canvas) {
+        // console.log("cleanPatternCache: Rebuilding pattern cache...");
         this.patternCanvas.width = canvas.width;
         this.patternCanvas.height = canvas.height;
         const patternCtx = this.patternCanvas.getContext("2d");
@@ -752,7 +732,7 @@ class GridManager {
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
             } else {
-                ctx.strokeStyle = 'gray';
+                ctx.strokeStyle = '#777777';
                 ctx.lineWidth = 1;
             }
             ctx.beginPath();
@@ -771,7 +751,7 @@ class GridManager {
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
             } else {
-                ctx.strokeStyle = 'gray';
+                ctx.strokeStyle = '#777777';
                 ctx.lineWidth = 1;
             }
             ctx.beginPath();
@@ -1058,10 +1038,11 @@ class GridManager {
             }
             
         }
-        if(this.cameraZoom > 1.25) {
+        /* if(this.cameraZoom > 1.25) {
+            console.log("Zoom level high enough to trigger refresh on click");
             this.renderCanvas();
             this.refreshCanvas(true);
-        }
+        } */
     }
 
     onTouchEnd(e) {

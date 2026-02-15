@@ -89,6 +89,7 @@ function loadJSON(data) {
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.refreshCanvas(true);
+    gridManager.clearUIToolStates();
 
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
@@ -255,7 +256,7 @@ document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) 
 }, {passive: false});
 
 document.querySelector('#tileCanvas').addEventListener('touchend', (e) => {
-    console.log("Touch end detected");
+    // console.log("Touch end detected");
     e.preventDefault();
     gridManager.handleTouch(e, gridManager.onTouchEnd(e));
 }, {passive: false});
