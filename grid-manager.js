@@ -335,8 +335,8 @@ class GridManager {
 
         // Paint background
         patternCtx.fillStyle = color;
-        patternCtx.clearRect(x, y, this.tileSize, this.tileSize);
-        patternCtx.fillRect(x, y, this.tileSize, this.tileSize);
+        patternCtx.clearRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2);
+        patternCtx.fillRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2);
 
         // Draw stitched X
         patternCtx.beginPath();
@@ -349,7 +349,7 @@ class GridManager {
         patternCtx.stroke();
 
         // Refresh lines and rulers in case they were affected
-        this.drawLines(patternCtx);
+        // this.drawLines(patternCtx);
     }
 
     getConnectedTiles(startX, startY, targetColor) {
