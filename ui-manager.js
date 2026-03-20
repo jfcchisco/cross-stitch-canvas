@@ -296,6 +296,8 @@ class UIManager {
                 drawPathButtons.style.display = "grid";
             }
             this.drawPreviewGridLines(box, ctx, cols, rows);
+            document.getElementById("pathXInput").value = this.gridManager.lastClickedX;
+            document.getElementById("pathYInput").value = this.gridManager.lastClickedY;
             this.hideSpinner();
         }, 0);
     }

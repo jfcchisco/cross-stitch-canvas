@@ -44,6 +44,8 @@ class GridManager {
         // Fast lookup of tiles changed by the user (x,y keys)
         this.changedTiles = new Set();
         this.patternCacheDirty = true;
+        this.lastClickedX = 0;
+        this.lastClickedY = 0;
     }
 
     /**
@@ -112,6 +114,8 @@ class GridManager {
 
         const code = this.getCoordinateColors(x, y);
         if(!code) return;
+        this.lastClickedX = x + 1;
+        this.lastClickedY = y + 1;
         this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         if (this.paintFlag) {
             if(this.highFlag && this.highlightedColor !== code) {
