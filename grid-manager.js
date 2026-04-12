@@ -18,6 +18,7 @@ class GridManager {
         this.paintFlag = false; // Paint mode flag
         this.bucketFlag = false; // Bucket mode flag
         this.highFlag = false; // Highlight mode flag
+        this.pathFlag = false; // Path visibility flag
         this.zoomResetFlag = false; 
         this.maxHeight = 50;
         this.minHeight = 10;
@@ -38,7 +39,13 @@ class GridManager {
         this.lastZoom = this.cameraZoom;
         this.renderScheduled = false;
         this.patternCanvas = document.createElement('canvas');
+        this.patternCanvas.width = 0;
+        this.patternCanvas.height = 0;
+        // Fast lookup of tiles changed by the user (x,y keys)
+        this.changedTiles = new Set();
         this.patternCacheDirty = true;
+        this.lastClickedX = 0;
+        this.lastClickedY = 0;
     }
 
     /**
@@ -83,7 +90,12 @@ class GridManager {
         }
         this.paintFlag = false;
         this.bucketFlag = false;
-        this.refreshCanvas();
+        this.refreshCanvas(true);
+    }
+
+    pathToggle() {
+        this.pathFlag = !this.pathFlag;
+        this.refreshCanvas(true);
     }
 
     activateHighContrast() {
@@ -102,6 +114,8 @@ class GridManager {
 
         const code = this.getCoordinateColors(x, y);
         if(!code) return;
+        this.lastClickedX = x + 1;
+        this.lastClickedY = y + 1;
         this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         if (this.paintFlag) {
             if(this.highFlag && this.highlightedColor !== code) {
@@ -116,7 +130,7 @@ class GridManager {
             return this.handleBucketFill(x, y, code);
         } 
         else if (this.highFlag) {
-            return this.handleHighlight(code);
+            return this.handleHighlight(x, y, code);
         }
 
     }
@@ -131,9 +145,20 @@ class GridManager {
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
         this.patternLoader.recordChange(x, y, 'stitched', code);
-        // this.updateColorStats(code, 1);
-        // this.updateColorStats();
-        this.refreshCanvas(true);
+        // Track changed tile for fast checks
+        this.changedTiles.add(`${x},${y}`);
+        this.updateChangesToColorArray(code, 1);
+        // Draw only the changed tile into the cached pattern and composite once
+        const patternCtx = this.patternCanvas.getContext('2d');
+        this.drawChangedTileToPatternCanvas(patternCtx, x, y, code);
+        // Composite updated cache to visible canvas (throttled by renderScheduled)
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
         this.uiManager.updateFootnote("1 stitch painted");
         
 
@@ -157,30 +182,36 @@ class GridManager {
         this.changeCounter++;
         this.patternLoader.changeCounter = this.changeCounter;
         
-        // Apply paint to all connected tiles
+        // Apply paint to all connected tiles and draw them directly to cache
         let tilesAffected = 0;
-        tilesToFill.forEach(({x, y}) => {
-            //const connectedTile = this.getTile(x, y);
+        const patternCtx = this.patternCanvas.getContext('2d');
+        for (let {x, y} of tilesToFill) {
             this.patternLoader.recordChange(x, y, 'stitched', fillColor);
+            this.updateChangesToColorArray(fillColor, 1);
+            this.changedTiles.add(`${x},${y}`);
+            this.drawChangedTileToPatternCanvas(patternCtx, x, y, fillColor);
             tilesAffected++;
-            
-        });
-        
-        // Update color statistics
-        // this.updateColorStats(fillColor, tilesAffected);
-        // this.updateColorStats();
-        this.refreshCanvas(true);
+        }
+
+        // Composite updated cache once (throttled)
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            requestAnimationFrame(() => {
+                this.renderCanvas();
+                this.renderScheduled = false;
+            });
+        }
+
         this.uiManager.updateFootnote(`${tilesAffected} stitches painted`);
-        
         return tilesAffected;
     }
 
-    handleHighlight(code) {
+    handleHighlight(x, y, code) {
         const symbol = this.getTileSymbol(code);
         
         // Select the color 
         this.selectColor(code, symbol);
-        
+        this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         return 0; // No tiles directly modified
     }
 
@@ -192,12 +223,25 @@ class GridManager {
             let changeToUndo = this.patternLoader.changes[i];
             if(changeToUndo.id == this.patternLoader.changeCounter) {
                 this.patternLoader.changes.splice(i, 1);
+                this.updateChangesToColorArray(changeToUndo.originalCode, -1);
+                // remove from changed set so isTileChanged is accurate
+                this.changedTiles.delete(`${changeToUndo.X},${changeToUndo.Y}`);
             }
         }
         this.patternLoader.changeCounter--;
-        this.refreshCanvas();
+        // Rebuild the pattern cache because some tiles reverted
+        this.patternCacheDirty = true;
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("Change undone");
         
+    }
+
+    updateChangesToColorArray(origCode, totalChanges) {
+        let colorArray = this.getColorArray();
+        colorArray.map(color => {
+            if(color.code === origCode) color.count -= totalChanges;
+            if(color.code === "stitched") color.count += totalChanges;
+        })
     }
 
     setHeight(newHeight) {
@@ -250,7 +294,7 @@ class GridManager {
 
     zoomReset() {
         const canvas = document.getElementById('tileCanvas');
-        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width) * 0.95;
         this.cameraZoom = this.minZoom;
         this.cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         // Schedule a single render instead of rendering on every move
@@ -267,36 +311,49 @@ class GridManager {
 
     // ===== HELPER METHODS =====
 
-    applyStitchToTile(tile, changeCounter) {
-        
-        const origCode = tile.getAttribute('data-tile-code');
-        
-        // Update tile attributes
-        tile.setAttribute('data-tile-code', 'stitched');
-        tile.setAttribute('data-tile-orig-code', origCode);
-        tile.setAttribute('data-tile-change', changeCounter);
-        tile.setAttribute('data-tile-r', 0);
-        tile.setAttribute('data-tile-g', 255);
-        tile.setAttribute('data-tile-b', 0);
-        
-        // Update visual appearance
-        tile.style.backgroundColor = "rgba(0, 255, 0, 1)"; // Green background
-        tile.children[0].style.color = 'white';
-        tile.children[0].innerText = '×'; // Stitched symbol
-        
-        // Record change in PatternLoader
-        const x = Number(tile.getAttribute('data-tile-x'));
-        const y = Number(tile.getAttribute('data-tile-y'));
-        this.patternLoader.recordChange(x, y, 'stitched', origCode);
+    isTileChanged(x, y) {
+        return this.changedTiles.has(`${x},${y}`);
     }
 
-    isTileChanged(x, y) {
-        for(let change of this.patternLoader.changes) {
-            if(change.X == x && change.Y == y) {
-                return true;
-            }
+    // Draw a single changed tile into the pattern cache canvas.
+    drawChangedTileToPatternCanvas(patternCtx, tileX, tileY, origCode) {
+        // Ensure pattern cache exists and is in-sync
+        const canvas = document.getElementById('tileCanvas');
+        this.ensureCanvasSize(canvas);
+        // console.log(this.patternCacheDirty, this.patternCanvas.width, canvas.width, this.patternCanvas.height, canvas.height);
+        if (this.patternCacheDirty || this.patternCanvas.width !== canvas.width || this.patternCanvas.height !== canvas.height) {
+            // console.log("Pattern cache out of sync, rebuilding...");
+            this.cleanPatternCache(canvas);
+            this.patternCacheDirty = false;
         }
-        return false;
+        patternCtx = this.patternCanvas.getContext('2d');
+        if (!patternCtx) return;
+        const x = tileX * this.tileSize;
+        const y = tileY * this.tileSize;
+        const colorData = this.getDMCValuesFromCode(origCode);
+        const R = colorData.R;
+        const G = colorData.G;
+        const B = colorData.B;
+        const code = "stitched";
+        const [color, spanColor] = this.getTileColorsBasedOnFlags(code, R, G, B);
+
+        // Paint background
+        patternCtx.fillStyle = color;
+        patternCtx.clearRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2);
+        patternCtx.fillRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2);
+
+        // Draw stitched X
+        patternCtx.beginPath();
+        patternCtx.strokeStyle = spanColor;
+        patternCtx.lineWidth = 2;
+        patternCtx.moveTo(x + 3, y + 3);
+        patternCtx.lineTo(x + this.tileSize - 3, y + this.tileSize - 3);
+        patternCtx.moveTo(x + this.tileSize - 3, y + 3);
+        patternCtx.lineTo(x + 3, y + this.tileSize - 3);
+        patternCtx.stroke();
+
+        // Refresh lines and rulers in case they were affected
+        // this.drawLines(patternCtx);
     }
 
     getConnectedTiles(startX, startY, targetColor) {
@@ -355,7 +412,7 @@ class GridManager {
         this.updateColorSelectorUI(colorCode, symbol);
             
             // Refresh grid to show highlighting
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         this.uiManager.updateFootnote("Selected color: " + colorCode + " - " + this.getDMCValuesFromCode(colorCode).dmcName);
 
     }
@@ -371,7 +428,6 @@ class GridManager {
                 }
             }
         }
-        // this.updateColorAfterPaint(origCode, count);
     }
 
     
@@ -379,6 +435,7 @@ class GridManager {
     // ===== UTILITY METHODS =====
 
     getCoordinateColors(x, y) {
+        if(this.isTileChanged(x, y)) return "stitched";
         for(let stitch of this.patternLoader.getCurrentPattern().stitches) {
             if(stitch.X == x && stitch.Y == y) {
                 return stitch.dmcCode;
@@ -424,7 +481,7 @@ class GridManager {
 
     toggleHighContrast() {
         this.contrastFlag = !this.contrastFlag;
-        this.refreshCanvas();
+        this.refreshCanvas(true);
         return this.contrastFlag;
     }
 
@@ -439,44 +496,65 @@ class GridManager {
         const cols = this.patternLoader.getCols();
         const rows = this.patternLoader.getRows();
         const maxDimension = Math.max(cols, rows);
-        this.tileSize = Math.min(Math.max(Math.floor(4000 / maxDimension), 10), 50);
+        this.tileSize = Math.min(Math.max(Math.floor(6000 / maxDimension), 10), 50);
         // Adjust max zoom based on tile size
         this.maxZoom = 50 / this.tileSize;
         
         canvas.width = cols * this.tileSize;
         canvas.height = rows * this.tileSize;
-        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width);
+        this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width) * 0.95;
         this.cameraZoom = this.minZoom;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
     }
 
     cleanPatternCache(canvas) {
+        // console.log("cleanPatternCache: Rebuilding pattern cache...");
         this.patternCanvas.width = canvas.width;
         this.patternCanvas.height = canvas.height;
         const patternCtx = this.patternCanvas.getContext("2d");
         const currentPattern = this.patternLoader.getCurrentPattern();
         this.drawTiles(patternCtx, currentPattern);
         this.drawLines(patternCtx);
+        if(this.pathFlag) this.uiManager.drawPreviewPath(patternCtx);
         this.drawRulers();
+    }
+
+    ensureCanvasSize(canvas) {
+        const expectedWidth = this.patternLoader.getCols() * this.tileSize;
+        const expectedHeight = this.patternLoader.getRows() * this.tileSize;
+        // Only resize if sizes differ to avoid clearing the canvas unnecessarily
+        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+            canvas.width = expectedWidth;
+            canvas.height = expectedHeight;
+            // Keep pattern cache in sync
+            this.patternCanvas.width = expectedWidth;
+            this.patternCanvas.height = expectedHeight;
+            this.patternCacheDirty = true;
+        }
     }
 
     refreshCanvas(visibleFlag=false) {
         const canvas = document.getElementById("tileCanvas");
-        canvas.width = this.patternLoader.getCols() * this.tileSize;
-        canvas.height = this.patternLoader.getRows() * this.tileSize;
         const ctx = canvas.getContext("2d");
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Set zoom and offset
+
+        // Ensure canvas and pattern cache sizes only when necessary
+        this.ensureCanvasSize(canvas);
+
+        // Rebuild pattern cache only when dirty or when explicitly requested
+        if (this.patternCacheDirty || visibleFlag) {
+            this.cleanPatternCache(canvas);
+            this.patternCacheDirty = false;
+        }
+
+        // Composite the cached pattern into the visible canvas with the current transform
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
         ctx.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y );
-        
-        const currentPattern = this.patternLoader.getCurrentPattern();
+        ctx.drawImage(this.patternCanvas, 0, 0);
 
-        this.drawTiles(ctx, currentPattern, visibleFlag);
-        this.drawLines(ctx);
         this.drawRulers();
-        this.cleanPatternCache(canvas);
     }
 
     renderCanvas() {
@@ -560,7 +638,9 @@ class GridManager {
         for(let stitch in currentPattern.stitches) {
             let stitchObj = currentPattern.stitches[stitch];
             if (stitchObj.X < minTileX || stitchObj.X >= maxTileX || 
-                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY) {
+                stitchObj.Y < minTileY || stitchObj.Y >= maxTileY ||
+                this.isTileChanged(stitchObj.X, stitchObj.Y)) {
+                    // if(this.isTileChanged(stitchObj.X, stitchObj.Y)) console.log("Skipped due to change");
                     if(visibleFlag)
                         continue;
             }
@@ -570,47 +650,15 @@ class GridManager {
             //let stitchObj = currentPattern.stitches[stitch];
             let x = stitchObj.X * this.tileSize;
             let y = stitchObj.Y * this.tileSize;
-            let colorData = this.getDMCValuesFromCode(stitchObj.dmcCode);
+            // console.log(stitchObj);
+            let colorData = (stitchObj.dmcCode === "stitched") ? this.getDMCValuesFromCode(stitchObj.origCode) : this.getDMCValuesFromCode(stitchObj.dmcCode);
+            // if(stitchObj.dmcCode === "stitched") console.log(colorData);
             let R = colorData.R;
             let G = colorData.G;
             let B = colorData.B;
             let code = stitchObj.dmcCode;
-            let alpha = 1;
-
-            // Check for high contrast mode
-            if (this.contrastFlag) {
-                if (code === "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = `rgba(${R}, ${G}, ${B}, 1)`;
-                } else {
-                    if (this.highFlag) {
-                        if (this.highlightedColor === code) {
-                            spanColor = 'white';
-                            color = 'black';
-                        } else {
-                            alpha = 0.25;
-                            spanColor = 'silver';
-                            color = 'white';
-                        }
-                    }
-                }
-            } else {
-                spanColor = this.getContrastColor(R, G, B);
-                
-                if (this.highFlag && this.highlightedColor !== code) {
-                    alpha = 0.25;
-                    spanColor = this.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-                }
-                
-                if (code === "stitched") {
-                    spanColor = this.getContrastColor(R, G, B);
-                    color = `rgba(${R}, ${G}, ${B}, 1)`;
-                    alpha = 1;
-                }
-
-                color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
-            }
-
+            
+            [color, spanColor] = this.getTileColorsBasedOnFlags(code, R, G, B);
             
             ctx.fillStyle = color;
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
@@ -619,27 +667,55 @@ class GridManager {
             ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
+            
             let symbol = colorData.symbol;
-            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+            
+            if(stitchObj.dmcCode === "stitched"){
+                ctx.beginPath();
+                ctx.strokeStyle = spanColor;
+                ctx.lineWidth = 2;
+                ctx.moveTo(x + 3, y + 3);
+                ctx.lineTo(x + this.tileSize - 3, y + this.tileSize - 3);
+                ctx.moveTo(x + this.tileSize - 3, y + 3);
+                ctx.lineTo(x + 3, y + this.tileSize - 3);
+                ctx.stroke();
+            } else {
+                ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+            }
+            
         }
 
         for(let change in this.patternLoader.changes) {
             let changeObj = this.patternLoader.changes[change];
             let x = changeObj.X * this.tileSize;
             let y = changeObj.Y * this.tileSize;
-            let code = changeObj.newCode;
-            let colorData = this.getDMCValuesFromCode(code);
-            color = `rgba(0, 255, 0, 1)`;
-            spanColor = 'white';
+            let colorData = this.getDMCValuesFromCode(changeObj.originalCode);
+            // console.log(colorData, changeObj);
+            let R = colorData.R;
+            let G = colorData.G;
+            let B = colorData.B;
+            let code = "stitched";
+            
+            [color, spanColor] = this.getTileColorsBasedOnFlags(code, R, G, B);
+
             ctx.fillStyle = color;
+            ctx.clearRect(x, y, this.tileSize, this.tileSize);
             ctx.fillRect(x, y, this.tileSize, this.tileSize);
             // Draw symbol
             ctx.fillStyle = spanColor;
             ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            let symbol = "×";
-            ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
+            // Draw two lines accross the tile for stitched changes
+            ctx.beginPath();
+            ctx.strokeStyle = spanColor;
+            ctx.lineWidth = 2;
+            ctx.moveTo(x + 3, y + 3);
+            ctx.lineTo(x + this.tileSize - 3, y + this.tileSize - 3);
+            ctx.moveTo(x + this.tileSize - 3, y + 3);
+            ctx.lineTo(x + 3, y + this.tileSize - 3);
+            ctx.stroke();
+            // ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
         }
         
     }
@@ -651,11 +727,16 @@ class GridManager {
         ctx.lineWidth = 1;
         // Draw vertical lines
         for (let i = 0; i <= cols; i++) {
-            if(i % 10 === 0) {
+            ctx.setLineDash([0, 0]);
+            if(i == Math.floor(cols/2)) {
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'darkred';
+                ctx.lineWidth = 3;
+            } else if(i % 10 === 0) {
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
             } else {
-                ctx.strokeStyle = 'gray';
+                ctx.strokeStyle = '#777777';
                 ctx.lineWidth = 1;
             }
             ctx.beginPath();
@@ -665,11 +746,16 @@ class GridManager {
         }
         // Draw horizontal lines
         for (let j = 0; j <= rows; j++) {
-            if(j % 10 === 0) {
+            ctx.setLineDash([0, 0]);
+            if(j == Math.floor(rows/2)) {
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'darkred';
+                ctx.lineWidth = 3;
+            } else if(j % 10 === 0) {
                 ctx.strokeStyle = 'black';
                 ctx.lineWidth = 2;
             } else {
-                ctx.strokeStyle = 'gray';
+                ctx.strokeStyle = '#777777';
                 ctx.lineWidth = 1;
             }
             ctx.beginPath();
@@ -772,6 +858,85 @@ class GridManager {
         // Ruler drawing logic can be implemented here if needed
     }
 
+     getTileColorsBasedOnFlags(code, R, G, B) {
+        /*
+        - If code STITCHED
+            - highFlag TRUE
+                - Highlighted code === code
+                    => color = RGB, spanColor = getContrastColor (CASE 0)
+                - Highlighted code !== code
+                    => color = RGB alpha 0.25, spanColor = getContrastColor black ? silver : white (CASE 1)
+            - highFlag FALSE
+                => color = RGB alpha 0.25, spanColor = getContrastColor black ? silver : white (CASE 1) 
+        - Else
+            - contrastFlag TRUE
+                - highFlag TRUE
+                    - Highlighted code === code
+                        => color = black, spanColor = white (CASE 2)
+                    - Highlighted code !== code
+                        => color = white, spanColor = silver (CASE 4)
+                - highFlag FALSE
+                    => color = white, spanColor = black (CASE 3)
+            - contrastFlag FALSE
+                - highFlag TRUE
+                    - Highlighted code === code
+                        => color = RGB, spanColor = getContrastColor (CASE 0)
+                    - Highlighted code !== code
+                        => color = RGB alpha 0.25, spanColor = getContrastColor black ? silver : white (CASE 1)
+                - highFlag FALSE
+                    => color = RGB, spanColor = getContrastColor (CASE 0)
+        
+                    
+
+        */
+        let drawCase = null;
+        let color = null;
+        let spanColor = null;
+        if(code === "stitched") {
+            drawCase = 1;
+            if(this.highFlag) {
+                drawCase = (this.highlightedColor === code) ? 0 : 1;
+            }
+        } else {
+            drawCase = 0;
+            if(this.contrastFlag) {
+                if(this.highFlag) {
+                    drawCase = (this.highlightedColor === code) ? 2 : 4;
+                } else {
+                    drawCase = 3;
+                }
+            } else {
+                if(this.highFlag) {
+                    drawCase = (this.highlightedColor === code) ? 0 : 1;
+                }
+            }
+        }
+
+        switch(drawCase) {
+            case 0:
+                color = `rgba(${R}, ${G}, ${B}, 1)`;
+                spanColor = this.getContrastColor(R, G, B);
+                break;
+            case 1:
+                color = `rgba(${R}, ${G}, ${B}, 0.25)`;
+                spanColor = (this.getContrastColor(R, G, B) === "black") ? "silver" : "white";
+                break;
+            case 2:
+                color = "black";
+                spanColor = "white";
+                break;
+            case 3:
+                color = "white";
+                spanColor = "black";
+                break;
+            case 4:
+                color = "white";
+                spanColor = "silver";
+            
+        }
+        return [color, spanColor];
+    } 
+
     adjustCanvasZoom(zoomAmount, zoomFactor, mouseEvent) {
         const canvas = document.getElementById("tileCanvas");
         const mousePos = this.getEventLocation(mouseEvent);
@@ -856,7 +1021,7 @@ class GridManager {
     }
 
     onPointerUp(e) {
-        this.DEBUGPrintZoomInfo();
+        // this.DEBUGPrintZoomInfo();
         this.isDragging = false;
         this.initialPinchDistance = null;
         this.lastZoom = this.cameraZoom;
@@ -877,10 +1042,11 @@ class GridManager {
             }
             
         }
-        if(this.cameraZoom > 1.25) {
+        /* if(this.cameraZoom > 1.25) {
+            console.log("Zoom level high enough to trigger refresh on click");
             this.renderCanvas();
             this.refreshCanvas(true);
-        }
+        } */
     }
 
     onTouchEnd(e) {
@@ -1055,25 +1221,6 @@ class GridManager {
         };
     }
 
-    updateColorAfterPaint(origCode, total) {
-        // Decrease count of original color
-        for (let i = 0; i < this.colorArray.length; i++) {
-            if (this.colorArray[i].code === origCode) {
-                this.colorArray[i].count -= Number(total);
-                break;
-            }
-        }
-
-        // Increase count of stitched color
-        for (let i = 0; i < this.colorArray.length; i++) {
-            if (this.colorArray[i].code === 'stitched') {
-                this.colorArray[i].count += Number(total);
-                break;
-            }
-        }
-        return this.colorArray;
-    }
-
     getColorArray() {
         return this.colorArray;
     }
@@ -1090,34 +1237,13 @@ class GridManager {
 
     getStitchedCount() {
         const stitchedColor = this.colorArray.find(color => color.code === "stitched");
-        return stitchedColor ? (stitchedColor.count + this.patternLoader.changes.length) : 0;
+        return stitchedColor ? (stitchedColor.count) : 0;
     }
 
     getContrastColor(r, g, b) {
         // Calculate luminance for contrast
         const luminance = (r * 0.299 + g * 0.587 + b * 0.114);
         return luminance > 186 ? 'black' : 'white';
-    }
-
-    getHighlightedStitches() {
-        // Return a collection of objects representing highlighted stitches
-        const highlightedStitches = [];
-        for (let i = 2; i < this.tileContainer.children.length; i++) {
-            const row = this.tileContainer.children[i];
-            for (let j = 1; j < row.children.length; j++) {
-                const tile = row.children[j];
-                const code = tile.getAttribute('data-tile-code');
-                if (this.highlightedColor === code) {
-                    highlightedStitches.push({
-                        X: Number(tile.getAttribute('data-tile-x')),
-                        Y: Number(tile.getAttribute('data-tile-y')),
-                        code: code,
-                        cluster: 0 // Initialize cluster to 0
-                    });
-                }
-            }
-        }        
-        return highlightedStitches;
     }
 
     getColorCount() {
@@ -1132,6 +1258,22 @@ class GridManager {
     }
     //this.tileCanvas.addEventListener('touchend', (e) => {
     //    this.handleTouch(e, onPointerUp))
+
+    getHighlightedStitches() {
+        const highlightedStitches = [];
+        const currentPattern = this.patternLoader.getCurrentPattern();
+        for(let stitch of currentPattern.stitches) {
+            if(stitch.dmcCode === this.highlightedColor && !this.isTileChanged(stitch.X, stitch.Y)) {
+                highlightedStitches.push({
+                    X: stitch.X,
+                    Y: stitch.Y,
+                    code: stitch.dmcCode,
+                    cluster: 0
+                });
+            }
+        }
+        return highlightedStitches;
+    }
 
     
 }

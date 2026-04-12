@@ -58,7 +58,8 @@ class UIManager {
         let toStitch = 0;
         colorArray.forEach(obj => {
             if(obj.code == "stitched") {
-                stitched = obj.count - this.gridManager.getChangeCount(obj.code);
+                // stitched = obj.count - this.gridManager.getChangeCount(obj.code);
+                stitched = obj.count;
             }
             else if(obj.code != "empty") {
                 toStitch += obj.count;
@@ -67,15 +68,7 @@ class UIManager {
 
         toStitch += stitched;
         // Add changed stitches
-        stitched += this.patternLoader.changes.length;
         let percentage = ((stitched * 100)/ toStitch).toFixed(2);
-
-        //Sort for table 
-        colorArray.sort(function(a, b) {
-            if(a.count < b.count) return 1;
-            if(a.count > b.count) return -1;
-            return 0;
-        });
 
         // Fill color selectors
         this.refreshColorSelectors(colorContainer, colorArray);
@@ -128,25 +121,32 @@ class UIManager {
                 newCell = document.createElement('td');
                 newCell.textContent = color.symbol;
                 newCell.setAttribute('style', 'text-align: center');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
                 newCell.textContent = color.code;
                 newCell.setAttribute('style', 'text-align: right');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
                 newCell.textContent = color.name;
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
 
                 newCell = document.createElement('td');
-                if(color.code == "stitched") {
-                    newCell.textContent = color.count + this.patternLoader.changes.length;
-                }
-                else {
-                    newCell.textContent = color.count - this.gridManager.getChangeCount(color.code);
-                }
+                newCell.textContent = color.count;
                 newCell.setAttribute('style', 'text-align: right');
+                if(color.code === this.gridManager.highlightedColor) {
+                    newCell.style.backgroundColor = "#ffff77";
+                }
                 newRow.appendChild(newCell);
                 table.appendChild(newRow);
             }
@@ -178,7 +178,7 @@ class UIManager {
 
         colorArray.map(color =>  {
             // Fill color selectors
-            if(color.code!="empty" && color.count > 0) {
+            if((color.code!="empty" && color.count > 0) || color.code === "stitched") {
                 const colorDiv = this.colorTemplate.content.cloneNode(true).children[0];
                 const colorBack = colorDiv.querySelector("[data-color-back]");
                 const colorFront = colorDiv.querySelector("[data-color]");
@@ -228,6 +228,7 @@ class UIManager {
         
         // Use setTimeout to allow the spinner to render before heavy computation
         setTimeout(() => {
+            // console.log(this.gridManager.highlightedColor)
             const canvas = document.getElementById("previewCanvas")
             const ctx = canvas.getContext('2d')
             const tileContainer = document.getElementsByClassName('tile-container')[0];
@@ -240,9 +241,6 @@ class UIManager {
             const box = Math.max(1, (Math.min(Math.floor(tileContainer.offsetHeight/rows), Math.floor(tileContainer.offsetWidth/cols))));
             canvas.height = box * rows;
             canvas.width =  box * cols;
-
-            let modalHeight = box * rows + 30;
-            let modalWidth =  box * cols + 30;
 
             modal.style.height = window.offsetHeight + "px";
             modal.style.width = window.offsetWidth + "px";
@@ -259,82 +257,47 @@ class UIManager {
                 
                 let x = stitchObj.X * box;
                 let y = stitchObj.Y * box;
-                let colorData = this.gridManager.getDMCValuesFromCode(stitchObj.dmcCode);
+                let colorData = (stitchObj.dmcCode === "stitched") ? this.gridManager.getDMCValuesFromCode(stitchObj.origCode) : this.gridManager.getDMCValuesFromCode(stitchObj.dmcCode);
                 let R = colorData.R;
                 let G = colorData.G;
                 let B = colorData.B;
                 let code = stitchObj.dmcCode;
-                let alpha = 1;
-
-                // Check for high contrast mode
-                if (this.gridManager.contrastFlag) {
-                    if (code === "stitched") {
-                        spanColor = this.gridManager.getContrastColor(R, G, B);
-                        color = `rgba(${R}, ${G}, ${B}, 1)`;
-                    } else {
-                        if (this.gridManager.highFlag) {
-                            if (this.gridManager.highlightedColor === code) {
-                                spanColor = 'white';
-                                color = 'black';
-                            } else {
-                                alpha = 0.25;
-                                spanColor = 'silver';
-                                color = 'white';
-                            }
-                        }
-                    }
-                } else {
-                    spanColor = this.gridManager.getContrastColor(R, G, B);
-                    
-                    if (this.gridManager.highFlag && this.gridManager.highlightedColor !== code) {
-                        alpha = 0.25;
-                        spanColor = this.gridManager.getContrastColor(R, G, B) === 'black' ? 'silver' : 'white';
-                    }
-                    
-                    if (code === "stitched") {
-                        spanColor = this.gridManager.getContrastColor(R, G, B);
-                        color = `rgba(${R}, ${G}, ${B}, 1)`;
-                        alpha = 1;
-                    }
-
-                    color = `rgba(${R}, ${G}, ${B}, ${alpha})`;
-                }
-
-                // console.log(x, y, box)
+                
+                [color, spanColor] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, box, box);
             }
 
-            
-    /*         for (let i = 0; i < data.length; i++) {
-                let tileValues = data[i];
-                //Adding offset due to ruler and svg-container
-                let row = this.gridManager.tileContainer.children.item(tileValues.Y + 2);
-                let tile = row.children.item(tileValues.X + 1)
+            //Draw changed tiles
+            for(let change of this.patternLoader.changes) {
+                let x = change.X * box;
+                let y = change.Y * box;
+                let colorData = this.gridManager.getDMCValuesFromCode(change.originalCode);
+                let R = colorData.R;
+                let G = colorData.G;
+                let B = colorData.B;
+                let code = "stitched";
 
-                let backColor = tile.style.backgroundColor;
-                if(!backColor.match('rgba')) {
-                    ctx.fillStyle = backColor;
-                    ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
-                }
-                else {
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(tileValues.X * box, tileValues.Y * box, tileValues.X * box + box, tileValues.Y * box + box);
-                }
-            } */
-
-                
-
-            // this.drawPreviewGridLines(box, ctx, cols, rows);
+                [color, spanColor] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
+                ctx.fillStyle = color;
+                ctx.clearRect(x, y, box, box);
+                ctx.fillRect(x, y, box, box);
+            }
 
             let createPathDiv = document.getElementsByClassName("pathButtons")[0];
             let inputFields = document.getElementsByClassName("inputFields")[0];
+            let drawPathButtons = document.getElementsByClassName("drawPathButtons")[0];
             inputFields.style.display = "none";
             createPathDiv.style.display = "none";
-            if(this.gridManager.highFlag && this.gridManager.highlightedColor != 0) {
+            drawPathButtons.style.display = "none";
+            if(this.gridManager.highFlag && this.gridManager.highlightedColor && this.gridManager.highlightedColor != "stitched") {
                 createPathDiv.style.display = "grid";
                 inputFields.style.display = "grid";
+                drawPathButtons.style.display = "grid";
             }
+            this.drawPreviewGridLines(box, ctx, cols, rows);
+            document.getElementById("pathXInput").value = this.gridManager.lastClickedX;
+            document.getElementById("pathYInput").value = this.gridManager.lastClickedY;
             this.hideSpinner();
         }, 0);
     }
@@ -490,37 +453,30 @@ class UIManager {
                 }
             });
 
-            let canvas = document.getElementById("canvas");
+            let canvas = document.getElementById("previewCanvas");
             let ctx = canvas.getContext('2d');
+            const tileContainer = document.getElementsByClassName('tile-container')[0];
 
             //Repeated drawing of stitches
-            let box = Math.max(1, (Math.min(Math.floor(document.body.offsetHeight/rows), Math.floor(document.body.offsetWidth/cols))));
+            const box = Math.max(1, (Math.min(Math.floor(tileContainer.offsetHeight/rows), Math.floor(tileContainer.offsetWidth/cols))));
             
             ctx.clearRect(0,0, canvas.width, canvas.height)
             ctx.fillStyle = "#ffffff"
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw one rectangle as test
-            let s = highStitches[1];
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(10,10,20,20);
-            
-            const tileCollection = document.getElementsByClassName("tile");
-
-            for (let i = 0; i < tileCollection.length; i++) {
-                let tileObj = tileCollection[i];
-                let code = tileObj.getAttribute('data-tile-code');
-                let x = Number(tileObj.getAttribute('data-tile-x'));
-                let y = Number(tileObj.getAttribute('data-tile-y'));
-                if(code == this.gridManager.highlightedColor) {
-                    ctx.fillStyle = "#000000";;
-                    ctx.fillRect(x * box, y * box, x * box + box, y * box + box);
+            for(let stitch of this.patternLoader.currentPattern.stitches) {
+                if(stitch.dmcCode == this.gridManager.highlightedColor && !this.gridManager.isTileChanged(stitch.X, stitch.Y)) {
+                    ctx.fillStyle = "#000000";
+                    ctx.fillRect(stitch.X * box, stitch.Y * box, box, box);
                 }
                 else {
                     ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(x * box, y * box, x * box + box, y * box + box);
+                    ctx.fillRect(stitch.X * box, stitch.Y * box, box, box);
                 }
             }
+
+
+
             let clusterSequence = [];
             let nextCluster = 0;
             if(type == 0) {
@@ -663,13 +619,52 @@ class UIManager {
         }, 0);
     }
 
-    drawSVG() {
+    drawPreviewPath(ctx) {
         const cols = this.patternLoader.getCols();
         const rows = this.patternLoader.getRows();
         if(this.CLUSTER_SEQUENCE.length === 0) {
             return;
         }
-        let tileWidth = document.getElementsByClassName("tile")[0].offsetWidth;
+        // console.log("Drawing path...");
+        const box = this.gridManager.tileSize;
+
+        // Draw circle on the initial point
+        ctx.beginPath();
+        ctx.arc(this.CLUSTER_SEQUENCE[0][3][0]*box + box/2, this.CLUSTER_SEQUENCE[0][3][1]*box + box/2, box/2, 0, 2 * Math.PI);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        // Draw circle on the final point
+        let lastCluster = this.CLUSTER_SEQUENCE[this.CLUSTER_SEQUENCE.length - 1];
+        ctx.beginPath();   
+        ctx.arc(lastCluster[4][0]*box + box/2, lastCluster[4][1]*box + box/2, box/2, 0, 2 * Math.PI);
+        ctx.strokeStyle = "orange";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        // Draw path lines
+        let lineColor = "cyan";
+        this.CLUSTER_SEQUENCE.forEach(cluster => {
+            ctx.beginPath();
+            ctx.moveTo(cluster[3][0]*box + box/2, cluster[3][1]*box + box/2);
+            ctx.lineTo(cluster[4][0]*box + box/2, cluster[4][1]*box + box/2);
+            if(lineColor == "cyan") {
+                lineColor = "greenyellow";
+            }
+            else {
+                lineColor = "cyan";
+            }
+            if(cluster[2] > this.THRESHOLD) {
+                ctx.strokeStyle = "red";
+            }
+            else {
+                ctx.strokeStyle = lineColor;
+            }
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        })
+
+
+/*         let tileWidth = document.getElementsByClassName("tile")[0].offsetWidth;
         let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
         // Delete all previous lines
         while (svgContainer.lastElementChild) { 
@@ -708,7 +703,13 @@ class UIManager {
             }
             newLine.setAttribute("stroke", lineColor);
             svgContainer.append(newLine); 
-        });
+        }); */
+    }
+
+    drawPath() {
+        this.gridManager.pathFlag = true;
+        this.gridManager.patternCacheDirty = true;
+        this.gridManager.refreshCanvas(true);
     }
 
     // Spinner functions

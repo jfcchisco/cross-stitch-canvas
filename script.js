@@ -80,9 +80,16 @@ function loadJSON(data) {
     cols = processedData.stitches[processedData.stitches.length-1].X+1
     rows = processedData.stitches[processedData.stitches.length-1].Y+1
 
+    // Reset flags
+    gridManager.paintFlag = false;
+    gridManager.bucketFlag = false;
+    gridManager.highFlag = false;
+    gridManager.pathFlag = false;
+
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
-    gridManager.refreshCanvas();
+    gridManager.refreshCanvas(true);
+    gridManager.clearUIToolStates();
 
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
@@ -127,7 +134,7 @@ function save() {
     patternLoader.mergeChanges();
     // addChangesToJsonObject();
     uiManager.fillFlossUsage();
-    console.log(gridManager.colorArray);
+    // console.log(gridManager.colorArray);
 
     const exportData = patternLoader.exportPattern();
     var text2write = JSON.stringify(exportData);
@@ -200,7 +207,7 @@ window.previewClose = previewClose;
 window.flossUsageOpen = () => uiManager.flossUsageOpen();
 window.flossUsageClose = () => uiManager.flossUsageClose();
 window.previewPath = (type) => uiManager.previewPath(type);
-window.drawSVG = () => uiManager.drawSVG();
+window.drawPath = () => uiManager.drawPath();
 
 // Grid manager tool functions
 window.highlight = () => gridManager.activateHighlight();
@@ -211,6 +218,7 @@ window.highContrast = () => gridManager.activateHighContrast();
 window.zoomIn = () => gridManager.zoomIn();
 window.zoomOut = () => gridManager.zoomOut();
 window.zoomReset = () => gridManager.zoomReset();
+window.pathToggle = () => gridManager.pathToggle();
 
 window.selectColor = selectColor;
 window.tileClick = tileClick;
@@ -248,7 +256,7 @@ document.querySelector('#tileCanvas').addEventListener('touchmove', function(e) 
 }, {passive: false});
 
 document.querySelector('#tileCanvas').addEventListener('touchend', (e) => {
-    console.log("Touch end detected");
+    // console.log("Touch end detected");
     e.preventDefault();
     gridManager.handleTouch(e, gridManager.onTouchEnd(e));
 }, {passive: false});

@@ -250,14 +250,14 @@ table, th, td {
     border-left: 1px dashed black;
 }
 
-.pathButtons {
+.pathButtons, .drawPathButtons {
     border: 2px solid gray;
     border-radius: 3px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
 }
 
-.pathButton {
+.pathButton, .drawPathButton {
     background-color: lightgray;
     border: 1px solid gray;
     border-radius: 3px;
@@ -330,7 +330,14 @@ table, th, td {
     font-size: 16px;
 }
 
+.vertical {
+    border-left: 5px solid rgb(58, 114, 116);
+    height: 100%;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
