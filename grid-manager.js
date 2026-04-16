@@ -253,6 +253,9 @@ class GridManager {
 
     handleRestore(x, y, code) {
         // console.log("handleRestore called for tile: ", x, y);
+        if(this.getTileOriginalCode(x, y) === null) {
+            return 0; // No original code to restore to
+        }
         
         this.updateCode(x, y, code);
         this.updateChangesToColorArray(code, 'stitched', 1);
