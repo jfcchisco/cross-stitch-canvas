@@ -134,9 +134,9 @@ class GridManager {
         if(!code) return;
         this.lastClickedX = x + 1;
         this.lastClickedY = y + 1;
-        console.log("TILE CLICK");
-        this.getTileValues(x, y);
-        this.displayCoordinateInfo(x, y);
+        // console.log("TILE CLICK");
+        // this.getTileValues(x, y);
+        // this.displayCoordinateInfo(x, y);
         this.uiManager.updateFootnote(`Tile (X: ${x+1}, Y: ${y+1}) - Code: ${code} - ${this.getDMCValuesFromCode(code).dmcName}`);
         if (this.paintFlag) {
             if(this.highFlag && this.highlightedColor !== code) {
