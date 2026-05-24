@@ -43,28 +43,7 @@ async function loadNextFile() {
     }
 }
 
-function addChangesToJsonObject() {
-    let tiles = document.querySelectorAll('[data-tile-change]');
-    const currentPattern = patternLoader.getCurrentPattern();
-
-    currentPattern.stitches.forEach(stitch => {
-        for(let i=0; i<tiles.length; i++) {
-            let X = tiles[i].getAttribute('data-tile-x');
-            let Y = tiles[i].getAttribute('data-tile-y');
-            if(stitch.X == X && stitch.Y == Y) {
-                // Record the change in PatternLoader
-                patternLoader.recordChange(X, Y, 'stitched', stitch.dmcCode);
-                // After this the change will be undoable
-                tiles[i].removeAttribute('data-tile-change');
-                tiles[i].removeAttribute('data-tile-orig-code');
-                let tileTitle = "STITCHED - X: " + X + " - Y: " + Y;
-                tiles[i].setAttribute('title', tileTitle);
-                stitch.dmcCode = 'stitched';
-            }
-        }
-    })
-    return;
-}
+// Note: change recording is handled directly via PatternLoader.recordChange
 
 function loadJSON(data) {
     // Data is already processed by PatternLoader

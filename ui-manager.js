@@ -301,71 +301,7 @@ class UIManager {
             this.hideSpinner();
         }, 0);
     }
-
-    createMarkers() {
-        let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
-        //Clear previous markers
-        while(svgContainer.lastElementChild) {
-            svgContainer.removeChild(svgContainer.lastElementChild);
-        }
-        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-        const marker1 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker1.setAttribute("id", "arrow1");   
-        marker1.setAttribute("markerWidth", "10");
-        marker1.setAttribute("markerHeight", "10");
-        marker1.setAttribute("refX", "3.5");
-        marker1.setAttribute("refY", "2.5");
-        marker1.setAttribute("orient", "auto");
-        const arrowPath1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath1.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath1.setAttribute("fill", "dodgerblue");
-        marker1.appendChild(arrowPath1);
-        defs.appendChild(marker1);
-
-        const marker2 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker2.setAttribute("id", "arrow2");   
-        marker2.setAttribute("markerWidth", "10");
-        marker2.setAttribute("markerHeight", "10");
-        marker2.setAttribute("refX", "3.5");
-        marker2.setAttribute("refY", "2.5");
-        marker2.setAttribute("orient", "auto");
-        const arrowPath2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath2.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath2.setAttribute("fill", "orange");
-        marker2.appendChild(arrowPath2);
-        defs.appendChild(marker2);
-
-        const marker3 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker3.setAttribute("id", "arrow3");   
-        marker3.setAttribute("markerWidth", "10");
-        marker3.setAttribute("markerHeight", "10");
-        marker3.setAttribute("refX", "3.5");
-        marker3.setAttribute("refY", "2.5");
-        marker3.setAttribute("orient", "auto");
-        const arrowPath3 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath3.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath3.setAttribute("fill", "red");
-        marker3.appendChild(arrowPath3);
-        defs.appendChild(marker3);
-        
-        const marker4 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker4.setAttribute("id", "circle");
-        marker4.setAttribute("markerWidth", "10");
-        marker4.setAttribute("markerHeight", "10");
-        marker4.setAttribute("refX", "5");
-        marker4.setAttribute("refY", "5");
-        marker4.setAttribute("orient", "auto");
-        const circlePath = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circlePath.setAttribute("cx", "5");
-        circlePath.setAttribute("cy", "5");
-        circlePath.setAttribute("r", "5");
-        circlePath.setAttribute("fill", "red");
-        marker4.appendChild(circlePath);
-        defs.appendChild(marker4);
-
-        svgContainer.appendChild(defs);
-
-    }
+    
 
     assignClusters(stitchesList) {
         // Assign clusters to a list of highlighted stitches

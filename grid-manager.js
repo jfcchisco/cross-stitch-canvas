@@ -348,19 +348,6 @@ class GridManager {
         })
     }
 
-    setHeight(newHeight) {
-        const collection = document.getElementsByClassName("tile");
-        let newHeightStyle = newHeight + "px";
-        let newFontSizeStyle = Math.round((newHeight*3)/4) + "px";
-
-        for (let i = 0; i < collection.length; i++) {
-            collection[i].style.height = newHeightStyle;
-            collection[i].style.width = newHeightStyle;
-            collection[i].children.item(0).style.fontSize = newFontSizeStyle;
-        }
-
-    }
-
     zoomIn() {
         const zoomAmount = 100 * this.scrollSensitivity;
         this.cameraZoom += zoomAmount;
@@ -812,28 +799,8 @@ class GridManager {
                 ctx.lineTo(x + 3, y + this.tileSize - 3);
                 ctx.stroke();
             } else {
-                ctx.fillText(symbol, x + this.tileSize / 2, y + this.tileSize / 2);
-            }
-            
-        }
 
-        for(let change in this.patternLoader.changes) {
-            let changeObj = this.patternLoader.changes[change];
-            let x = changeObj.X * this.tileSize;
-            let y = changeObj.Y * this.tileSize;
-            let colorData = this.getDMCValuesFromCode(changeObj.originalCode);
-            // console.log(colorData, changeObj);
-            let R = colorData.R;
-            let G = colorData.G;
-            let B = colorData.B;
-            let code = "stitched";
-            
-            [color, spanColor] = this.getTileColorsBasedOnFlags(code, R, G, B);
-
-            ctx.fillStyle = color;
-            ctx.clearRect(x, y, this.tileSize, this.tileSize);
-            ctx.fillRect(x, y, this.tileSize, this.tileSize);
-            // Draw symbol
+            // ===== UTILITY METHODS =====
             ctx.fillStyle = spanColor;
             ctx.font = `${Math.round((this.tileSize*3)/4)}px Arial`;
             ctx.textAlign = "center";
@@ -1352,17 +1319,6 @@ class GridManager {
             symbol: "?"
         };
     }
-
-    getTileValues(x, y) {
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        const stitch = currentPattern.stitches.find(s => s.X === x && s.Y === y); 
-        if(stitch) {
-            console.log(stitch);
-            return stitch;
-        }
-        return null;
-    }
-
     getTileOriginalCode(x, y) {
         const currentPattern = this.patternLoader.getCurrentPattern();
         const stitch = currentPattern.stitches.find(s => s.X === x && s.Y === y);
