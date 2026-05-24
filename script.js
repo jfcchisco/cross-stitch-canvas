@@ -131,7 +131,7 @@ function previewOpen() {
 
 
 function save() {
-    patternLoader.mergeChanges();
+    // patternLoader.mergeChanges();
     // addChangesToJsonObject();
     uiManager.fillFlossUsage();
     // console.log(gridManager.colorArray);
@@ -213,6 +213,7 @@ window.drawPath = () => uiManager.drawPath();
 window.highlight = () => gridManager.activateHighlight();
 window.paint = () => gridManager.activatePaint();
 window.bucket = () => gridManager.activateBucket();
+window.restore = () => gridManager.activateRestore();
 window.undo = () => gridManager.undo();
 window.highContrast = () => gridManager.activateHighContrast();
 window.zoomIn = () => gridManager.zoomIn();
