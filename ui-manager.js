@@ -479,6 +479,9 @@ class UIManager {
 
             let clusterSequence = [];
             let nextCluster = 0;
+            // Limit total accumulated distance between clusters to avoid runaway paths
+            const MAX_TOTAL_DISTANCE = Number(document.getElementById('pathDistanceLimit')?.value) || (cols * rows * 2);
+            let accumulatedDistance = 0;
             if(type == 0) {
                 // Closest to top-left
                 nextCluster = this.getClosestClusterToPoint(clusterNumbers, highStitches, 0, 0);
@@ -518,6 +521,10 @@ class UIManager {
 
                 if(dist2Next[2] <= threshold) {
                     clusterSequence.push(dist2Next);
+                    accumulatedDistance += dist2Next[2];
+                    if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
+                        break;
+                    }
                     if(clusterSequence.length == 1) {
                         let index = clusterNumbers.indexOf(nextCluster);
                         if (index > -1) {
@@ -555,6 +562,14 @@ class UIManager {
                     }
                     if(betterOptionFlag) {
                         clusterSequence.splice(betterOptionIndex, 1, newSeq0, newSeq1);
+                        accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0);
+                        if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
+                            let index = clusterNumbers.indexOf(closestCluster);
+                            if (index > -1) {
+                                clusterNumbers.splice(index, 1);
+                            }
+                            break;
+                        }
                         let index = clusterNumbers.indexOf(closestCluster);
                         if (index > -1) {
                             clusterNumbers.splice(index, 1);
@@ -562,6 +577,16 @@ class UIManager {
                     }
                     else {
                         clusterSequence.push(dist2Next);
+                        accumulatedDistance += dist2Next[2];
+                        if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
+                            if(clusterSequence.length == 1) {
+                                let index = clusterNumbers.indexOf(nextCluster);
+                                if (index > -1) {
+                                    clusterNumbers.splice(index, 1);
+                                }
+                            }
+                            break;
+                        }
                         if(clusterSequence.length == 1) {
                             let index = clusterNumbers.indexOf(nextCluster);
                             if (index > -1) {
@@ -576,6 +601,14 @@ class UIManager {
                         }
                     }
                 }
+            }
+            // If no sequence found or we exited early, avoid accessing clusterSequence[0]
+            if(clusterSequence.length === 0) {
+                this.CLUSTER_SEQUENCE = clusterSequence;
+                this.THRESHOLD = threshold;
+                this.drawPreviewGridLines(box, ctx, cols, rows);
+                this.hideSpinner();
+                return;
             }
             // Draw circle on the initial point
             ctx.beginPath();
