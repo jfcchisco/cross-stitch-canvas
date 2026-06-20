@@ -325,7 +325,6 @@ table, th, td {
     display: flex;
     gap: 8px;
     align-items: center;
-    justify-content: space-between;
     background: rgba(0,0,0,0.45);
     padding: 8px 10px;
     border-radius: 8px;
@@ -333,6 +332,10 @@ table, th, td {
     backdrop-filter: blur(4px);
     width: calc(100% - 24px);
     margin-bottom: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 #previewModal .preview-toolbar .preview-close {
@@ -423,6 +426,7 @@ table, th, td {
 #previewModal .preview-toolbar .inputField {
     margin: 0;
     padding: 0 4px;
+    flex: 0 0 auto;
 }
 
 #previewModal label {
