@@ -119,31 +119,41 @@
 
     <div id="previewModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="previewClose()">&times;</span>
+            <div class="preview-toolbar">
+                <button class="preview-close" onclick="previewClose()" title="Close preview">✕</button>
+                <div class="pathButtons">
+                    <label for="pathSelect" class="visually-hidden">Choose path start</label>
+                    <select id="pathSelect" class="pathSelect" onchange="previewPath(Number(this.value))" title="Choose path start">
+                        <option value="0">First</option>
+                        <option value="1">Center</option>
+                        <option value="2">Coord</option>
+                        <option value="3">Random</option>
+                    </select>
+                    <button class="pathApply" type="button" onclick="previewPath(Number(document.getElementById('pathSelect').value))" title="Run selected path">▶</button>
+                </div>
+                <div class="inputFields toolbarInputs">
+                    <div class="inputField thresholdDiv">
+                        <label for="pathInput">Threshold:</label>
+                        <input type="number" id="pathInput" title="Threshold: maximum distance between clusters to use a direct connection" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="20" aria-label="Threshold" />
+                    </div>
+                    <div class="inputField">
+                        <label for="pathDistanceLimit">Distance:</label>
+                        <input type="number" id="pathDistanceLimit" title="Max total accumulated distance (optional)" placeholder="Optional max distance..." inputmode="numeric" min="0" step="1" value="500" aria-label="Max total distance" />
+                    </div>
+                    <div class="inputField">
+                        <label for="pathXInput">X:</label>
+                        <input type="number" id="pathXInput" title="Start X coordinate" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" aria-label="Start X" />
+                    </div>
+                    <div class="inputField">
+                        <label for="pathYInput">Y:</label>
+                        <input type="number" id="pathYInput" title="Start Y coordinate" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" aria-label="Start Y" />
+                    </div>
+                </div>
+                <div class="drawPathButtons">
+                    <span class="drawPathButton" onclick="drawPath()">DRAW PATH</span>
+                </div>
+            </div>
             <canvas id="previewCanvas"></canvas>
-            <div class="pathButtons">
-                <span class="pathButton" onclick="previewPath(0)">FIRST</span>
-                <span class="pathButton" onclick="previewPath(1)">CENTER</span>
-                <span class="pathButton" onclick="previewPath(2)">COORD</span>
-                <span class="pathButton" onclick="previewPath(3)">RANDOM</span>
-            </div>
-            <div class="inputFields">
-                <div class="inputField thresholdDiv">
-                    <label for="pathInput">Threshold:</label>
-                    <input type="number" id="pathInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="10" />
-                </div>
-                <div class="inputField">
-                    <label for="pathXInput">Start X:</label>
-                    <input type="number" id="pathXInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" />
-                </div>
-                <div class="inputField">
-                    <label for="pathYInput">Start Y:</label>
-                    <input type="number" id="pathYInput" placeholder="Enter whole number..." inputmode="numeric" min="0" step="1" value="0" />
-                </div>
-            </div>
-            <div class="drawPathButtons">
-                <span class="drawPathButton" onclick="drawPath()">DRAW PATH</span>
-            </div>
         </div>
     </div>
 
