@@ -75,6 +75,34 @@ class PatternLoader {
     }
 
     /**
+     * Extract persisted view settings from a pattern file if present.
+     * @param {Object} data - Raw pattern data
+     * @returns {Object|null} Normalized settings payload
+     */
+    extractSettings(data) {
+        if (!data || typeof data !== 'object' || !data.settings || typeof data.settings !== 'object') {
+            return null;
+        }
+
+        const settings = data.settings;
+        const normalizedSettings = {};
+
+        if (typeof settings.highFlag === 'boolean') {
+            normalizedSettings.highFlag = settings.highFlag;
+        }
+
+        if (typeof settings.contrastFlag === 'boolean') {
+            normalizedSettings.contrastFlag = settings.contrastFlag;
+        }
+
+        if (Number.isInteger(Number(settings.lastSelectedID))) {
+            normalizedSettings.lastSelectedID = Number(settings.lastSelectedID);
+        }
+
+        return Object.keys(normalizedSettings).length > 0 ? normalizedSettings : null;
+    }
+
+    /**
      * Process raw JSON data into usable pattern format
      * @param {Object} data - Raw JSON data
      * @returns {Object} Processed pattern data
@@ -85,8 +113,13 @@ class PatternLoader {
             throw new Error('Invalid pattern data structure');
         }
 
+        const settings = this.extractSettings(data);
+
         // Convert stitches to array format
         data = this.convertFileToStitches(data);
+        if (settings) {
+            data.settings = settings;
+        }
 
         // Store original and current state
         this.originalPattern = JSON.parse(JSON.stringify(data));
@@ -191,11 +224,17 @@ class PatternLoader {
             }
         }
 
-        return {
+        const exportedData = {
             stitches: newStitches,
             properties: data.properties,
             colors: data.colors
         };
+
+        if (data && data.settings) {
+            exportedData.settings = data.settings;
+        }
+
+        return exportedData;
     }
 
     /**
@@ -317,8 +356,12 @@ class PatternLoader {
      * Export current pattern to JSON file
      * @returns {Object} Exportable pattern data
      */
-    exportPattern() {
+    exportPattern(settings = null) {
         if (!this.currentPattern) return null;
+
+        if (settings) {
+            this.currentPattern.settings = settings;
+        }
 
         const exportData = this.convertStitchesToFile(this.currentPattern);
         exportData.metadata = {

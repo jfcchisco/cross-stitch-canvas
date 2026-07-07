@@ -19,6 +19,61 @@ let rows = 0;
 let jsonFiles = ['json/cubs.json', 'json/liverpool.json', 'json/japan.json', 'json/northern.json', 'json/cuphead.json', 'json/dino.json', 'json/amsterdam.json', 'json/african.json', 'json/messi.json'];
 let currIndex = 0;
 
+function buildSettingsPayload() {
+    const currentPattern = patternLoader.getCurrentPattern();
+    const selectedColor = gridManager.highlightedColor;
+    let lastSelectedID = -1;
+
+    if (selectedColor && currentPattern && currentPattern.colors) {
+        const matchingColor = currentPattern.colors.find(color => color.dmcCode === selectedColor);
+        if (matchingColor) {
+            lastSelectedID = Number(matchingColor.id);
+        }
+    }
+
+    return {
+        highFlag: Boolean(gridManager.highFlag),
+        contrastFlag: Boolean(gridManager.contrastFlag),
+        lastSelectedID
+    };
+}
+
+function applyLoadedSettings(settings, promptForSettings = false) {
+    if (!settings || typeof settings !== 'object') {
+        return false;
+    }
+
+    if (promptForSettings) {
+        const shouldLoad = confirm('This pattern file contains saved settings. Load them?');
+        if (!shouldLoad) {
+            return false;
+        }
+    }
+
+    const currentPattern = patternLoader.getCurrentPattern();
+    gridManager.highFlag = Boolean(settings.highFlag);
+    gridManager.contrastFlag = Boolean(settings.contrastFlag);
+
+    if (Number.isInteger(Number(settings.lastSelectedID)) && Number(settings.lastSelectedID) >= 0) {
+        const matchingColor = currentPattern && currentPattern.colors
+            ? currentPattern.colors.find(color => Number(color.id) === Number(settings.lastSelectedID))
+            : null;
+
+        if (matchingColor) {
+            gridManager.highlightedColor = matchingColor.dmcCode;
+            gridManager.highlightedSymbol = matchingColor.symbol;
+            gridManager.updateColorSelectorUI(matchingColor.dmcCode, matchingColor.symbol);
+        }
+    }
+
+    if (gridManager.highFlag) {
+        gridManager.activateUIToolState('highTool');
+    }
+
+    gridManager.refreshCanvas(true);
+    return true;
+}
+
 window.onload = async function() {
     try {
         uiManager.showSpinner();
@@ -66,7 +121,9 @@ function addChangesToJsonObject() {
     return;
 }
 
-function loadJSON(data) {
+function loadJSON(data, options = {}) {
+    const { promptForSettings = false } = options;
+
     // Data is already processed by PatternLoader
     const processedData = data;
 
@@ -80,16 +137,21 @@ function loadJSON(data) {
     cols = processedData.stitches[processedData.stitches.length-1].X+1
     rows = processedData.stitches[processedData.stitches.length-1].Y+1
 
-    // Reset flags
+    // Reset flags for regular tool state transitions, but preserve highlight/contrast
+    // when the loaded file does not contain saved settings.
     gridManager.paintFlag = false;
     gridManager.bucketFlag = false;
-    gridManager.highFlag = false;
     gridManager.pathFlag = false;
 
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
-    gridManager.refreshCanvas(true);
     gridManager.clearUIToolStates();
+
+    if (processedData.settings) {
+        applyLoadedSettings(processedData.settings, promptForSettings);
+    }
+
+    gridManager.refreshCanvas(true);
 
     // Adjust tile container height
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
@@ -106,7 +168,7 @@ async function openFile() {
             try {
                 uiManager.showSpinner();
                 const pattern = await patternLoader.loadFromFile(file);
-                loadJSON(pattern);
+                loadJSON(pattern, { promptForSettings: true });
             } catch (error) {
                 alert('Error loading file: ' + error.message);
             } finally {
@@ -136,7 +198,7 @@ function save() {
     uiManager.fillFlossUsage();
     // console.log(gridManager.colorArray);
 
-    const exportData = patternLoader.exportPattern();
+    const exportData = patternLoader.exportPattern(buildSettingsPayload());
     var text2write = JSON.stringify(exportData);
     
     var element = document.createElement('a');
@@ -164,6 +226,7 @@ function save() {
 
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text2write));
     element.setAttribute('download', outFile);
+    console.log("Saving file: " + outFile);
 
     element.style.display = 'none';
     document.body.appendChild(element);
