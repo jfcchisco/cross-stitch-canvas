@@ -439,7 +439,6 @@ class GridManager {
         const G = colorData.G;
         const B = colorData.B;
         const symbol = colorData.symbol;
-        console.log(symbol);
         const code = newCode;
         const [color, spanColor] = this.getTileColorsBasedOnFlags(code, R, G, B);
 
