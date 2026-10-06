@@ -13,6 +13,7 @@ class UIManager {
         this.colorContainer = document.querySelector("[data-color-container]");
         this.CLUSTER_SEQUENCE = [];
         this.THRESHOLD = 10;
+        this.CLUSTER_SIZE_FACTOR = 5.25;
     }
 
     getGridManager(gridManager) {
@@ -395,6 +396,10 @@ class UIManager {
         return stitchesList;
     }
 
+    getClusterSize(cluster, stitchesList) {
+        return stitchesList.filter(stitch => stitch.cluster === cluster).length;
+    }
+
     getDistBetweenClusters(c1, c2, sList) {
         let retVal = [0, 0, 0, [0, 0], [0, 0]];
         let dist = Infinity;
@@ -521,7 +526,7 @@ class UIManager {
 
                 if(dist2Next[2] <= threshold) {
                     clusterSequence.push(dist2Next);
-                    accumulatedDistance += dist2Next[2];
+                    accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
                     if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
                         break;
                     }
@@ -562,7 +567,7 @@ class UIManager {
                     }
                     if(betterOptionFlag) {
                         clusterSequence.splice(betterOptionIndex, 1, newSeq0, newSeq1);
-                        accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0);
+                        accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0) + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
                         if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
                             let index = clusterNumbers.indexOf(closestCluster);
                             if (index > -1) {
@@ -577,7 +582,7 @@ class UIManager {
                     }
                     else {
                         clusterSequence.push(dist2Next);
-                        accumulatedDistance += dist2Next[2];
+                        accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
                         if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
                             if(clusterSequence.length == 1) {
                                 let index = clusterNumbers.indexOf(nextCluster);
