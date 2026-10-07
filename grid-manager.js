@@ -531,6 +531,15 @@ class GridManager {
     }
 
     selectColor(colorCode, symbol) {
+        // Deactivate tools that can modify the grid when selecting a color
+        if(this.bucketFlag) {
+            this.activateBucket();
+        } else if(this.paintFlag) {
+            this.activatePaint();
+        } else if(this.restoreFlag) {
+            this.activateRestore();
+        } 
+
         // Update global highlight state
         this.highlightedColor = colorCode;
         this.highlightedSymbol = symbol;

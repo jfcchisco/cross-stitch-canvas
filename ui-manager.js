@@ -303,7 +303,7 @@ class UIManager {
         }, 0);
     }
 
-    createMarkers() {
+/*     createMarkers() {
         let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
         //Clear previous markers
         while(svgContainer.lastElementChild) {
@@ -366,7 +366,7 @@ class UIManager {
 
         svgContainer.appendChild(defs);
 
-    }
+    } */
 
     assignClusters(stitchesList) {
         // Assign clusters to a list of highlighted stitches
@@ -705,47 +705,6 @@ class UIManager {
             ctx.stroke();
         })
 
-
-/*         let tileWidth = document.getElementsByClassName("tile")[0].offsetWidth;
-        let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
-        // Delete all previous lines
-        while (svgContainer.lastElementChild) { 
-            svgContainer.removeChild(svgContainer.lastElementChild);
-        }
-
-        let svgWidth = tileWidth * (cols + 1);
-        let svgHeight = tileWidth * (rows + 1);
-        svgContainer.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
-        svgContainer.setAttribute("width", svgWidth);
-        svgContainer.setAttribute("height", svgHeight);
-        /// Insert defs for arrowheads
-        this.createMarkers(svgContainer);
-
-        let lineColor = "dodgerblue";
-        this.CLUSTER_SEQUENCE.forEach(cluster => {
-            let newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            
-            newLine.setAttribute("x1", (cluster[3][0]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("y1", (cluster[3][1]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("x2", (cluster[4][0]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("y2", (cluster[4][1]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("stroke-width", "2");
-            newLine.setAttribute("marker-end", "url(#arrowhead)");
-            if(lineColor == "dodgerblue") {
-                lineColor = "orange";
-                newLine.setAttribute("marker-end", "url(#arrow2)");
-            }
-            else {
-                lineColor = "dodgerblue";
-                newLine.setAttribute("marker-end", "url(#arrow1)");
-            }
-            if(cluster[2] > this.THRESHOLD) {
-                lineColor = "red";
-                newLine.setAttribute("marker-end", "url(#arrow3)");
-            }
-            newLine.setAttribute("stroke", lineColor);
-            svgContainer.append(newLine); 
-        }); */
     }
 
     drawPath() {
