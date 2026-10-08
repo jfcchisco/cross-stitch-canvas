@@ -12,6 +12,7 @@ class UIManager {
         this.colorTemplate = document.querySelector("[data-color-template]");
         this.colorContainer = document.querySelector("[data-color-container]");
         this.CLUSTER_SEQUENCE = [];
+        this.SEQUENCED_COLOR = null;
         this.THRESHOLD = 10;
         this.CLUSTER_SIZE_FACTOR = 5.25;
     }
@@ -611,6 +612,7 @@ class UIManager {
                 nextCluster = clusterNumbers[Math.floor(Math.random() * clusterNumbers.length)];
             }
             this.buildClusterSequence(nextCluster, clusterNumbers, clusterSequence, highStitches, threshold, MAX_TOTAL_DISTANCE);
+            this.SEQUENCED_COLOR = this.gridManager.highlightedColor;
             // If no sequence found or we exited early, avoid accessing clusterSequence[0]
             if(clusterSequence.length === 0) {
                 this.CLUSTER_SEQUENCE = clusterSequence;

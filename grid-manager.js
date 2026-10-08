@@ -531,6 +531,8 @@ class GridManager {
     }
 
     selectColor(colorCode, symbol) {
+        this.pathFlag = colorCode === this.uiManager.SEQUENCED_COLOR;
+
         // Deactivate tools that can modify the grid when selecting a color
         if(this.bucketFlag) {
             this.activateBucket();
