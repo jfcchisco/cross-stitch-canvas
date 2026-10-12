@@ -140,6 +140,76 @@ canvas {
     display: none;
 }
 
+.cloud-file-dialog {
+    width: min(480px, calc(100vw - 32px));
+    max-height: min(70vh, 560px);
+    padding: 16px;
+    border: 2px solid #222;
+    border-radius: 8px;
+    color: #222;
+}
+
+.cloud-file-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.cloud-file-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.cloud-file-dialog-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.cloud-file-dialog-close {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #777;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.cloud-file-list {
+    max-height: 52vh;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.cloud-file-list li + li {
+    margin-top: 6px;
+}
+
+.cloud-file-option {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b6b6b6;
+    border-radius: 4px;
+    background: #fff;
+    color: #222;
+    cursor: pointer;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.cloud-file-option:hover,
+.cloud-file-option:focus-visible {
+    border-color: #1a73e8;
+    background: #eef5ff;
+}
+
+.cloud-file-empty {
+    margin: 8px 0 0;
+}
+
 .activeTool {
     background-color: orangered;
 }
