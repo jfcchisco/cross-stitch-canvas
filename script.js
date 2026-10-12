@@ -2,6 +2,10 @@ import PatternLoader from "./load-pattern.js";
 import GridManager from "./grid-manager.js";
 import UIManager from "./ui-manager.js";
 
+const GOOGLE_CLIENT_ID = "877144070400-ka6bh05tm1nrfndfhms8tl2ohecn957g.apps.googleusercontent.com";
+let googleIdToken = null;
+let googleIdentityServicesPromise = null;
+
 const tileContainer = document.getElementsByClassName("tile-container")[0];
 
 const patternLoader = new PatternLoader();
@@ -18,6 +22,72 @@ let rows = 0;
 
 let jsonFiles = ['json/cubs.json', 'json/liverpool.json', 'json/japan.json', 'json/northern.json', 'json/cuphead.json', 'json/dino.json', 'json/amsterdam.json', 'json/african.json', 'json/messi.json'];
 let currIndex = 0;
+
+function loadGoogleIdentityServices() {
+    if (window.google?.accounts?.id) {
+        return Promise.resolve();
+    }
+
+    if (!googleIdentityServicesPromise) {
+        googleIdentityServicesPromise = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://accounts.google.com/gsi/client";
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = () => {
+                googleIdentityServicesPromise = null;
+                reject(new Error("Google Identity Services could not be loaded."));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    return googleIdentityServicesPromise;
+}
+
+function handleGoogleCredential(response) {
+    if (!response.credential) {
+        return;
+    }
+
+    googleIdToken = response.credential;
+    document.getElementById("googleSignInButton").hidden = true;
+    document.getElementById("googleSignOutButton").hidden = false;
+    document.getElementById("googleAuthStatus").textContent = "Signed in with Google";
+}
+
+async function initializeGoogleSignIn() {
+    const status = document.getElementById("googleAuthStatus");
+    if (GOOGLE_CLIENT_ID.startsWith("YOUR_GOOGLE_CLIENT_ID")) {
+        status.textContent = "Google sign-in requires a Client ID in script.js";
+        console.warn("Set GOOGLE_CLIENT_ID in script.js to enable Google sign-in.");
+        return;
+    }
+
+    try {
+        await loadGoogleIdentityServices();
+        window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredential,
+            auto_select: false
+        });
+        window.google.accounts.id.renderButton(
+            document.getElementById("googleSignInButton"),
+            { type: "icon", theme: "outline", size: "large", shape: "circle" }
+        );
+    } catch (error) {
+        status.textContent = "Google sign-in is unavailable";
+        console.error(error);
+    }
+}
+
+function signOutFromGoogle() {
+    googleIdToken = null;
+    window.google?.accounts?.id?.disableAutoSelect();
+    document.getElementById("googleSignOutButton").hidden = true;
+    document.getElementById("googleSignInButton").hidden = false;
+    document.getElementById("googleAuthStatus").textContent = "Signed out";
+}
 
 function buildSettingsPayload() {
     const currentPattern = patternLoader.getCurrentPattern();
@@ -265,6 +335,9 @@ window.save = save;
 window.loadNextFile = loadNextFile;
 window.previewOpen = previewOpen;
 window.previewClose = previewClose;
+
+document.getElementById("googleSignOutButton").addEventListener("click", signOutFromGoogle);
+void initializeGoogleSignIn();
 
 // UI manager tool functions
 window.flossUsageOpen = () => uiManager.flossUsageOpen();

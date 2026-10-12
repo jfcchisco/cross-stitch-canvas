@@ -85,6 +85,45 @@ canvas {
     white-space: nowrap;
 }
 
+.google-auth-tool {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    height: 50px;
+    width: 50px;
+    flex: 0 0 50px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: cadetblue;
+}
+
+#googleSignInButton {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-sign-out {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.google-sign-out[hidden] {
+    display: none;
+}
+
 .activeTool {
     background-color: orangered;
 }
