@@ -90,10 +90,11 @@ canvas {
     right: 0;
     z-index: 1;
     height: 50px;
-    width: 50px;
-    flex: 0 0 50px;
+    width: 90px;
+    flex: 0 0 90px;
     margin-left: auto;
     display: flex;
+    gap: 4px;
     align-items: center;
     justify-content: center;
     background-color: cadetblue;
@@ -107,12 +108,27 @@ canvas {
     justify-content: center;
 }
 
-.google-sign-out {
+.google-user-avatar {
     width: 40px;
     height: 40px;
+    flex: 0 0 40px;
     padding: 0;
     border: 0;
-    border-radius: 10px;
+    border-radius: 50%;
+    background-color: #1a73e8;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.google-sign-out {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
     background: white;
     color: #333;
     cursor: pointer;

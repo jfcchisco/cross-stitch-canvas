@@ -51,6 +51,25 @@ function handleGoogleCredential(response) {
     }
 
     googleIdToken = response.credential;
+    let displayName = "Google user";
+    try {
+        const encodedPayload = response.credential.split(".")[1]
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+        const paddedPayload = encodedPayload.padEnd(Math.ceil(encodedPayload.length / 4) * 4, "=");
+        const payloadBytes = Uint8Array.from(atob(paddedPayload), character => character.charCodeAt(0));
+        const claims = JSON.parse(new TextDecoder().decode(payloadBytes));
+        displayName = claims.given_name || claims.name || claims.email || displayName;
+    } catch (error) {
+        console.warn("Could not read the Google account name from its sign-in token.", error);
+    }
+
+    const initial = Array.from(displayName.trim())[0]?.toLocaleUpperCase() || "?";
+    const avatar = document.getElementById("googleUserAvatar");
+    avatar.textContent = initial;
+    avatar.title = `Signed in as ${displayName}`;
+    avatar.setAttribute("aria-label", `Signed in as ${displayName}`);
+    avatar.hidden = false;
     document.getElementById("googleSignInButton").hidden = true;
     document.getElementById("googleSignOutButton").hidden = false;
     document.getElementById("googleAuthStatus").textContent = "Signed in with Google";
@@ -84,6 +103,7 @@ async function initializeGoogleSignIn() {
 function signOutFromGoogle() {
     googleIdToken = null;
     window.google?.accounts?.id?.disableAutoSelect();
+    document.getElementById("googleUserAvatar").hidden = true;
     document.getElementById("googleSignOutButton").hidden = true;
     document.getElementById("googleSignInButton").hidden = false;
     document.getElementById("googleAuthStatus").textContent = "Signed out";
