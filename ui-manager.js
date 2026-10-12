@@ -12,7 +12,9 @@ class UIManager {
         this.colorTemplate = document.querySelector("[data-color-template]");
         this.colorContainer = document.querySelector("[data-color-container]");
         this.CLUSTER_SEQUENCE = [];
+        this.SEQUENCED_COLOR = null;
         this.THRESHOLD = 10;
+        this.CLUSTER_SIZE_FACTOR = 5.25;
     }
 
     getGridManager(gridManager) {
@@ -302,7 +304,7 @@ class UIManager {
         }, 0);
     }
 
-    createMarkers() {
+/*     createMarkers() {
         let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
         //Clear previous markers
         while(svgContainer.lastElementChild) {
@@ -365,7 +367,7 @@ class UIManager {
 
         svgContainer.appendChild(defs);
 
-    }
+    } */
 
     assignClusters(stitchesList) {
         // Assign clusters to a list of highlighted stitches
@@ -393,6 +395,10 @@ class UIManager {
             }
         }
         return stitchesList;
+    }
+
+    getClusterSize(cluster, stitchesList) {
+        return stitchesList.filter(stitch => stitch.cluster === cluster).length;
     }
 
     getDistBetweenClusters(c1, c2, sList) {
@@ -429,6 +435,105 @@ class UIManager {
             }
         }
         return retCluster;
+    }
+
+    buildClusterSequence(nextCluster, clusterNumbers, clusterSequence, highStitches, threshold, maxTotalDistance) {
+        let closestCluster = 0;
+        let accumulatedDistance = 0;
+        while(clusterNumbers.length > 0) {
+            let dist2Next = [nextCluster, 0, Infinity, [0,0], [0,0]];
+            for (let i = 0; i < clusterNumbers.length; i++) {
+                let cNum = clusterNumbers[i];
+                let dist2Cluster = this.getDistBetweenClusters(nextCluster, cNum, highStitches);
+                if(dist2Cluster[2] < dist2Next[2] && dist2Cluster[2] != 0) {
+                    dist2Next = dist2Cluster;
+                    closestCluster = cNum;
+                }
+            }
+
+            if(dist2Next[2] <= threshold) {
+                clusterSequence.push(dist2Next);
+                accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
+                if(accumulatedDistance > maxTotalDistance) {
+                    break;
+                }
+                if(clusterSequence.length == 1) {
+                    let index = clusterNumbers.indexOf(nextCluster);
+                    if (index > -1) {
+                        clusterNumbers.splice(index, 1);
+                    }
+                }
+                nextCluster = closestCluster;
+                //remove from clusterNumbers
+                let index = clusterNumbers.indexOf(closestCluster);
+                if (index > -1) {
+                    clusterNumbers.splice(index, 1);
+                }
+            }
+            else {
+                // Try a better path
+                // Go through the clusterSequence and find the summed
+                // distance to each pair
+                let newMinSum = dist2Next[2];
+                let betterOptionFlag = false;
+                let newSeq0 = [];
+                let newSeq1 = [];
+                let betterOptionIndex = -1;
+                for(let i = 0; i < clusterSequence.length; i++) {
+                    let dist0 = this.getDistBetweenClusters(clusterSequence[i][0], closestCluster, highStitches);
+                    let dist1 = this.getDistBetweenClusters(closestCluster, clusterSequence[i][1], highStitches);
+                    let sumDist = dist0[2] + dist1[2];
+                    if(sumDist < newMinSum) {
+                        // Found a better option
+                        newMinSum = sumDist;
+                        betterOptionFlag = true;
+                        newSeq0 = dist0;
+                        newSeq1 = dist1;
+                        betterOptionIndex = i;
+                    }
+                }
+                if(betterOptionFlag) {
+                    clusterSequence.splice(betterOptionIndex, 1, newSeq0, newSeq1);
+                    accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0) + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
+                    if(accumulatedDistance > maxTotalDistance) {
+                        let index = clusterNumbers.indexOf(closestCluster);
+                        if (index > -1) {
+                            clusterNumbers.splice(index, 1);
+                        }
+                        break;
+                    }
+                    let index = clusterNumbers.indexOf(closestCluster);
+                    if (index > -1) {
+                        clusterNumbers.splice(index, 1);
+                    }
+                }
+                else {
+                    clusterSequence.push(dist2Next);
+                    accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
+                    if(accumulatedDistance > maxTotalDistance) {
+                        if(clusterSequence.length == 1) {
+                            let index = clusterNumbers.indexOf(nextCluster);
+                            if (index > -1) {
+                                clusterNumbers.splice(index, 1);
+                            }
+                        }
+                        break;
+                    }
+                    if(clusterSequence.length == 1) {
+                        let index = clusterNumbers.indexOf(nextCluster);
+                        if (index > -1) {
+                            clusterNumbers.splice(index, 1);
+                        }
+                    }
+                    nextCluster = closestCluster;
+                    //remove from clusterNumbers
+                    let index = clusterNumbers.indexOf(closestCluster);
+                    if (index > -1) {
+                        clusterNumbers.splice(index, 1);
+                    }
+                }
+            }
+        }
     }
     
     previewPath(type) {
@@ -481,7 +586,6 @@ class UIManager {
             let nextCluster = 0;
             // Limit total accumulated distance between clusters to avoid runaway paths
             const MAX_TOTAL_DISTANCE = Number(document.getElementById('pathDistanceLimit')?.value) || (cols * rows * 2);
-            let accumulatedDistance = 0;
             if(type == 0) {
                 // Closest to top-left
                 nextCluster = this.getClosestClusterToPoint(clusterNumbers, highStitches, 0, 0);
@@ -507,101 +611,8 @@ class UIManager {
             else if(type == 3) {
                 nextCluster = clusterNumbers[Math.floor(Math.random() * clusterNumbers.length)];
             }
-            let closestCluster = 0;
-            while(clusterNumbers.length > 0) {
-                let dist2Next = [nextCluster, 0, Infinity, [0,0], [0,0]];
-                for (let i = 0; i < clusterNumbers.length; i++) {
-                    let cNum = clusterNumbers[i];
-                    let dist2Cluster = this.getDistBetweenClusters(nextCluster, cNum, highStitches);
-                    if(dist2Cluster[2] < dist2Next[2] && dist2Cluster[2] != 0) {
-                        dist2Next = dist2Cluster;
-                        closestCluster = cNum;
-                    }
-                }
-
-                if(dist2Next[2] <= threshold) {
-                    clusterSequence.push(dist2Next);
-                    accumulatedDistance += dist2Next[2];
-                    if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
-                        break;
-                    }
-                    if(clusterSequence.length == 1) {
-                        let index = clusterNumbers.indexOf(nextCluster);
-                        if (index > -1) {
-                            clusterNumbers.splice(index, 1);
-                        }
-                    }
-                    nextCluster = closestCluster;
-                    //remove from clusterNumbers
-                    let index = clusterNumbers.indexOf(closestCluster);
-                    if (index > -1) {
-                        clusterNumbers.splice(index, 1);
-                    }
-                }
-                else {
-                    // Try a better path
-                    // Go through the clusterSequence and find the summed
-                    // distance to each pair
-                    let newMinSum = dist2Next[2];
-                    let betterOptionFlag = false;
-                    let newSeq0 = [];
-                    let newSeq1 = [];
-                    let betterOptionIndex = -1;
-                    for(let i = 0; i < clusterSequence.length; i++) {
-                        let dist0 = this.getDistBetweenClusters(clusterSequence[i][0], closestCluster, highStitches);
-                        let dist1 = this.getDistBetweenClusters(closestCluster, clusterSequence[i][1], highStitches);
-                        let sumDist = dist0[2] + dist1[2];
-                        if(sumDist < newMinSum) {
-                            // Found a better option
-                            newMinSum = sumDist;
-                            betterOptionFlag = true;
-                            newSeq0 = dist0;
-                            newSeq1 = dist1;
-                            betterOptionIndex = i;
-                        }
-                    }
-                    if(betterOptionFlag) {
-                        clusterSequence.splice(betterOptionIndex, 1, newSeq0, newSeq1);
-                        accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0);
-                        if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
-                            let index = clusterNumbers.indexOf(closestCluster);
-                            if (index > -1) {
-                                clusterNumbers.splice(index, 1);
-                            }
-                            break;
-                        }
-                        let index = clusterNumbers.indexOf(closestCluster);
-                        if (index > -1) {
-                            clusterNumbers.splice(index, 1);
-                        }
-                    }
-                    else {
-                        clusterSequence.push(dist2Next);
-                        accumulatedDistance += dist2Next[2];
-                        if(accumulatedDistance > MAX_TOTAL_DISTANCE) {
-                            if(clusterSequence.length == 1) {
-                                let index = clusterNumbers.indexOf(nextCluster);
-                                if (index > -1) {
-                                    clusterNumbers.splice(index, 1);
-                                }
-                            }
-                            break;
-                        }
-                        if(clusterSequence.length == 1) {
-                            let index = clusterNumbers.indexOf(nextCluster);
-                            if (index > -1) {
-                                clusterNumbers.splice(index, 1);
-                            }
-                        }
-                        nextCluster = closestCluster;
-                        //remove from clusterNumbers
-                        let index = clusterNumbers.indexOf(closestCluster);
-                        if (index > -1) {
-                            clusterNumbers.splice(index, 1);
-                        }
-                    }
-                }
-            }
+            this.buildClusterSequence(nextCluster, clusterNumbers, clusterSequence, highStitches, threshold, MAX_TOTAL_DISTANCE);
+            this.SEQUENCED_COLOR = this.gridManager.highlightedColor;
             // If no sequence found or we exited early, avoid accessing clusterSequence[0]
             if(clusterSequence.length === 0) {
                 this.CLUSTER_SEQUENCE = clusterSequence;
@@ -696,47 +707,6 @@ class UIManager {
             ctx.stroke();
         })
 
-
-/*         let tileWidth = document.getElementsByClassName("tile")[0].offsetWidth;
-        let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
-        // Delete all previous lines
-        while (svgContainer.lastElementChild) { 
-            svgContainer.removeChild(svgContainer.lastElementChild);
-        }
-
-        let svgWidth = tileWidth * (cols + 1);
-        let svgHeight = tileWidth * (rows + 1);
-        svgContainer.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
-        svgContainer.setAttribute("width", svgWidth);
-        svgContainer.setAttribute("height", svgHeight);
-        /// Insert defs for arrowheads
-        this.createMarkers(svgContainer);
-
-        let lineColor = "dodgerblue";
-        this.CLUSTER_SEQUENCE.forEach(cluster => {
-            let newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            
-            newLine.setAttribute("x1", (cluster[3][0]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("y1", (cluster[3][1]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("x2", (cluster[4][0]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("y2", (cluster[4][1]*tileWidth + tileWidth + tileWidth/2).toString());
-            newLine.setAttribute("stroke-width", "2");
-            newLine.setAttribute("marker-end", "url(#arrowhead)");
-            if(lineColor == "dodgerblue") {
-                lineColor = "orange";
-                newLine.setAttribute("marker-end", "url(#arrow2)");
-            }
-            else {
-                lineColor = "dodgerblue";
-                newLine.setAttribute("marker-end", "url(#arrow1)");
-            }
-            if(cluster[2] > this.THRESHOLD) {
-                lineColor = "red";
-                newLine.setAttribute("marker-end", "url(#arrow3)");
-            }
-            newLine.setAttribute("stroke", lineColor);
-            svgContainer.append(newLine); 
-        }); */
     }
 
     drawPath() {
