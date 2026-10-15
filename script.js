@@ -331,7 +331,8 @@ async function upload() {
         currentCloudFile = {
             id: result.id,
             name: result.name,
-            etag: response.headers.get("ETag") || result.etag
+            etag: normalizeCloudEtag(response.headers.get("ETag"))
+                || normalizeCloudEtag(result.etag)
         };
         alert("Cloud file saved successfully.");
     } catch (error) {
