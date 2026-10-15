@@ -174,6 +174,10 @@ async function listCloudFiles() {
     return files;
 }
 
+function normalizeCloudFileName(name) {
+    return name.normalize("NFKC").trim().toLocaleLowerCase();
+}
+
 function chooseCloudFile(files) {
     const dialog = document.getElementById("cloudFileDialog");
     const list = document.getElementById("cloudFileList");
@@ -243,12 +247,16 @@ async function download() {
         const rawPattern = await response.json();
         const pattern = patternLoader.loadJSON(rawPattern);
         const selectedFile = files.find(file => file.id === selectedFileId);
+        const etag = response.headers.get("ETag") || selectedFile?.etag;
+        if (!etag) {
+            throw new Error("The file version could not be read. Refresh the cloud file list and try again.");
+        }
         loadJSON(pattern, {
             promptForSettings: true,
             cloudFile: {
                 id: selectedFileId,
                 name: selectedFile?.name || "Untitled pattern",
-                etag: response.headers.get("ETag")
+                etag
             }
         });
     } catch (error) {
@@ -268,6 +276,10 @@ async function upload() {
         alert("There is no pattern to upload.");
         return;
     }
+    if (currentCloudFile && !currentCloudFile.etag) {
+        alert("The cloud file version is missing. Download the file again before saving to avoid overwriting newer changes.");
+        return;
+    }
 
     const name = currentCloudFile?.name || prompt(
         "Name for this cloud file:",
@@ -278,9 +290,21 @@ async function upload() {
     }
 
     try {
+        const isUpdate = Boolean(currentCloudFile);
+        uiManager.showSpinner("Checking cloud filenames...");
+        const existingFiles = await listCloudFiles();
+        const normalizedName = normalizeCloudFileName(name);
+        const duplicate = existingFiles.find(file =>
+            file.id !== currentCloudFile?.id
+            && normalizeCloudFileName(file.name) === normalizedName
+        );
+        if (duplicate) {
+            alert(`A cloud file named "${duplicate.name}" already exists. Choose a different name.`);
+            return;
+        }
+
         uiManager.showSpinner("Saving cloud file...");
         const pattern = patternLoader.exportPattern(buildSettingsPayload());
-        const isUpdate = Boolean(currentCloudFile);
         const path = isUpdate
             ? `/api/files/${encodeURIComponent(currentCloudFile.id)}`
             : "/api/files";
@@ -296,7 +320,14 @@ async function upload() {
         });
 
         if (response.status === 409) {
-            throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
+            const conflict = await response.json().catch(() => ({}));
+            if (conflict.error === "duplicate_name") {
+                throw new Error("A cloud file with that name already exists. Choose a different name.");
+            }
+            if (conflict.error === "version_conflict") {
+                throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
+            }
+            throw new Error(conflict.error || "The cloud save conflicted with another request.");
         }
         if (!response.ok) {
             throw await readCloudError(response);
