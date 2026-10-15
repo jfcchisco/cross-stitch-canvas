@@ -243,12 +243,16 @@ async function download() {
         const rawPattern = await response.json();
         const pattern = patternLoader.loadJSON(rawPattern);
         const selectedFile = files.find(file => file.id === selectedFileId);
+        const etag = response.headers.get("ETag") || selectedFile?.etag;
+        if (!etag) {
+            throw new Error("The server did not provide a version for this file. Please reload the cloud file list and try again.");
+        }
         loadJSON(pattern, {
             promptForSettings: true,
             cloudFile: {
                 id: selectedFileId,
                 name: selectedFile?.name || "Untitled pattern",
-                etag: response.headers.get("ETag")
+                etag
             }
         });
     } catch (error) {
