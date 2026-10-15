@@ -153,6 +153,22 @@ async function readCloudError(response) {
     return error;
 }
 
+function normalizeCloudEtag(value) {
+    if (typeof value !== "string") {
+        return null;
+    }
+
+    const etag = value.trim();
+    if (/^"[^"\r\n]+"$/.test(etag)) {
+        return etag;
+    }
+    if (etag.startsWith("W/") || !/^[\x21\x23-\x7E]+$/.test(etag)) {
+        return null;
+    }
+
+    return `"${etag}"`;
+}
+
 async function listCloudFiles() {
     const files = [];
     let cursor = null;
@@ -243,7 +259,8 @@ async function download() {
         const rawPattern = await response.json();
         const pattern = patternLoader.loadJSON(rawPattern);
         const selectedFile = files.find(file => file.id === selectedFileId);
-        const etag = response.headers.get("ETag") || selectedFile?.etag;
+        const etag = normalizeCloudEtag(response.headers.get("ETag"))
+            || normalizeCloudEtag(selectedFile?.etag);
         if (!etag) {
             throw new Error("The server did not provide a version for this file. Please reload the cloud file list and try again.");
         }
@@ -285,12 +302,16 @@ async function upload() {
         uiManager.showSpinner("Saving cloud file...");
         const pattern = patternLoader.exportPattern(buildSettingsPayload());
         const isUpdate = Boolean(currentCloudFile);
+        const etag = isUpdate ? normalizeCloudEtag(currentCloudFile.etag) : null;
+        if (isUpdate && !etag) {
+            throw new Error("This cloud file's version is missing or invalid. Download it again before saving.");
+        }
         const path = isUpdate
             ? `/api/files/${encodeURIComponent(currentCloudFile.id)}`
             : "/api/files";
         const headers = { "Content-Type": "application/json" };
         if (isUpdate) {
-            headers["If-Match"] = currentCloudFile.etag;
+            headers["If-Match"] = etag;
         }
 
         const response = await cloudApiRequest(path, {
