@@ -178,6 +178,23 @@ function normalizeCloudFileName(name) {
     return name.normalize("NFKC").trim().toLocaleLowerCase();
 }
 
+function normalizeCloudEtag(value) {
+    const etag = String(value || "").trim();
+    if (!etag || etag.startsWith("W/")) {
+        throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
+    }
+    if (etag.startsWith('"') && etag.endsWith('"')) {
+        if (/["\r\n]/.test(etag.slice(1, -1))) {
+            throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
+        }
+        return etag;
+    }
+    if (/["\r\n]/.test(etag)) {
+        throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
+    }
+    return `"${etag}"`;
+}
+
 function chooseCloudFile(files) {
     const dialog = document.getElementById("cloudFileDialog");
     const list = document.getElementById("cloudFileList");
@@ -247,10 +264,11 @@ async function download() {
         const rawPattern = await response.json();
         const pattern = patternLoader.loadJSON(rawPattern);
         const selectedFile = files.find(file => file.id === selectedFileId);
-        const etag = response.headers.get("ETag") || selectedFile?.etag;
-        if (!etag) {
+        const rawEtag = response.headers.get("ETag") || selectedFile?.etag;
+        if (!rawEtag) {
             throw new Error("The file version could not be read. Refresh the cloud file list and try again.");
         }
+        const etag = normalizeCloudEtag(rawEtag);
         loadJSON(pattern, {
             promptForSettings: true,
             cloudFile: {
@@ -310,7 +328,7 @@ async function upload() {
             : "/api/files";
         const headers = { "Content-Type": "application/json" };
         if (isUpdate) {
-            headers["If-Match"] = currentCloudFile.etag;
+            headers["If-Match"] = normalizeCloudEtag(currentCloudFile.etag);
         }
 
         const response = await cloudApiRequest(path, {
@@ -337,7 +355,7 @@ async function upload() {
         currentCloudFile = {
             id: result.id,
             name: result.name,
-            etag: response.headers.get("ETag") || result.etag
+            etag: normalizeCloudEtag(response.headers.get("ETag") || result.etag)
         };
         alert("Cloud file saved successfully.");
     } catch (error) {
