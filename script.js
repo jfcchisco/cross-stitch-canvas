@@ -3,7 +3,7 @@ import GridManager from "./grid-manager.js";
 import UIManager from "./ui-manager.js";
 
 const GOOGLE_CLIENT_ID = "877144070400-ka6bh05tm1nrfndfhms8tl2ohecn957g.apps.googleusercontent.com";
-const CLOUD_API_BASE_URL = "https://pattern-file-worker.jfcchisco.workers.dev";
+const CLOUD_API_BASE_URL = "https://replace-with-your-worker.workers.dev";
 let googleIdToken = null;
 let googleIdentityServicesPromise = null;
 let currentCloudFile = null;
