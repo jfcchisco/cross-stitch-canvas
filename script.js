@@ -3,7 +3,7 @@ import GridManager from "./grid-manager.js";
 import UIManager from "./ui-manager.js";
 
 const GOOGLE_CLIENT_ID = "877144070400-ka6bh05tm1nrfndfhms8tl2ohecn957g.apps.googleusercontent.com";
-const CLOUD_API_BASE_URL = "https://replace-with-your-worker.workers.dev";
+const CLOUD_API_BASE_URL = "https://pattern-file-worker.jfcchisco.workers.dev";
 let googleIdToken = null;
 let googleIdentityServicesPromise = null;
 let currentCloudFile = null;
@@ -174,27 +174,6 @@ async function listCloudFiles() {
     return files;
 }
 
-function normalizeCloudFileName(name) {
-    return name.normalize("NFKC").trim().toLocaleLowerCase();
-}
-
-function normalizeCloudEtag(value) {
-    const etag = String(value || "").trim();
-    if (!etag || etag.startsWith("W/")) {
-        throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
-    }
-    if (etag.startsWith('"') && etag.endsWith('"')) {
-        if (/["\r\n]/.test(etag.slice(1, -1))) {
-            throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
-        }
-        return etag;
-    }
-    if (/["\r\n]/.test(etag)) {
-        throw new Error("The cloud file has no valid strong version tag. Download it again before saving.");
-    }
-    return `"${etag}"`;
-}
-
 function chooseCloudFile(files) {
     const dialog = document.getElementById("cloudFileDialog");
     const list = document.getElementById("cloudFileList");
@@ -264,17 +243,12 @@ async function download() {
         const rawPattern = await response.json();
         const pattern = patternLoader.loadJSON(rawPattern);
         const selectedFile = files.find(file => file.id === selectedFileId);
-        const rawEtag = response.headers.get("ETag") || selectedFile?.etag;
-        if (!rawEtag) {
-            throw new Error("The file version could not be read. Refresh the cloud file list and try again.");
-        }
-        const etag = normalizeCloudEtag(rawEtag);
         loadJSON(pattern, {
             promptForSettings: true,
             cloudFile: {
                 id: selectedFileId,
                 name: selectedFile?.name || "Untitled pattern",
-                etag
+                etag: response.headers.get("ETag")
             }
         });
     } catch (error) {
@@ -294,10 +268,6 @@ async function upload() {
         alert("There is no pattern to upload.");
         return;
     }
-    if (currentCloudFile && !currentCloudFile.etag) {
-        alert("The cloud file version is missing. Download the file again before saving to avoid overwriting newer changes.");
-        return;
-    }
 
     const name = currentCloudFile?.name || prompt(
         "Name for this cloud file:",
@@ -308,27 +278,15 @@ async function upload() {
     }
 
     try {
-        const isUpdate = Boolean(currentCloudFile);
-        uiManager.showSpinner("Checking cloud filenames...");
-        const existingFiles = await listCloudFiles();
-        const normalizedName = normalizeCloudFileName(name);
-        const duplicate = existingFiles.find(file =>
-            file.id !== currentCloudFile?.id
-            && normalizeCloudFileName(file.name) === normalizedName
-        );
-        if (duplicate) {
-            alert(`A cloud file named "${duplicate.name}" already exists. Choose a different name.`);
-            return;
-        }
-
         uiManager.showSpinner("Saving cloud file...");
         const pattern = patternLoader.exportPattern(buildSettingsPayload());
+        const isUpdate = Boolean(currentCloudFile);
         const path = isUpdate
             ? `/api/files/${encodeURIComponent(currentCloudFile.id)}`
             : "/api/files";
         const headers = { "Content-Type": "application/json" };
         if (isUpdate) {
-            headers["If-Match"] = normalizeCloudEtag(currentCloudFile.etag);
+            headers["If-Match"] = currentCloudFile.etag;
         }
 
         const response = await cloudApiRequest(path, {
@@ -338,14 +296,7 @@ async function upload() {
         });
 
         if (response.status === 409) {
-            const conflict = await response.json().catch(() => ({}));
-            if (conflict.error === "duplicate_name") {
-                throw new Error("A cloud file with that name already exists. Choose a different name.");
-            }
-            if (conflict.error === "version_conflict") {
-                throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
-            }
-            throw new Error(conflict.error || "The cloud save conflicted with another request.");
+            throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
         }
         if (!response.ok) {
             throw await readCloudError(response);
@@ -355,7 +306,7 @@ async function upload() {
         currentCloudFile = {
             id: result.id,
             name: result.name,
-            etag: normalizeCloudEtag(response.headers.get("ETag") || result.etag)
+            etag: response.headers.get("ETag") || result.etag
         };
         alert("Cloud file saved successfully.");
     } catch (error) {
