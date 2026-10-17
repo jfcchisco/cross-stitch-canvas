@@ -321,6 +321,10 @@ async function upload() {
         });
 
         if (response.status === 409) {
+            const error = await readCloudError(response);
+            if (error.details.error === "duplicate_file_name") {
+                throw new Error("A cloud file with this name already exists. Choose a different name.");
+            }
             throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
         }
         if (!response.ok) {
