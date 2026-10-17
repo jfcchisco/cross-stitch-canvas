@@ -20,12 +20,24 @@
                 <img src="./img/save.png" class="toolImage">
             </div>
         </div>
+        <div class="vertical"></div>
+        <div id="downloadTool" class="toolback">
+            <div title="Download" class="tool" onclick="download()">
+                <img src="./img/download.png" class="toolImage">
+            </div>
+        </div>
+        <div id="uploadTool" class="toolback">
+            <div title="Upload" class="tool" onclick="upload()">
+                <img src="./img/upload.png" class="toolImage">
+            </div>
+        </div>
+        <div class="vertical"></div>
         <div id="flossUsage" class="toolback" onclick="flossUsageOpen()">
             <div title="Floss Usage" class="tool">
                 <img src="./img/report.png" class="toolImage">
             </div>
         </div>
-        <div class="vertical"></div>
+        
         <div id="highTool" class="toolback">
             <div title="Highlight color" class="tool" onclick="highlight()">
                 <img src="./img/highlight.png" class="toolImage">
@@ -87,6 +99,12 @@
             <div title="Next Design" class="tool">
                 <img src="./img/arrow.png" class="toolImage">
             </div>
+        </div>
+        <div id="googleAuthTool" class="google-auth-tool">
+            <div id="googleSignInButton" title="Sign in with Google"></div>
+            <button id="googleUserAvatar" class="google-user-avatar" type="button" hidden></button>
+            <button id="googleSignOutButton" class="google-sign-out" type="button" title="Sign out of this app" aria-label="Sign out of this app" hidden>&times;</button>
+            <span id="googleAuthStatus" class="visually-hidden" role="status" aria-live="polite"></span>
         </div>
         
     </div>
@@ -156,6 +174,15 @@
             <canvas id="previewCanvas"></canvas>
         </div>
     </div>
+
+    <dialog id="cloudFileDialog" class="cloud-file-dialog" aria-labelledby="cloudFileDialogTitle">
+        <div class="cloud-file-dialog-header">
+            <h2 id="cloudFileDialogTitle">Open cloud pattern</h2>
+            <button type="button" class="cloud-file-dialog-close" aria-label="Close" onclick="closeCloudFileDialog()">&times;</button>
+        </div>
+        <ul id="cloudFileList" class="cloud-file-list"></ul>
+        <p id="cloudFileEmpty" class="cloud-file-empty" hidden>No cloud files found.</p>
+    </dialog>
 
     <!-- TEMPLATES -->
 

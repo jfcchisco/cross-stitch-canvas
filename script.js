@@ -2,6 +2,12 @@ import PatternLoader from "./load-pattern.js";
 import GridManager from "./grid-manager.js";
 import UIManager from "./ui-manager.js";
 
+const GOOGLE_CLIENT_ID = "877144070400-ka6bh05tm1nrfndfhms8tl2ohecn957g.apps.googleusercontent.com";
+const CLOUD_API_BASE_URL = "https://pattern-file-worker.jfcchisco.workers.dev";
+let googleIdToken = null;
+let googleIdentityServicesPromise = null;
+let currentCloudFile = null;
+
 const tileContainer = document.getElementsByClassName("tile-container")[0];
 
 const patternLoader = new PatternLoader();
@@ -18,6 +24,323 @@ let rows = 0;
 
 let jsonFiles = ['json/cubs.json', 'json/liverpool.json', 'json/japan.json', 'json/northern.json', 'json/cuphead.json', 'json/dino.json', 'json/amsterdam.json', 'json/african.json', 'json/messi.json'];
 let currIndex = 0;
+
+function loadGoogleIdentityServices() {
+    if (window.google?.accounts?.id) {
+        return Promise.resolve();
+    }
+
+    if (!googleIdentityServicesPromise) {
+        googleIdentityServicesPromise = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://accounts.google.com/gsi/client";
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = () => {
+                googleIdentityServicesPromise = null;
+                reject(new Error("Google Identity Services could not be loaded."));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    return googleIdentityServicesPromise;
+}
+
+function handleGoogleCredential(response) {
+    if (!response.credential) {
+        return;
+    }
+
+    googleIdToken = response.credential;
+    let displayName = "Google user";
+    try {
+        const encodedPayload = response.credential.split(".")[1]
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+        const paddedPayload = encodedPayload.padEnd(Math.ceil(encodedPayload.length / 4) * 4, "=");
+        const payloadBytes = Uint8Array.from(atob(paddedPayload), character => character.charCodeAt(0));
+        const claims = JSON.parse(new TextDecoder().decode(payloadBytes));
+        displayName = claims.given_name || claims.name || claims.email || displayName;
+    } catch (error) {
+        console.warn("Could not read the Google account name from its sign-in token.", error);
+    }
+
+    const initial = Array.from(displayName.trim())[0]?.toLocaleUpperCase() || "?";
+    const avatar = document.getElementById("googleUserAvatar");
+    avatar.textContent = initial;
+    avatar.title = `Signed in as ${displayName}`;
+    avatar.setAttribute("aria-label", `Signed in as ${displayName}`);
+    avatar.hidden = false;
+    document.getElementById("googleSignInButton").hidden = true;
+    document.getElementById("googleSignOutButton").hidden = false;
+    document.getElementById("googleAuthStatus").textContent = "Signed in with Google";
+}
+
+async function initializeGoogleSignIn() {
+    const status = document.getElementById("googleAuthStatus");
+    if (GOOGLE_CLIENT_ID.startsWith("YOUR_GOOGLE_CLIENT_ID")) {
+        status.textContent = "Google sign-in requires a Client ID in script.js";
+        console.warn("Set GOOGLE_CLIENT_ID in script.js to enable Google sign-in.");
+        return;
+    }
+
+    try {
+        await loadGoogleIdentityServices();
+        window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredential,
+            auto_select: false
+        });
+        window.google.accounts.id.renderButton(
+            document.getElementById("googleSignInButton"),
+            { type: "icon", theme: "outline", size: "large", shape: "circle" }
+        );
+    } catch (error) {
+        status.textContent = "Google sign-in is unavailable";
+        console.error(error);
+    }
+}
+
+function signOutFromGoogle() {
+    googleIdToken = null;
+    currentCloudFile = null;
+    window.google?.accounts?.id?.disableAutoSelect();
+    document.getElementById("googleUserAvatar").hidden = true;
+    document.getElementById("googleSignOutButton").hidden = true;
+    document.getElementById("googleSignInButton").hidden = false;
+    document.getElementById("googleAuthStatus").textContent = "Signed out";
+}
+
+function requireCloudSignIn() {
+    if (!googleIdToken) {
+        alert("Please sign in with Google to use cloud files.");
+        return false;
+    }
+    if (CLOUD_API_BASE_URL.startsWith("https://replace-with-your-worker")) {
+        alert("Set CLOUD_API_BASE_URL in script.js to your deployed Cloudflare Worker URL.");
+        return false;
+    }
+    return true;
+}
+
+async function cloudApiRequest(path, options = {}) {
+    const headers = new Headers(options.headers || {});
+    headers.set("Authorization", `Bearer ${googleIdToken}`);
+    const response = await fetch(`${CLOUD_API_BASE_URL.replace(/\/+$/, "")}${path}`, {
+        ...options,
+        headers
+    });
+
+    if (response.status === 401) {
+        signOutFromGoogle();
+        throw new Error("Your Google sign-in expired. Please sign in again.");
+    }
+
+    return response;
+}
+
+async function readCloudError(response) {
+    let details = {};
+    try {
+        details = await response.json();
+    } catch {
+        // Use the HTTP status if the Worker did not return JSON.
+    }
+    const error = new Error(details.error || `Cloud request failed (${response.status}).`);
+    error.status = response.status;
+    error.details = details;
+    return error;
+}
+
+function normalizeCloudEtag(value) {
+    if (typeof value !== "string") {
+        return null;
+    }
+
+    const etag = value.trim();
+    if (/^"[^"\r\n]+"$/.test(etag)) {
+        return etag;
+    }
+    if (etag.startsWith("W/") || !/^[\x21\x23-\x7E]+$/.test(etag)) {
+        return null;
+    }
+
+    return `"${etag}"`;
+}
+
+async function listCloudFiles() {
+    const files = [];
+    let cursor = null;
+
+    do {
+        const query = new URLSearchParams({ limit: "100" });
+        if (cursor) {
+            query.set("cursor", cursor);
+        }
+        const response = await cloudApiRequest(`/api/files?${query}`);
+        if (!response.ok) {
+            throw await readCloudError(response);
+        }
+        const result = await response.json();
+        files.push(...result.files);
+        cursor = result.cursor;
+    } while (cursor);
+
+    return files;
+}
+
+function chooseCloudFile(files) {
+    const dialog = document.getElementById("cloudFileDialog");
+    const list = document.getElementById("cloudFileList");
+    const emptyMessage = document.getElementById("cloudFileEmpty");
+    list.replaceChildren();
+    emptyMessage.hidden = files.length > 0;
+
+    for (const file of files) {
+        const item = document.createElement("li");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "cloud-file-option";
+        button.textContent = file.name;
+        button.addEventListener("click", () => dialog.close(file.id));
+        item.appendChild(button);
+        list.appendChild(item);
+    }
+
+    return new Promise(resolve => {
+        const handleClose = () => {
+            dialog.removeEventListener("close", handleClose);
+            resolve(dialog.returnValue || null);
+        };
+        dialog.addEventListener("close", handleClose);
+        dialog.returnValue = "";
+        dialog.showModal();
+    });
+}
+
+function closeCloudFileDialog() {
+    document.getElementById("cloudFileDialog").close();
+}
+
+async function download() {
+    if (!requireCloudSignIn()) {
+        return;
+    }
+
+    let files;
+    try {
+        uiManager.showSpinner("Loading cloud files...");
+        files = await listCloudFiles();
+    } catch (error) {
+        alert(`Could not list cloud files: ${error.message}`);
+        return;
+    } finally {
+        uiManager.hideSpinner();
+    }
+
+    if (files.length === 0) {
+        alert("There are no cloud files to open.");
+        return;
+    }
+
+    const selectedFileId = await chooseCloudFile(files);
+    if (!selectedFileId) {
+        return;
+    }
+
+    try {
+        uiManager.showSpinner("Downloading cloud file...");
+        const response = await cloudApiRequest(`/api/files/${encodeURIComponent(selectedFileId)}`);
+        if (!response.ok) {
+            throw await readCloudError(response);
+        }
+
+        const rawPattern = await response.json();
+        const pattern = patternLoader.loadJSON(rawPattern);
+        const selectedFile = files.find(file => file.id === selectedFileId);
+        const etag = normalizeCloudEtag(response.headers.get("ETag"))
+            || normalizeCloudEtag(selectedFile?.etag);
+        if (!etag) {
+            throw new Error("The server did not provide a version for this file. Please reload the cloud file list and try again.");
+        }
+        loadJSON(pattern, {
+            promptForSettings: true,
+            cloudFile: {
+                id: selectedFileId,
+                name: selectedFile?.name || "Untitled pattern",
+                etag
+            }
+        });
+    } catch (error) {
+        alert(`Could not open cloud file: ${error.message}`);
+    } finally {
+        uiManager.hideSpinner();
+    }
+}
+
+async function upload() {
+    if (!requireCloudSignIn()) {
+        return;
+    }
+
+    const currentPattern = patternLoader.getCurrentPattern();
+    if (!currentPattern) {
+        alert("There is no pattern to upload.");
+        return;
+    }
+
+    const name = currentCloudFile?.name || prompt(
+        "Name for this cloud file:",
+        currentPattern.properties?.name || "Cross-stitch pattern"
+    );
+    if (!name) {
+        return;
+    }
+
+    try {
+        uiManager.showSpinner("Saving cloud file...");
+        const pattern = patternLoader.exportPattern(buildSettingsPayload());
+        const isUpdate = Boolean(currentCloudFile);
+        const etag = isUpdate ? normalizeCloudEtag(currentCloudFile.etag) : null;
+        if (isUpdate && !etag) {
+            throw new Error("This cloud file's version is missing or invalid. Download it again before saving.");
+        }
+        const path = isUpdate
+            ? `/api/files/${encodeURIComponent(currentCloudFile.id)}`
+            : "/api/files";
+        const headers = { "Content-Type": "application/json" };
+        if (isUpdate) {
+            headers["If-Match"] = etag;
+        }
+
+        const response = await cloudApiRequest(path, {
+            method: isUpdate ? "PUT" : "POST",
+            headers,
+            body: JSON.stringify({ name, pattern })
+        });
+
+        if (response.status === 409) {
+            throw new Error("This cloud file changed in another session. Download the latest copy before saving again.");
+        }
+        if (!response.ok) {
+            throw await readCloudError(response);
+        }
+
+        const result = await response.json();
+        currentCloudFile = {
+            id: result.id,
+            name: result.name,
+            etag: normalizeCloudEtag(response.headers.get("ETag"))
+                || normalizeCloudEtag(result.etag)
+        };
+        alert("Cloud file saved successfully.");
+    } catch (error) {
+        alert(`Could not save cloud file: ${error.message}`);
+    } finally {
+        uiManager.hideSpinner();
+    }
+}
 
 function buildSettingsPayload() {
     const currentPattern = patternLoader.getCurrentPattern();
@@ -122,7 +445,7 @@ function addChangesToJsonObject() {
 }
 
 function loadJSON(data, options = {}) {
-    const { promptForSettings = false } = options;
+    const { promptForSettings = false, cloudFile = null } = options;
 
     // Data is already processed by PatternLoader
     const processedData = data;
@@ -157,6 +480,7 @@ function loadJSON(data, options = {}) {
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
 
     uiManager.updateFootnote("Loaded pattern"); 
+    currentCloudFile = cloudFile;
 }
 
 async function openFile() {
@@ -265,6 +589,12 @@ window.save = save;
 window.loadNextFile = loadNextFile;
 window.previewOpen = previewOpen;
 window.previewClose = previewClose;
+window.download = download;
+window.upload = upload;
+window.closeCloudFileDialog = closeCloudFileDialog;
+
+document.getElementById("googleSignOutButton").addEventListener("click", signOutFromGoogle);
+void initializeGoogleSignIn();
 
 // UI manager tool functions
 window.flossUsageOpen = () => uiManager.flossUsageOpen();
