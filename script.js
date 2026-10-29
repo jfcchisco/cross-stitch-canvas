@@ -5,6 +5,7 @@ import UIManager from "./ui-manager.js";
 const GOOGLE_CLIENT_ID = "877144070400-ka6bh05tm1nrfndfhms8tl2ohecn957g.apps.googleusercontent.com";
 const CLOUD_API_BASE_URL = "https://pattern-file-worker.jfcchisco.workers.dev";
 let googleIdToken = null;
+let googleUserId = null;
 let googleIdentityServicesPromise = null;
 let currentCloudFile = null;
 
@@ -53,6 +54,7 @@ function handleGoogleCredential(response) {
     }
 
     googleIdToken = response.credential;
+    googleUserId = null;
     let displayName = "Google user";
     try {
         const encodedPayload = response.credential.split(".")[1]
@@ -62,6 +64,7 @@ function handleGoogleCredential(response) {
         const payloadBytes = Uint8Array.from(atob(paddedPayload), character => character.charCodeAt(0));
         const claims = JSON.parse(new TextDecoder().decode(payloadBytes));
         displayName = claims.given_name || claims.name || claims.email || displayName;
+        googleUserId = typeof claims.sub === "string" ? claims.sub : null;
     } catch (error) {
         console.warn("Could not read the Google account name from its sign-in token.", error);
     }
@@ -104,7 +107,7 @@ async function initializeGoogleSignIn() {
 
 function signOutFromGoogle() {
     googleIdToken = null;
-    currentCloudFile = null;
+    googleUserId = null;
     window.google?.accounts?.id?.disableAutoSelect();
     document.getElementById("googleUserAvatar").hidden = true;
     document.getElementById("googleSignOutButton").hidden = true;
@@ -269,7 +272,8 @@ async function download() {
             cloudFile: {
                 id: selectedFileId,
                 name: selectedFile?.name || "Untitled pattern",
-                etag
+                etag,
+                ownerSub: googleUserId
             }
         });
     } catch (error) {
@@ -281,6 +285,10 @@ async function download() {
 
 async function upload() {
     if (!requireCloudSignIn()) {
+        return;
+    }
+    if (currentCloudFile && currentCloudFile.ownerSub !== googleUserId) {
+        alert("Sign in with the Google account that opened this cloud file to save your changes.");
         return;
     }
 
@@ -336,7 +344,8 @@ async function upload() {
             id: result.id,
             name: result.name,
             etag: normalizeCloudEtag(response.headers.get("ETag"))
-                || normalizeCloudEtag(result.etag)
+                || normalizeCloudEtag(result.etag),
+            ownerSub: currentCloudFile?.ownerSub || googleUserId
         };
         alert("Cloud file saved successfully.");
     } catch (error) {
