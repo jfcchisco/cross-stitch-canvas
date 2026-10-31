@@ -193,11 +193,13 @@ async function listCloudFiles() {
     return files;
 }
 
-function chooseCloudFile(files) {
+function chooseCloudFile(files, title = "Open cloud pattern", emptyText = "No cloud files found.") {
     const dialog = document.getElementById("cloudFileDialog");
     const list = document.getElementById("cloudFileList");
     const emptyMessage = document.getElementById("cloudFileEmpty");
+    document.getElementById("cloudFileDialogTitle").textContent = title;
     list.replaceChildren();
+    emptyMessage.textContent = emptyText;
     emptyMessage.hidden = files.length > 0;
 
     for (const file of files) {
@@ -220,6 +222,27 @@ function chooseCloudFile(files) {
         dialog.returnValue = "";
         dialog.showModal();
     });
+}
+
+async function listDefaultFiles() {
+    const files = [];
+    let cursor = null;
+
+    do {
+        const query = new URLSearchParams({ limit: "100" });
+        if (cursor) {
+            query.set("cursor", cursor);
+        }
+        const response = await cloudApiRequest(`/api/default-files?${query}`);
+        if (!response.ok) {
+            throw await readCloudError(response);
+        }
+        const result = await response.json();
+        files.push(...result.files);
+        cursor = result.cursor;
+    } while (cursor);
+
+    return files;
 }
 
 function closeCloudFileDialog() {
@@ -247,7 +270,7 @@ async function download() {
         return;
     }
 
-    const selectedFileId = await chooseCloudFile(files);
+    const selectedFileId = await chooseCloudFile(files, "Open cloud pattern", "No cloud files found.");
     if (!selectedFileId) {
         return;
     }
@@ -278,6 +301,49 @@ async function download() {
         });
     } catch (error) {
         alert(`Could not open cloud file: ${error.message}`);
+    } finally {
+        uiManager.hideSpinner();
+    }
+}
+
+async function openDefaultPatterns() {
+    if (!requireCloudSignIn()) {
+        return;
+    }
+
+    let files;
+    try {
+        uiManager.showSpinner("Loading default patterns...");
+        files = await listDefaultFiles();
+    } catch (error) {
+        alert(`Could not list default patterns: ${error.message}`);
+        return;
+    } finally {
+        uiManager.hideSpinner();
+    }
+
+    if (files.length === 0) {
+        alert("There are no default patterns to open.");
+        return;
+    }
+
+    const selectedFileKey = await chooseCloudFile(files, "Open default pattern", "No default patterns found.");
+    if (!selectedFileKey) {
+        return;
+    }
+
+    try {
+        uiManager.showSpinner("Opening default pattern...");
+        const query = new URLSearchParams({ key: selectedFileKey });
+        const response = await cloudApiRequest(`/api/default-files?${query}`);
+        if (!response.ok) {
+            throw await readCloudError(response);
+        }
+
+        const pattern = patternLoader.loadJSON(await response.json());
+        loadJSON(pattern, { promptForSettings: true });
+    } catch (error) {
+        alert(`Could not open default pattern: ${error.message}`);
     } finally {
         uiManager.hideSpinner();
     }
@@ -604,6 +670,7 @@ window.previewOpen = previewOpen;
 window.previewClose = previewClose;
 window.download = download;
 window.upload = upload;
+window.openDefaultPatterns = openDefaultPatterns;
 window.closeCloudFileDialog = closeCloudFileDialog;
 
 document.getElementById("googleSignOutButton").addEventListener("click", signOutFromGoogle);
