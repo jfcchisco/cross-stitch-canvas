@@ -94,10 +94,9 @@ canvas {
     flex: 0 0 auto;
     margin-left: auto;
     display: flex;
-    gap: 4px;
     align-items: center;
     justify-content: center;
-    background-color: cadetblue;
+    background-color: darkcyan;
 }
 
 #googleSignInButton {
@@ -106,6 +105,7 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 5px;
 }
 
 .google-user-avatar {
@@ -114,6 +114,7 @@ canvas {
     flex: 0 0 40px;
     padding: 0;
     border: 0;
+    margin: 5px;
     border-radius: 50%;
     background-color: #1a73e8;
     color: white;
@@ -123,11 +124,12 @@ canvas {
 }
 
 .google-sign-out {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
     padding: 0;
     border: 0;
+    margin: 5px;
     border-radius: 50%;
     background: white;
     color: #333;
