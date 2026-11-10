@@ -189,6 +189,18 @@
         <p id="cloudFileEmpty" class="cloud-file-empty" hidden>No cloud files found.</p>
     </dialog>
 
+    <dialog id="patternPreviewDialog" class="pattern-preview-dialog" aria-labelledby="patternPreviewTitle">
+        <div class="cloud-file-dialog-header">
+            <h2 id="patternPreviewTitle">Pattern preview</h2>
+            <button id="patternPreviewClose" type="button" class="cloud-file-dialog-close" aria-label="Cancel">&times;</button>
+        </div>
+        <img id="patternPreviewImage" class="pattern-preview-image" alt="">
+        <div class="pattern-preview-actions">
+            <button id="patternPreviewCancel" type="button" class="cloud-file-option">Cancel</button>
+            <button id="patternPreviewOpen" type="button" class="cloud-file-option">Open pattern</button>
+        </div>
+    </dialog>
+
     <!-- TEMPLATES -->
 
     <template data-color-template>
