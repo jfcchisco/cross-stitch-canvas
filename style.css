@@ -192,6 +192,9 @@ canvas {
 
 .cloud-file-option {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 10px 12px;
     border: 1px solid #b6b6b6;
     border-radius: 4px;
@@ -212,32 +215,18 @@ canvas {
     margin: 8px 0 0;
 }
 
-.pattern-preview-dialog {
-    width: min(440px, calc(100vw - 32px));
-    padding: 16px;
-    border: 2px solid #222;
-    border-radius: 8px;
-    color: #222;
-}
-
-.pattern-preview-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.55);
-}
-
-.pattern-preview-image {
-    display: block;
-    width: 100%;
-    max-height: min(55vh, 420px);
+.cloud-file-thumbnail {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
     object-fit: contain;
     image-rendering: pixelated;
     background: #f2f2f2;
 }
 
-.pattern-preview-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 12px;
+.cloud-file-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .activeTool {

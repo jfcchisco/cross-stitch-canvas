@@ -165,26 +165,6 @@ function exportPatternWithThumbnail() {
     return pattern;
 }
 
-function confirmPatternPreview(thumbnail, name) {
-    if (typeof thumbnail !== "string" || !/^data:image\/(?:webp|png);base64,/i.test(thumbnail)) {
-        return Promise.resolve(true);
-    }
-
-    const dialog = document.getElementById("patternPreviewDialog");
-    const image = document.getElementById("patternPreviewImage");
-    document.getElementById("patternPreviewTitle").textContent = name;
-    image.src = thumbnail;
-    image.alt = `Preview of ${name}`;
-
-    return new Promise(resolve => {
-        dialog.addEventListener("close", () => {
-            image.removeAttribute("src");
-            resolve(dialog.returnValue === "open");
-        }, { once: true });
-        dialog.showModal();
-    });
-}
-
 function normalizeCloudEtag(value) {
     if (typeof value !== "string") {
         return null;
@@ -234,9 +214,20 @@ function chooseCloudFile(files, title = "Open cloud pattern", emptyText = "No cl
     for (const file of files) {
         const item = document.createElement("li");
         const button = document.createElement("button");
+        const name = document.createElement("span");
         button.type = "button";
         button.className = "cloud-file-option";
-        button.textContent = file.name;
+        if (typeof file.thumbnail === "string" && /^data:image\/(?:webp|png);base64,/i.test(file.thumbnail)) {
+            const image = document.createElement("img");
+            image.className = "cloud-file-thumbnail";
+            image.src = file.thumbnail;
+            image.alt = "";
+            image.loading = "lazy";
+            button.appendChild(image);
+        }
+        name.className = "cloud-file-name";
+        name.textContent = file.name;
+        button.appendChild(name);
         button.addEventListener("click", () => dialog.close(file.id));
         item.appendChild(button);
         list.appendChild(item);
@@ -312,11 +303,8 @@ async function download() {
         }
 
         const rawPattern = await response.json();
-        const selectedFile = files.find(file => file.id === selectedFileId);
-        if (!await confirmPatternPreview(rawPattern.thumbnail, selectedFile?.name || "Cloud pattern")) {
-            return;
-        }
         const pattern = patternLoader.loadJSON(rawPattern);
+        const selectedFile = files.find(file => file.id === selectedFileId);
         const etag = normalizeCloudEtag(response.headers.get("ETag"))
             || normalizeCloudEtag(selectedFile?.etag);
         if (!etag) {
@@ -373,10 +361,6 @@ async function openDefaultPatterns() {
         }
 
         const rawPattern = await response.json();
-        const file = files.find(item => item.id === selectedFileKey);
-        if (!await confirmPatternPreview(rawPattern.thumbnail, file?.name || "Default pattern")) {
-            return;
-        }
         const pattern = patternLoader.loadJSON(rawPattern);
         loadJSON(pattern, { promptForSettings: true });
     } catch (error) {
@@ -711,15 +695,6 @@ window.openDefaultPatterns = openDefaultPatterns;
 window.closeCloudFileDialog = closeCloudFileDialog;
 
 document.getElementById("googleSignOutButton").addEventListener("click", signOutFromGoogle);
-document.getElementById("patternPreviewOpen").addEventListener("click", () => {
-    document.getElementById("patternPreviewDialog").close("open");
-});
-document.getElementById("patternPreviewCancel").addEventListener("click", () => {
-    document.getElementById("patternPreviewDialog").close("cancel");
-});
-document.getElementById("patternPreviewClose").addEventListener("click", () => {
-    document.getElementById("patternPreviewDialog").close("cancel");
-});
 void initializeGoogleSignIn();
 
 // UI manager tool functions
