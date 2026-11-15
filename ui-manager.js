@@ -711,8 +711,7 @@ class UIManager {
 
     drawPath() {
         this.gridManager.pathFlag = true;
-        this.gridManager.patternCacheDirty = true;
-        this.gridManager.refreshCanvas(true);
+        this.gridManager.renderHighlightLayer();
     }
 
     // Spinner functions
