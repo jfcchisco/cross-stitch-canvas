@@ -566,6 +566,8 @@ function loadJSON(data, options = {}) {
     gridManager.bucketFlag = false;
     gridManager.pathFlag = false;
 
+    // Set the final viewport size before initializing the canvas layers and zoom.
+    tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
     gridManager.clearUIToolStates();
@@ -575,9 +577,6 @@ function loadJSON(data, options = {}) {
     }
 
     gridManager.refreshCanvas(true);
-
-    // Adjust tile container height
-    tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
 
     uiManager.updateFootnote("Loaded pattern"); 
     currentCloudFile = cloudFile;
@@ -681,6 +680,9 @@ window.addEventListener('resize', function(event) {
     var body = document.body;
     var height = body.offsetHeight - 130 - 25; // total minus the 2 toolbars and some margin
     tileContainer.style.height = height+"px";
+    if (patternLoader.getCurrentPattern()) {
+        gridManager.renderCanvas();
+    }
 }, true);
 
 // Expose functions to global scope for HTML onclick attributes
