@@ -1363,6 +1363,66 @@ class GridManager {
         };
     }
 
+    createOriginalThumbnail(maxSize = 128) {
+        const pattern = this.patternLoader.originalPattern;
+        if (!pattern?.properties || !Array.isArray(pattern.stitches) || !Array.isArray(pattern.colors)) {
+            return null;
+        }
+
+        const { width, height } = pattern.properties;
+        if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+            return null;
+        }
+
+        const colorByCode = new Map(pattern.colors.map(color => [color.dmcCode, color]));
+        let thumbnailSize = Math.min(maxSize, 128);
+        while (thumbnailSize >= 32) {
+            const scale = Math.min(thumbnailSize / width, thumbnailSize / height);
+            const thumbnailWidth = Math.max(1, Math.round(width * scale));
+            const thumbnailHeight = Math.max(1, Math.round(height * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = thumbnailWidth;
+            canvas.height = thumbnailHeight;
+            const context = canvas.getContext("2d");
+            if (!context) {
+                return null;
+            }
+
+            const image = context.createImageData(thumbnailWidth, thumbnailHeight);
+            for (let offset = 0; offset < image.data.length; offset += 4) {
+                image.data[offset] = 255;
+                image.data[offset + 1] = 255;
+                image.data[offset + 2] = 255;
+                image.data[offset + 3] = 255;
+            }
+
+            for (const stitch of pattern.stitches) {
+                const code = stitch.dmcCode === "stitched" ? stitch.origCode : stitch.dmcCode;
+                const color = colorByCode.get(code);
+                if (!color || stitch.X < 0 || stitch.X >= width || stitch.Y < 0 || stitch.Y >= height) {
+                    continue;
+                }
+
+                const x = Math.min(thumbnailWidth - 1, Math.floor(stitch.X * thumbnailWidth / width));
+                const y = Math.min(thumbnailHeight - 1, Math.floor(stitch.Y * thumbnailHeight / height));
+                const offset = (y * thumbnailWidth + x) * 4;
+                image.data[offset] = color.R;
+                image.data[offset + 1] = color.G;
+                image.data[offset + 2] = color.B;
+                image.data[offset + 3] = 255;
+            }
+
+            context.putImageData(image, 0, 0);
+            const thumbnail = canvas.toDataURL("image/webp", 0.65);
+            if (thumbnail.length <= 6000) {
+                return thumbnail;
+            }
+            thumbnailSize = Math.floor(thumbnailSize / 2);
+        }
+
+        return null;
+    }
+
     getTileValues(x, y) {
         const currentPattern = this.patternLoader.getCurrentPattern();
         const stitch = currentPattern.stitches.find(s => s.X === x && s.Y === y); 

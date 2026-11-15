@@ -156,6 +156,15 @@ async function readCloudError(response) {
     return error;
 }
 
+function exportPatternWithThumbnail() {
+    const pattern = patternLoader.exportPattern(buildSettingsPayload());
+    const thumbnail = gridManager.createOriginalThumbnail();
+    if (thumbnail) {
+        pattern.thumbnail = thumbnail;
+    }
+    return pattern;
+}
+
 function normalizeCloudEtag(value) {
     if (typeof value !== "string") {
         return null;
@@ -205,9 +214,20 @@ function chooseCloudFile(files, title = "Open cloud pattern", emptyText = "No cl
     for (const file of files) {
         const item = document.createElement("li");
         const button = document.createElement("button");
+        const name = document.createElement("span");
         button.type = "button";
         button.className = "cloud-file-option";
-        button.textContent = file.name;
+        if (typeof file.thumbnail === "string" && /^data:image\/(?:webp|png);base64,/i.test(file.thumbnail)) {
+            const image = document.createElement("img");
+            image.className = "cloud-file-thumbnail";
+            image.src = file.thumbnail;
+            image.alt = "";
+            image.loading = "lazy";
+            button.appendChild(image);
+        }
+        name.className = "cloud-file-name";
+        name.textContent = file.name;
+        button.appendChild(name);
         button.addEventListener("click", () => dialog.close(file.id));
         item.appendChild(button);
         list.appendChild(item);
@@ -340,7 +360,8 @@ async function openDefaultPatterns() {
             throw await readCloudError(response);
         }
 
-        const pattern = patternLoader.loadJSON(await response.json());
+        const rawPattern = await response.json();
+        const pattern = patternLoader.loadJSON(rawPattern);
         loadJSON(pattern, { promptForSettings: true });
     } catch (error) {
         alert(`Could not open default pattern: ${error.message}`);
@@ -374,7 +395,7 @@ async function upload() {
 
     try {
         uiManager.showSpinner("Saving cloud file...");
-        const pattern = patternLoader.exportPattern(buildSettingsPayload());
+        const pattern = exportPatternWithThumbnail();
         const isUpdate = Boolean(currentCloudFile);
         const etag = isUpdate ? normalizeCloudEtag(currentCloudFile.etag) : null;
         if (isUpdate && !etag) {
@@ -601,7 +622,7 @@ function save() {
     uiManager.fillFlossUsage();
     // console.log(gridManager.colorArray);
 
-    const exportData = patternLoader.exportPattern(buildSettingsPayload());
+    const exportData = exportPatternWithThumbnail();
     var text2write = JSON.stringify(exportData);
     
     var element = document.createElement('a');
