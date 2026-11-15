@@ -571,6 +571,12 @@ table, th, td {
     border: none;
 }
 
+#previewModal .pathStats {
+    flex: 0 0 auto;
+    color: #fff;
+    font-size: 12px;
+}
+
 
 /* Input fields area (within toolbar) */
 #previewModal .preview-toolbar .inputFields,
