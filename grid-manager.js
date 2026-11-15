@@ -746,15 +746,9 @@ class GridManager {
                 this.highlightCanvas.clientHeight / scaleY
             );
 
-            const highlightedStitches = this.stitchesByColor.get(this.highlightedColor) || [];
-            for (const stitch of highlightedStitches) {
-                ctx.clearRect(
-                    stitch.X * this.tileSize,
-                    stitch.Y * this.tileSize,
-                    this.tileSize,
-                    this.tileSize
-                );
-                this.drawTile(ctx, stitch, true);
+            const highlightedStitches = this.stitchesByColor.get(this.highlightedColor);
+            if (highlightedStitches) {
+                this.drawHighlightedStitches(ctx, highlightedStitches);
             }
 
             this.drawLines(ctx);
@@ -762,6 +756,52 @@ class GridManager {
 
         if (this.pathFlag) {
             this.uiManager.drawPreviewPath(ctx);
+        }
+    }
+
+    drawHighlightedStitches(ctx, stitches) {
+        if (stitches.size === 0) {
+            return;
+        }
+
+        if (this.highlightedColor === "stitched") {
+            for (const stitch of stitches) {
+                this.drawTile(ctx, stitch, true);
+            }
+            return;
+        }
+
+        const colorData = this.getDMCValuesFromCode(this.highlightedColor);
+        const [color, spanColor] = this.getTileColorsBasedOnFlags(
+            this.highlightedColor,
+            colorData.R,
+            colorData.G,
+            colorData.B,
+            true
+        );
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        for (const stitch of stitches) {
+            ctx.rect(
+                stitch.X * this.tileSize,
+                stitch.Y * this.tileSize,
+                this.tileSize,
+                this.tileSize
+            );
+        }
+        ctx.fill();
+
+        ctx.fillStyle = spanColor;
+        ctx.font = `${Math.round((this.tileSize * 3) / 4)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (const stitch of stitches) {
+            ctx.fillText(
+                colorData.symbol,
+                (stitch.X + 0.5) * this.tileSize,
+                (stitch.Y + 0.5) * this.tileSize
+            );
         }
     }
 
