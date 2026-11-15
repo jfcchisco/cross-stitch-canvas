@@ -738,7 +738,7 @@ class GridManager {
         ctx.translate(translateX, translateY);
 
         if (this.highFlag) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
             ctx.fillRect(
                 -translateX,
                 -translateY,
@@ -1138,7 +1138,7 @@ class GridManager {
                 spanColor = this.getContrastColor(R, G, B);
                 break;
             case 1:
-                color = `rgba(${R}, ${G}, ${B}, 0.25)`;
+                color = `rgba(${R}, ${G}, ${B}, 1)`;
                 spanColor = (this.getContrastColor(R, G, B) === "black") ? "silver" : "white";
                 break;
             case 2:
