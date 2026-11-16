@@ -743,6 +743,90 @@ class UIManager {
         }
         return { sequence, stitchCount, distance: routeDistance };
     }
+
+    drawPathConnections(ctx, sequence, box, lineWidth) {
+        const colors = ["#00B8D9", "#F05A28"];
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        sequence.forEach((connection, index) => {
+            const startX = connection[3][0] * box + box / 2;
+            const startY = connection[3][1] * box + box / 2;
+            const endX = connection[4][0] * box + box / 2;
+            const endY = connection[4][1] * box + box / 2;
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const length = Math.hypot(deltaX, deltaY);
+            const color = colors[index % colors.length];
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = lineWidth + 4;
+            ctx.stroke();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = lineWidth + 2;
+            ctx.stroke();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+
+            const arrowSize = Math.min(Math.max(3, box * 0.75), length * 0.2);
+            if (length < arrowSize * 2.5) {
+                return;
+            }
+
+            const angle = Math.atan2(deltaY, deltaX);
+            ctx.save();
+            ctx.translate(startX + deltaX * 0.6, startY + deltaY * 0.6);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(arrowSize, 0);
+            ctx.lineTo(-arrowSize, -arrowSize * 0.7);
+            ctx.lineTo(-arrowSize, arrowSize * 0.7);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.fill();
+            ctx.stroke();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+
+    drawPathEndpoint(ctx, point, box, color, lineWidth) {
+        const x = point[0] * box + box / 2;
+        const y = point[1] * box + box / 2;
+        const radius = Math.max(box * 0.55, lineWidth * 1.5);
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = lineWidth + 4;
+        ctx.stroke();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = lineWidth + 2;
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+    }
+
+    drawPathRoute(ctx, sequence, box, lineWidth) {
+        if (sequence.length === 0) {
+            return;
+        }
+
+        ctx.save();
+        this.drawPathConnections(ctx, sequence, box, lineWidth);
+        this.drawPathEndpoint(ctx, sequence[0][3], box, "#B6FF00", lineWidth);
+        this.drawPathEndpoint(ctx, sequence[sequence.length - 1][4], box, "#FF2D95", lineWidth);
+        ctx.restore();
+    }
     
     previewPath(type) {
         // This function should be called only when there is already a created canvas
@@ -837,32 +921,8 @@ class UIManager {
                     stats.textContent = `Covered: ${result.stitchCount}/${highlightedStitches.length} stitches · Estimated path cost: ${result.distance.toFixed(1)}`;
                 }
 
-                if (result.sequence.length > 0) {
-                    ctx.beginPath();
-                    ctx.arc(result.sequence[0][3][0] * box + box / 2, result.sequence[0][3][1] * box + box / 2, box, 0, 2 * Math.PI);
-                    ctx.strokeStyle = "red";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    const lastConnection = result.sequence[result.sequence.length - 1];
-                    ctx.beginPath();
-                    ctx.arc(lastConnection[4][0] * box + box / 2, lastConnection[4][1] * box + box / 2, box, 0, 2 * Math.PI);
-                    ctx.strokeStyle = "orange";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    let lineColor = "cyan";
-                    for (const connection of result.sequence) {
-                        ctx.beginPath();
-                        ctx.moveTo(connection[3][0] * box + box / 2, connection[3][1] * box + box / 2);
-                        ctx.lineTo(connection[4][0] * box + box / 2, connection[4][1] * box + box / 2);
-                        lineColor = lineColor === "cyan" ? "greenyellow" : "cyan";
-                        ctx.strokeStyle = lineColor;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                    }
-                }
                 this.drawPreviewGridLines(box, ctx, cols, rows);
+                this.drawPathRoute(ctx, result.sequence, box, Math.max(2, box * 0.12));
             } catch (error) {
                 this.CLUSTER_SEQUENCE = [];
                 if (stats) {
@@ -876,49 +936,11 @@ class UIManager {
     }
 
     drawPreviewPath(ctx) {
-        const cols = this.patternLoader.getCols();
-        const rows = this.patternLoader.getRows();
         if(this.CLUSTER_SEQUENCE.length === 0) {
             return;
         }
-        // console.log("Drawing path...");
         const box = this.gridManager.tileSize;
-
-        // Draw circle on the initial point
-        ctx.beginPath();
-        ctx.arc(this.CLUSTER_SEQUENCE[0][3][0]*box + box/2, this.CLUSTER_SEQUENCE[0][3][1]*box + box/2, box/2, 0, 2 * Math.PI);
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        // Draw circle on the final point
-        let lastCluster = this.CLUSTER_SEQUENCE[this.CLUSTER_SEQUENCE.length - 1];
-        ctx.beginPath();   
-        ctx.arc(lastCluster[4][0]*box + box/2, lastCluster[4][1]*box + box/2, box/2, 0, 2 * Math.PI);
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        // Draw path lines
-        let lineColor = "cyan";
-        this.CLUSTER_SEQUENCE.forEach(cluster => {
-            ctx.beginPath();
-            ctx.moveTo(cluster[3][0]*box + box/2, cluster[3][1]*box + box/2);
-            ctx.lineTo(cluster[4][0]*box + box/2, cluster[4][1]*box + box/2);
-            if(lineColor == "cyan") {
-                lineColor = "greenyellow";
-            }
-            else {
-                lineColor = "cyan";
-            }
-            if(cluster[2] > this.THRESHOLD) {
-                ctx.strokeStyle = "red";
-            }
-            else {
-                ctx.strokeStyle = lineColor;
-            }
-            ctx.lineWidth = 4;
-            ctx.stroke();
-        })
-
+        this.drawPathRoute(ctx, this.CLUSTER_SEQUENCE, box, Math.max(3, box * 0.2));
     }
 
     drawPath() {
