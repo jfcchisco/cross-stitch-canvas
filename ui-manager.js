@@ -12,8 +12,6 @@ class UIManager {
         this.colorTemplate = document.querySelector("[data-color-template]");
         this.colorContainer = document.querySelector("[data-color-container]");
         this.CLUSTER_SEQUENCE = [];
-        this.SEQUENCED_COLOR = null;
-        this.THRESHOLD = 10;
         this.CLUSTER_SIZE_FACTOR = 5.25;
     }
 
@@ -60,7 +58,6 @@ class UIManager {
         let toStitch = 0;
         colorArray.forEach(obj => {
             if(obj.code == "stitched") {
-                // stitched = obj.count - this.gridManager.getChangeCount(obj.code);
                 stitched = obj.count;
             }
             else if(obj.code != "empty") {
@@ -94,7 +91,6 @@ class UIManager {
 
         //Fill table
         
-        //let table = document.getElementById("modalTable");
         let table = document.createElement("table");
         const headRow = document.createElement('tr');
 
@@ -115,7 +111,6 @@ class UIManager {
                 newRow = document.createElement('tr');
 
                 newCell = document.createElement('td');
-                //newCell.textContent = color.R + "," + color.G + "," + color.B;
                 let backColor = "background-color: rgb(" + color.R + "," + color.G + "," + color.B + ")";
                 newCell.setAttribute('style', backColor);
                 newRow.appendChild(newCell);
@@ -230,7 +225,6 @@ class UIManager {
         
         // Use setTimeout to allow the spinner to render before heavy computation
         setTimeout(() => {
-            // console.log(this.gridManager.highlightedColor)
             const canvas = document.getElementById("previewCanvas")
             const ctx = canvas.getContext('2d')
             const tileContainer = document.getElementsByClassName('tile-container')[0];
@@ -251,8 +245,6 @@ class UIManager {
             ctx.fillStyle = "#ffffff"
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let spanColor = 'black';
-            let color = 'white';
             // Draw tiles
             for(let stitch in this.patternLoader.currentPattern.stitches) {
                 let stitchObj = this.patternLoader.currentPattern.stitches[stitch];
@@ -265,7 +257,7 @@ class UIManager {
                 let B = colorData.B;
                 let code = stitchObj.dmcCode;
                 
-                [color, spanColor] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
+                const [color] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, box, box);
             }
@@ -280,7 +272,7 @@ class UIManager {
                 let B = colorData.B;
                 let code = "stitched";
 
-                [color, spanColor] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
+                const [color] = this.gridManager.getTileColorsBasedOnFlags(code, R, G, B);
                 ctx.fillStyle = color;
                 ctx.clearRect(x, y, box, box);
                 ctx.fillRect(x, y, box, box);
@@ -304,236 +296,464 @@ class UIManager {
         }, 0);
     }
 
-/*     createMarkers() {
-        let svgContainer = document.getElementsByClassName("svg-container")[0].children[0];
-        //Clear previous markers
-        while(svgContainer.lastElementChild) {
-            svgContainer.removeChild(svgContainer.lastElementChild);
+    createPathClusters(stitchesList, cols, threshold) {
+        const stitchByCoordinate = new Map();
+        for (const stitch of stitchesList) {
+            stitch.cluster = -1;
+            stitchByCoordinate.set(stitch.Y * cols + stitch.X, stitch);
         }
-        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-        const marker1 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker1.setAttribute("id", "arrow1");   
-        marker1.setAttribute("markerWidth", "10");
-        marker1.setAttribute("markerHeight", "10");
-        marker1.setAttribute("refX", "3.5");
-        marker1.setAttribute("refY", "2.5");
-        marker1.setAttribute("orient", "auto");
-        const arrowPath1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath1.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath1.setAttribute("fill", "dodgerblue");
-        marker1.appendChild(arrowPath1);
-        defs.appendChild(marker1);
 
-        const marker2 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker2.setAttribute("id", "arrow2");   
-        marker2.setAttribute("markerWidth", "10");
-        marker2.setAttribute("markerHeight", "10");
-        marker2.setAttribute("refX", "3.5");
-        marker2.setAttribute("refY", "2.5");
-        marker2.setAttribute("orient", "auto");
-        const arrowPath2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath2.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath2.setAttribute("fill", "orange");
-        marker2.appendChild(arrowPath2);
-        defs.appendChild(marker2);
+        const clusters = [];
+        for (const seed of stitchesList) {
+            if (seed.cluster !== -1) {
+                continue;
+            }
 
-        const marker3 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker3.setAttribute("id", "arrow3");   
-        marker3.setAttribute("markerWidth", "10");
-        marker3.setAttribute("markerHeight", "10");
-        marker3.setAttribute("refX", "3.5");
-        marker3.setAttribute("refY", "2.5");
-        marker3.setAttribute("orient", "auto");
-        const arrowPath3 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        arrowPath3.setAttribute("d", "M0,0 L0,5 L4,2.5 z");
-        arrowPath3.setAttribute("fill", "red");
-        marker3.appendChild(arrowPath3);
-        defs.appendChild(marker3);
-        
-        const marker4 = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-        marker4.setAttribute("id", "circle");
-        marker4.setAttribute("markerWidth", "10");
-        marker4.setAttribute("markerHeight", "10");
-        marker4.setAttribute("refX", "5");
-        marker4.setAttribute("refY", "5");
-        marker4.setAttribute("orient", "auto");
-        const circlePath = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circlePath.setAttribute("cx", "5");
-        circlePath.setAttribute("cy", "5");
-        circlePath.setAttribute("r", "5");
-        circlePath.setAttribute("fill", "red");
-        marker4.appendChild(circlePath);
-        defs.appendChild(marker4);
+            const cluster = {
+                id: clusters.length,
+                stitches: [],
+                boundary: [],
+                bounds: { minX: seed.X, minY: seed.Y, maxX: seed.X, maxY: seed.Y },
+                buckets: new Map()
+            };
+            const queue = [seed];
+            seed.cluster = cluster.id;
 
-        svgContainer.appendChild(defs);
+            for (let head = 0; head < queue.length; head++) {
+                const stitch = queue[head];
+                cluster.stitches.push(stitch);
+                cluster.bounds.minX = Math.min(cluster.bounds.minX, stitch.X);
+                cluster.bounds.minY = Math.min(cluster.bounds.minY, stitch.Y);
+                cluster.bounds.maxX = Math.max(cluster.bounds.maxX, stitch.X);
+                cluster.bounds.maxY = Math.max(cluster.bounds.maxY, stitch.Y);
 
-    } */
-
-    assignClusters(stitchesList) {
-        // Assign clusters to a list of highlighted stitches
-        let clusterCounter = 0;
-        // Create a map for fast coordinate lookup
-        const stitchMap = new Map();
-        stitchesList.forEach((stitch, index) => {
-            const key = `${stitch.X},${stitch.Y}`;
-            stitchMap.set(key, index);
-            stitch.cluster = 0; // Reset clusters
-        });
-
-        for(let i = 0; i < stitchesList.length; i++) {
-            let s = stitchesList[i];
-            if(s.cluster == 0) {
-                clusterCounter += 1;
-                let neighborList = this.gridManager.getConnectedTiles(s.X, s.Y, s.code);
-                for(let neighbor of neighborList) {
-                    const key = `${neighbor.x},${neighbor.y}`;
-                    const index = stitchMap.get(key);
-                    if(index !== undefined) {
-                        stitchesList[index].cluster = clusterCounter;
+                const neighbors = [
+                    [stitch.X, stitch.Y - 1],
+                    [stitch.X, stitch.Y + 1],
+                    [stitch.X - 1, stitch.Y],
+                    [stitch.X + 1, stitch.Y]
+                ];
+                for (const [x, y] of neighbors) {
+                    if (x < 0 || x >= cols || y < 0) {
+                        continue;
+                    }
+                    const neighbor = stitchByCoordinate.get(y * cols + x);
+                    if (neighbor && neighbor.cluster === -1) {
+                        neighbor.cluster = cluster.id;
+                        queue.push(neighbor);
                     }
                 }
             }
+            clusters.push(cluster);
         }
-        return stitchesList;
+
+        const bucketSize = Math.max(1, Math.ceil(threshold));
+        for (const cluster of clusters) {
+            for (const stitch of cluster.stitches) {
+                const neighbors = [
+                    [stitch.X, stitch.Y - 1],
+                    [stitch.X, stitch.Y + 1],
+                    [stitch.X - 1, stitch.Y],
+                    [stitch.X + 1, stitch.Y]
+                ];
+                const isBoundary = neighbors.some(([x, y]) => {
+                    const neighbor = x < 0 || x >= cols || y < 0
+                        ? null
+                        : stitchByCoordinate.get(y * cols + x);
+                    return !neighbor || neighbor.cluster !== cluster.id;
+                });
+                if (!isBoundary) {
+                    continue;
+                }
+
+                cluster.boundary.push(stitch);
+                const bucketKey = this.getPathBucketKey(stitch.X, stitch.Y, bucketSize);
+                let bucket = cluster.buckets.get(bucketKey);
+                if (!bucket) {
+                    bucket = [];
+                    cluster.buckets.set(bucketKey, bucket);
+                }
+                bucket.push(stitch);
+            }
+        }
+        return { clusters, bucketSize };
     }
 
-    getClusterSize(cluster, stitchesList) {
-        return stitchesList.filter(stitch => stitch.cluster === cluster).length;
+    getPathBucketKey(x, y, bucketSize) {
+        return `${Math.floor(x / bucketSize)},${Math.floor(y / bucketSize)}`;
     }
 
-    getDistBetweenClusters(c1, c2, sList) {
-        let retVal = [0, 0, 0, [0, 0], [0, 0]];
-        let dist = Infinity;
-        for(let s1 of sList) {
-            if(s1.cluster == c1) {
-                for(let s2 of sList) {
-                    if(s2.cluster == c2) {
-                        let newDist = Math.sqrt((s1.X - s2.X) ** 2 + (s1.Y - s2.Y) ** 2);
-                        if(newDist < dist) {
-                            dist = newDist;
-                            retVal = [c1, c2, dist, [s1.X, s1.Y], [s2.X, s2.Y] ];
+    getPathConnection(first, second, threshold, bucketSize, connectionCache) {
+        if (first === second) {
+            return null;
+        }
+
+        const firstId = Math.min(first.id, second.id);
+        const secondId = Math.max(first.id, second.id);
+        const cacheKey = `${firstId}:${secondId}`;
+        let cached = connectionCache.get(cacheKey);
+        if (cached === undefined) {
+            const firstBounds = first.bounds;
+            const secondBounds = second.bounds;
+            const dx = Math.max(0, firstBounds.minX - secondBounds.maxX, secondBounds.minX - firstBounds.maxX);
+            const dy = Math.max(0, firstBounds.minY - secondBounds.maxY, secondBounds.minY - firstBounds.maxY);
+            if (dx * dx + dy * dy > threshold * threshold) {
+                return null;
+            }
+
+            let source = first;
+            let target = second;
+            if (source.boundary.length > target.boundary.length) {
+                source = second;
+                target = first;
+            }
+
+            let bestDistanceSquared = threshold * threshold;
+            let sourcePoint = null;
+            let targetPoint = null;
+            for (const point of source.boundary) {
+                const pointBucketX = Math.floor(point.X / bucketSize);
+                const pointBucketY = Math.floor(point.Y / bucketSize);
+                const minBucketX = pointBucketX - 1;
+                const maxBucketX = pointBucketX + 1;
+                const minBucketY = pointBucketY - 1;
+                const maxBucketY = pointBucketY + 1;
+                for (let bucketY = minBucketY; bucketY <= maxBucketY; bucketY++) {
+                    for (let bucketX = minBucketX; bucketX <= maxBucketX; bucketX++) {
+                        const bucket = target.buckets.get(`${bucketX},${bucketY}`);
+                        if (!bucket) {
+                            continue;
                         }
-                    }
-                }
-            }
-        }
-        return retVal;
-    }
-
-    getClosestClusterToPoint(clusterNumbers, sList, pointX, pointY) {
-        let retCluster = -1;
-        let dist = Infinity;
-        for(let c of clusterNumbers) {
-            for(let s of sList) {
-                if(s.cluster == c) {
-                    let newDist = Math.sqrt((s.X - pointX) ** 2 + (s.Y - pointY) ** 2);
-                    if(newDist < dist) {
-                        dist = newDist;
-                        retCluster = c;
-                    }
-                }
-            }
-        }
-        return retCluster;
-    }
-
-    buildClusterSequence(nextCluster, clusterNumbers, clusterSequence, highStitches, threshold, maxTotalDistance) {
-        let closestCluster = 0;
-        let accumulatedDistance = 0;
-        while(clusterNumbers.length > 0) {
-            let dist2Next = [nextCluster, 0, Infinity, [0,0], [0,0]];
-            for (let i = 0; i < clusterNumbers.length; i++) {
-                let cNum = clusterNumbers[i];
-                let dist2Cluster = this.getDistBetweenClusters(nextCluster, cNum, highStitches);
-                if(dist2Cluster[2] < dist2Next[2] && dist2Cluster[2] != 0) {
-                    dist2Next = dist2Cluster;
-                    closestCluster = cNum;
-                }
-            }
-
-            if(dist2Next[2] <= threshold) {
-                clusterSequence.push(dist2Next);
-                accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
-                if(accumulatedDistance > maxTotalDistance) {
-                    break;
-                }
-                if(clusterSequence.length == 1) {
-                    let index = clusterNumbers.indexOf(nextCluster);
-                    if (index > -1) {
-                        clusterNumbers.splice(index, 1);
-                    }
-                }
-                nextCluster = closestCluster;
-                //remove from clusterNumbers
-                let index = clusterNumbers.indexOf(closestCluster);
-                if (index > -1) {
-                    clusterNumbers.splice(index, 1);
-                }
-            }
-            else {
-                // Try a better path
-                // Go through the clusterSequence and find the summed
-                // distance to each pair
-                let newMinSum = dist2Next[2];
-                let betterOptionFlag = false;
-                let newSeq0 = [];
-                let newSeq1 = [];
-                let betterOptionIndex = -1;
-                for(let i = 0; i < clusterSequence.length; i++) {
-                    let dist0 = this.getDistBetweenClusters(clusterSequence[i][0], closestCluster, highStitches);
-                    let dist1 = this.getDistBetweenClusters(closestCluster, clusterSequence[i][1], highStitches);
-                    let sumDist = dist0[2] + dist1[2];
-                    if(sumDist < newMinSum) {
-                        // Found a better option
-                        newMinSum = sumDist;
-                        betterOptionFlag = true;
-                        newSeq0 = dist0;
-                        newSeq1 = dist1;
-                        betterOptionIndex = i;
-                    }
-                }
-                if(betterOptionFlag) {
-                    clusterSequence.splice(betterOptionIndex, 1, newSeq0, newSeq1);
-                    accumulatedDistance += (newSeq0[2] || 0) + (newSeq1[2] || 0) + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
-                    if(accumulatedDistance > maxTotalDistance) {
-                        let index = clusterNumbers.indexOf(closestCluster);
-                        if (index > -1) {
-                            clusterNumbers.splice(index, 1);
-                        }
-                        break;
-                    }
-                    let index = clusterNumbers.indexOf(closestCluster);
-                    if (index > -1) {
-                        clusterNumbers.splice(index, 1);
-                    }
-                }
-                else {
-                    clusterSequence.push(dist2Next);
-                    accumulatedDistance += dist2Next[2] + this.getClusterSize(closestCluster, highStitches) * this.CLUSTER_SIZE_FACTOR;
-                    if(accumulatedDistance > maxTotalDistance) {
-                        if(clusterSequence.length == 1) {
-                            let index = clusterNumbers.indexOf(nextCluster);
-                            if (index > -1) {
-                                clusterNumbers.splice(index, 1);
+                        for (const candidate of bucket) {
+                            const deltaX = point.X - candidate.X;
+                            const deltaY = point.Y - candidate.Y;
+                            const distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                            if (distanceSquared < bestDistanceSquared ||
+                                (!sourcePoint && distanceSquared === bestDistanceSquared)) {
+                                bestDistanceSquared = distanceSquared;
+                                sourcePoint = point;
+                                targetPoint = candidate;
+                                if (bestDistanceSquared === 0) {
+                                    break;
+                                }
                             }
                         }
-                        break;
-                    }
-                    if(clusterSequence.length == 1) {
-                        let index = clusterNumbers.indexOf(nextCluster);
-                        if (index > -1) {
-                            clusterNumbers.splice(index, 1);
+                        if (bestDistanceSquared === 0) {
+                            break;
                         }
                     }
-                    nextCluster = closestCluster;
-                    //remove from clusterNumbers
-                    let index = clusterNumbers.indexOf(closestCluster);
-                    if (index > -1) {
-                        clusterNumbers.splice(index, 1);
+                    if (bestDistanceSquared === 0) {
+                        break;
                     }
+                }
+                if (bestDistanceSquared === 0) {
+                    break;
+                }
+            }
+
+            if (!sourcePoint) {
+                return null;
+            }
+            cached = {
+                firstId,
+                secondId,
+                distance: Math.sqrt(bestDistanceSquared),
+                firstPoint: source.id === firstId ? sourcePoint : targetPoint,
+                secondPoint: source.id === firstId ? targetPoint : sourcePoint
+            };
+            connectionCache.set(cacheKey, cached);
+            if (connectionCache.size > 20000) {
+                connectionCache.delete(connectionCache.keys().next().value);
+            }
+        }
+
+        if (first.id === cached.firstId) {
+            return [
+                first.id,
+                second.id,
+                cached.distance,
+                [cached.firstPoint.X, cached.firstPoint.Y],
+                [cached.secondPoint.X, cached.secondPoint.Y]
+            ];
+        }
+        return [
+            first.id,
+            second.id,
+            cached.distance,
+            [cached.secondPoint.X, cached.secondPoint.Y],
+            [cached.firstPoint.X, cached.firstPoint.Y]
+        ];
+    }
+
+    getClosestPathCluster(clusters, pointX, pointY) {
+        let closestCluster = null;
+        let closestDistanceSquared = Infinity;
+        for (const cluster of clusters) {
+            for (const stitch of cluster.stitches) {
+                const dx = stitch.X - pointX;
+                const dy = stitch.Y - pointY;
+                const distanceSquared = dx * dx + dy * dy;
+                if (distanceSquared < closestDistanceSquared) {
+                    closestDistanceSquared = distanceSquared;
+                    closestCluster = cluster;
                 }
             }
         }
+        return closestCluster;
+    }
+
+    getPathRouteDistance(route, threshold, bucketSize, connectionCache) {
+        let distance = 0;
+        for (let index = 1; index < route.length; index++) {
+            const connection = this.getPathConnection(
+                route[index - 1],
+                route[index],
+                threshold,
+                bucketSize,
+                connectionCache
+            );
+            if (!connection) {
+                return Infinity;
+            }
+            distance += connection[2] + route[index].stitches.length * this.CLUSTER_SIZE_FACTOR;
+        }
+        return distance;
+    }
+
+    findBestPathInsertion(route, clusters, visited, routeDistance, threshold, maxTotalDistance, bucketSize, connectionCache) {
+        let bestInsertion = null;
+        for (const candidate of clusters) {
+            if (visited.has(candidate.id)) {
+                continue;
+            }
+
+            const serviceCost = candidate.stitches.length * this.CLUSTER_SIZE_FACTOR;
+            for (let position = 1; position <= route.length; position++) {
+                const previous = route[position - 1];
+                const toCandidate = this.getPathConnection(previous, candidate, threshold, bucketSize, connectionCache);
+                if (!toCandidate) {
+                    continue;
+                }
+
+                let addedCost = toCandidate[2] + serviceCost;
+                if (position < route.length) {
+                    const next = route[position];
+                    const fromCandidate = this.getPathConnection(candidate, next, threshold, bucketSize, connectionCache);
+                    const replaced = this.getPathConnection(previous, next, threshold, bucketSize, connectionCache);
+                    if (!fromCandidate || !replaced) {
+                        continue;
+                    }
+                    addedCost += fromCandidate[2] - replaced[2];
+                }
+
+                if (routeDistance + addedCost > maxTotalDistance) {
+                    continue;
+                }
+
+                const score = candidate.stitches.length / Math.max(addedCost, 0.001);
+                if (!bestInsertion ||
+                    score > bestInsertion.score ||
+                    (score === bestInsertion.score && candidate.stitches.length > bestInsertion.cluster.stitches.length) ||
+                    (score === bestInsertion.score &&
+                        candidate.stitches.length === bestInsertion.cluster.stitches.length &&
+                        addedCost < bestInsertion.addedCost) ||
+                    (score === bestInsertion.score &&
+                        candidate.stitches.length === bestInsertion.cluster.stitches.length &&
+                        addedCost === bestInsertion.addedCost &&
+                        candidate.id < bestInsertion.cluster.id)) {
+                    bestInsertion = { cluster: candidate, position, addedCost, score };
+                }
+            }
+        }
+        return bestInsertion;
+    }
+
+    improvePathRoute(route, maxTotalDistance, threshold, bucketSize, connectionCache) {
+        const maxEvaluations = 5000;
+        let routeDistance = this.getPathRouteDistance(route, threshold, bucketSize, connectionCache);
+
+        for (let pass = 0; pass < 2; pass++) {
+            let bestRoute = route;
+            let bestDistance = routeDistance;
+            let evaluations = 0;
+
+            for (let start = 1; start < route.length && evaluations < maxEvaluations; start++) {
+                for (let end = start + 1; end < route.length && evaluations < maxEvaluations; end++) {
+                    const reordered = route.slice();
+                    const [moved] = reordered.splice(start, 1);
+                    reordered.splice(end, 0, moved);
+                    const distance = this.getPathRouteDistance(reordered, threshold, bucketSize, connectionCache);
+                    evaluations++;
+                    if (distance <= maxTotalDistance && distance < bestDistance) {
+                        bestRoute = reordered;
+                        bestDistance = distance;
+                    }
+                }
+            }
+
+            for (let start = 1; start < route.length - 1 && evaluations < maxEvaluations; start++) {
+                for (let end = start + 1; end < route.length && evaluations < maxEvaluations; end++) {
+                    const reordered = route.slice();
+                    const reversed = reordered.slice(start, end + 1).reverse();
+                    reordered.splice(start, reversed.length, ...reversed);
+                    const distance = this.getPathRouteDistance(reordered, threshold, bucketSize, connectionCache);
+                    evaluations++;
+                    if (distance <= maxTotalDistance && distance < bestDistance) {
+                        bestRoute = reordered;
+                        bestDistance = distance;
+                    }
+                }
+            }
+
+            if (bestDistance >= routeDistance) {
+                break;
+            }
+            route = bestRoute;
+            routeDistance = bestDistance;
+        }
+        return { route, distance: routeDistance };
+    }
+
+    buildCoveragePath(startCluster, clusters, threshold, maxTotalDistance, bucketSize, connectionCache) {
+        if (!startCluster) {
+            return { sequence: [], stitchCount: 0, distance: 0 };
+        }
+
+        let route = [startCluster];
+        let routeDistance = 0;
+        const visited = new Set([startCluster.id]);
+        while (true) {
+            const insertion = this.findBestPathInsertion(
+                route,
+                clusters,
+                visited,
+                routeDistance,
+                threshold,
+                maxTotalDistance,
+                bucketSize,
+                connectionCache
+            );
+            if (insertion) {
+                route.splice(insertion.position, 0, insertion.cluster);
+                visited.add(insertion.cluster.id);
+                routeDistance = this.getPathRouteDistance(route, threshold, bucketSize, connectionCache);
+                continue;
+            }
+
+            const improved = this.improvePathRoute(
+                route,
+                maxTotalDistance,
+                threshold,
+                bucketSize,
+                connectionCache
+            );
+            if (improved.distance >= routeDistance) {
+                break;
+            }
+            route = improved.route;
+            routeDistance = improved.distance;
+        }
+
+        const sequence = [];
+        let stitchCount = route[0].stitches.length;
+        for (let index = 1; index < route.length; index++) {
+            const connection = this.getPathConnection(
+                route[index - 1],
+                route[index],
+                threshold,
+                bucketSize,
+                connectionCache
+            );
+            if (connection) {
+                sequence.push(connection);
+                stitchCount += route[index].stitches.length;
+            }
+        }
+        return { sequence, stitchCount, distance: routeDistance };
+    }
+
+    drawPathConnections(ctx, sequence, box, lineWidth) {
+        const colors = ["#00B8D9", "#F05A28"];
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        sequence.forEach((connection, index) => {
+            const startX = connection[3][0] * box + box / 2;
+            const startY = connection[3][1] * box + box / 2;
+            const endX = connection[4][0] * box + box / 2;
+            const endY = connection[4][1] * box + box / 2;
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const length = Math.hypot(deltaX, deltaY);
+            const color = colors[index % colors.length];
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = lineWidth + 4;
+            ctx.stroke();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = lineWidth + 2;
+            ctx.stroke();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+
+            const arrowSize = Math.min(Math.max(3, box * 0.75), length * 0.2);
+            if (length < arrowSize * 2.5) {
+                return;
+            }
+
+            const angle = Math.atan2(deltaY, deltaX);
+            ctx.save();
+            ctx.translate(startX + deltaX * 0.6, startY + deltaY * 0.6);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(arrowSize, 0);
+            ctx.lineTo(-arrowSize, -arrowSize * 0.7);
+            ctx.lineTo(-arrowSize, arrowSize * 0.7);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.fill();
+            ctx.stroke();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+
+    drawPathEndpoint(ctx, point, box, color, lineWidth) {
+        const x = point[0] * box + box / 2;
+        const y = point[1] * box + box / 2;
+        const radius = Math.max(box * 0.55, lineWidth * 1.5);
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = lineWidth + 4;
+        ctx.stroke();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = lineWidth + 2;
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+    }
+
+    drawPathRoute(ctx, sequence, box, lineWidth) {
+        if (sequence.length === 0) {
+            return;
+        }
+
+        ctx.save();
+        this.drawPathConnections(ctx, sequence, box, lineWidth);
+        this.drawPathEndpoint(ctx, sequence[0][3], box, "#B6FF00", lineWidth);
+        this.drawPathEndpoint(ctx, sequence[sequence.length - 1][4], box, "#FF2D95", lineWidth);
+        ctx.restore();
     }
     
     previewPath(type) {
@@ -543,176 +763,116 @@ class UIManager {
         
         // Use setTimeout to allow the spinner to render before heavy computation
         setTimeout(() => {
-            const cols = this.patternLoader.getCols();
-            const rows = this.patternLoader.getRows();
-            const thresholdInput = document.getElementById('pathInput');
-            const threshold = thresholdInput ? Number(thresholdInput.value) : 10;
+            const stats = document.getElementById("pathStats");
+            try {
+                const cols = this.patternLoader.getCols();
+                const rows = this.patternLoader.getRows();
+                const canvas = document.getElementById("previewCanvas");
+                const ctx = canvas.getContext("2d");
+                const tileContainer = document.getElementsByClassName("tile-container")[0];
+                const threshold = Number(document.getElementById("pathInput")?.value ?? 10);
+                const distanceInput = document.getElementById("pathDistanceLimit")?.value.trim() ?? "";
+                const maxTotalDistance = distanceInput === ""
+                    ? cols * rows * 2
+                    : Number(distanceInput);
 
-            let highStitches = this.gridManager.getHighlightedStitches(this.gridManager.highlightedColor);
-            highStitches = this.assignClusters(highStitches);
-            
-            let clusterNumbers = [];
-            highStitches.forEach(s => {
-                if(!clusterNumbers.includes(s.cluster)) {
-                    clusterNumbers.push(s.cluster);
+                if (!ctx) {
+                    throw new Error("Preview canvas context is unavailable.");
                 }
-            });
+                if (!Number.isFinite(threshold) || threshold < 0) {
+                    throw new Error("Threshold must be a non-negative number.");
+                }
+                if (!Number.isFinite(maxTotalDistance) || maxTotalDistance < 0) {
+                    throw new Error("Distance limit must be a non-negative number.");
+                }
+                if (cols <= 0 || rows <= 0) {
+                    throw new Error("The current pattern has no drawable area.");
+                }
 
-            let canvas = document.getElementById("previewCanvas");
-            let ctx = canvas.getContext('2d');
-            const tileContainer = document.getElementsByClassName('tile-container')[0];
+                const box = Math.max(1, Math.min(
+                    Math.floor(tileContainer.offsetHeight / rows),
+                    Math.floor(tileContainer.offsetWidth / cols)
+                ));
+                canvas.height = box * rows;
+                canvas.width = box * cols;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            //Repeated drawing of stitches
-            const box = Math.max(1, (Math.min(Math.floor(tileContainer.offsetHeight/rows), Math.floor(tileContainer.offsetWidth/cols))));
-            
-            ctx.clearRect(0,0, canvas.width, canvas.height)
-            ctx.fillStyle = "#ffffff"
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            for(let stitch of this.patternLoader.currentPattern.stitches) {
-                if(stitch.dmcCode == this.gridManager.highlightedColor && !this.gridManager.isTileChanged(stitch.X, stitch.Y)) {
-                    ctx.fillStyle = "#000000";
+                const highlightedColor = this.gridManager.highlightedColor;
+                for (const stitch of this.patternLoader.getCurrentPattern().stitches) {
+                    const isHighlighted = stitch.dmcCode === highlightedColor &&
+                        !this.gridManager.isTileChanged(stitch.X, stitch.Y);
+                    ctx.fillStyle = isHighlighted ? "#000000" : "#ffffff";
                     ctx.fillRect(stitch.X * box, stitch.Y * box, box, box);
                 }
-                else {
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(stitch.X * box, stitch.Y * box, box, box);
-                }
-            }
 
-
-
-            let clusterSequence = [];
-            let nextCluster = 0;
-            // Limit total accumulated distance between clusters to avoid runaway paths
-            const MAX_TOTAL_DISTANCE = Number(document.getElementById('pathDistanceLimit')?.value) || (cols * rows * 2);
-            if(type == 0) {
-                // Closest to top-left
-                nextCluster = this.getClosestClusterToPoint(clusterNumbers, highStitches, 0, 0);
-            }
-            else if(type == 1) {
-                // Closest to center
-                nextCluster = this.getClosestClusterToPoint(clusterNumbers, highStitches, cols/2, rows/2);
-            }
-            else if(type == 2) {
-                // Closest to bottom-right
-                let coordX = Number(document.getElementById("pathXInput").value);
-                let coordY = Number(document.getElementById("pathYInput").value);
-                if(coordX == null || !Number.isInteger(coordX) || coordX > cols || coordX < 0) {
-                    alert("Invalid X coordinate, using 0"); 
-                    coordX = 0;
+                const highlightedStitches = this.gridManager.getHighlightedStitches(highlightedColor);
+                const { clusters, bucketSize } = this.createPathClusters(highlightedStitches, cols, threshold);
+                let startCluster = null;
+                if (clusters.length > 0) {
+                    if (type === 0) {
+                        startCluster = this.getClosestPathCluster(clusters, 0, 0);
+                    } else if (type === 1) {
+                        startCluster = this.getClosestPathCluster(clusters, cols / 2, rows / 2);
+                    } else if (type === 2) {
+                        let coordX = Number(document.getElementById("pathXInput").value);
+                        let coordY = Number(document.getElementById("pathYInput").value);
+                        if (!Number.isInteger(coordX) || coordX >= cols || coordX < 0) {
+                            alert(`Invalid X coordinate, using 0`);
+                            coordX = 0;
+                        }
+                        if (!Number.isInteger(coordY) || coordY >= rows || coordY < 0) {
+                            alert(`Invalid Y coordinate, using 0`);
+                            coordY = 0;
+                        }
+                        startCluster = this.getClosestPathCluster(clusters, coordX, coordY);
+                    } else if (type === 3) {
+                        startCluster = clusters[Math.floor(Math.random() * clusters.length)];
+                    } else {
+                        throw new Error("Unknown path start selection.");
+                    }
                 }
-                if(coordY == null || !Number.isInteger(coordY) || coordY > rows || coordY < 0) {
-                    alert("Invalid Y coordinate, using 0");
-                    coordY = 0;
+
+                const connectionCache = new Map();
+                const result = this.buildCoveragePath(
+                    startCluster,
+                    clusters,
+                    threshold,
+                    maxTotalDistance,
+                    bucketSize,
+                    connectionCache
+                );
+                this.CLUSTER_SEQUENCE = result.sequence;
+                if (stats) {
+                    stats.textContent = `Covered: ${result.stitchCount}/${highlightedStitches.length} stitches · Estimated path cost: ${result.distance.toFixed(1)}`;
                 }
-                nextCluster = this.getClosestClusterToPoint(clusterNumbers, highStitches, coordX, coordY);
-            }
-            else if(type == 3) {
-                nextCluster = clusterNumbers[Math.floor(Math.random() * clusterNumbers.length)];
-            }
-            this.buildClusterSequence(nextCluster, clusterNumbers, clusterSequence, highStitches, threshold, MAX_TOTAL_DISTANCE);
-            this.SEQUENCED_COLOR = this.gridManager.highlightedColor;
-            // If no sequence found or we exited early, avoid accessing clusterSequence[0]
-            if(clusterSequence.length === 0) {
-                this.CLUSTER_SEQUENCE = clusterSequence;
-                this.THRESHOLD = threshold;
+
                 this.drawPreviewGridLines(box, ctx, cols, rows);
+                this.drawPathRoute(ctx, result.sequence, box, Math.max(1, box * 0.12));
+            } catch (error) {
+                this.CLUSTER_SEQUENCE = [];
+                if (stats) {
+                    stats.textContent = `Path calculation failed: ${error.message}`;
+                }
+                console.error("Path calculation failed.", error);
+            } finally {
                 this.hideSpinner();
-                return;
             }
-            // Draw circle on the initial point
-            ctx.beginPath();
-            ctx.arc(clusterSequence[0][3][0]*box + box/2, clusterSequence[0][3][1]*box + box/2, box, 0, 2 * Math.PI);
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // Draw circle on the final point
-            let lastCluster = clusterSequence[clusterSequence.length - 1];
-            ctx.beginPath();   
-            ctx.arc(lastCluster[4][0]*box + box/2, lastCluster[4][1]*box + box/2, box, 0, 2 * Math.PI);
-            ctx.strokeStyle = "orange";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // Draw path lines
-            let lineColor = "cyan";
-            clusterSequence.forEach(cluster => {
-                ctx.beginPath();
-                ctx.moveTo(cluster[3][0]*box + box/2, cluster[3][1]*box + box/2);
-                ctx.lineTo(cluster[4][0]*box + box/2, cluster[4][1]*box + box/2);
-                if(lineColor == "cyan") {
-                    lineColor = "greenyellow";
-                }
-                else {
-                    lineColor = "cyan";
-                }
-                if(cluster[2] > threshold) {
-                    ctx.strokeStyle = "red";
-                }
-                else {
-                    ctx.strokeStyle = lineColor;
-                }
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            })
-            // Copy to global variable
-            this.CLUSTER_SEQUENCE = clusterSequence;
-            this.THRESHOLD = threshold;
-            this.drawPreviewGridLines(box, ctx, cols, rows);
-            this.hideSpinner();
         }, 0);
     }
 
     drawPreviewPath(ctx) {
-        const cols = this.patternLoader.getCols();
-        const rows = this.patternLoader.getRows();
         if(this.CLUSTER_SEQUENCE.length === 0) {
             return;
         }
-        // console.log("Drawing path...");
         const box = this.gridManager.tileSize;
-
-        // Draw circle on the initial point
-        ctx.beginPath();
-        ctx.arc(this.CLUSTER_SEQUENCE[0][3][0]*box + box/2, this.CLUSTER_SEQUENCE[0][3][1]*box + box/2, box/2, 0, 2 * Math.PI);
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        // Draw circle on the final point
-        let lastCluster = this.CLUSTER_SEQUENCE[this.CLUSTER_SEQUENCE.length - 1];
-        ctx.beginPath();   
-        ctx.arc(lastCluster[4][0]*box + box/2, lastCluster[4][1]*box + box/2, box/2, 0, 2 * Math.PI);
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        // Draw path lines
-        let lineColor = "cyan";
-        this.CLUSTER_SEQUENCE.forEach(cluster => {
-            ctx.beginPath();
-            ctx.moveTo(cluster[3][0]*box + box/2, cluster[3][1]*box + box/2);
-            ctx.lineTo(cluster[4][0]*box + box/2, cluster[4][1]*box + box/2);
-            if(lineColor == "cyan") {
-                lineColor = "greenyellow";
-            }
-            else {
-                lineColor = "cyan";
-            }
-            if(cluster[2] > this.THRESHOLD) {
-                ctx.strokeStyle = "red";
-            }
-            else {
-                ctx.strokeStyle = lineColor;
-            }
-            ctx.lineWidth = 4;
-            ctx.stroke();
-        })
-
+        this.drawPathRoute(ctx, this.CLUSTER_SEQUENCE, box, Math.max(3, box * 0.2));
     }
 
     drawPath() {
         this.gridManager.pathFlag = true;
-        this.gridManager.patternCacheDirty = true;
-        this.gridManager.refreshCanvas(true);
+        this.gridManager.renderHighlightLayer();
     }
 
     // Spinner functions
