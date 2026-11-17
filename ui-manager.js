@@ -849,7 +849,7 @@ class UIManager {
                 }
 
                 this.drawPreviewGridLines(box, ctx, cols, rows);
-                this.drawPathRoute(ctx, result.sequence, box, Math.max(2, box * 0.12));
+                this.drawPathRoute(ctx, result.sequence, box, Math.max(1, box * 0.12));
             } catch (error) {
                 this.CLUSTER_SEQUENCE = [];
                 if (stats) {
