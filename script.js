@@ -222,8 +222,8 @@ function applyLoadedSettings(settings, promptForSettings = false) {
     }
 
     const currentPattern = patternLoader.getCurrentPattern();
-    gridManager.highFlag = Boolean(settings.highFlag);
-    gridManager.contrastFlag = Boolean(settings.contrastFlag);
+    gridManager.setHighlightState(Boolean(settings.highFlag));
+    gridManager.setContrastState(Boolean(settings.contrastFlag));
 
     if (Number.isInteger(Number(settings.lastSelectedID)) && Number(settings.lastSelectedID) >= 0) {
         const matchingColor = currentPattern && currentPattern.colors
@@ -231,16 +231,11 @@ function applyLoadedSettings(settings, promptForSettings = false) {
             : null;
 
         if (matchingColor) {
-            gridManager.highlightedColor = matchingColor.dmcCode;
-            gridManager.highlightedSymbol = matchingColor.symbol;
-            gridManager.updateColorSelectorUI(matchingColor.dmcCode, matchingColor.symbol);
+            gridManager.selectColor(matchingColor.dmcCode, matchingColor.symbol);
         }
     }
 
-    if (gridManager.highFlag) {
-        gridManager.activateUIToolState('highTool');
-    }
-
+    gridManager.syncGridToolState();
     gridManager.refreshCanvas(true);
     return true;
 }
@@ -282,17 +277,15 @@ function loadJSON(data, options = {}) {
     //Create all divs for tiles
     //One additional because the array starts at zero
     //Another additional
-    // Reset flags for regular tool state transitions, but preserve highlight/contrast
-    // when the loaded file does not contain saved settings.
-    gridManager.paintFlag = false;
-    gridManager.bucketFlag = false;
-    gridManager.pathFlag = false;
+    // Reset edit and route state for regular pattern transitions. Highlight and
+    // contrast remain available until settings are applied or preserved by the caller.
+    gridManager.resetInteractionState();
 
     // Set the final viewport size before initializing the canvas layers and zoom.
     tileContainer.style.height = (document.body.offsetHeight - 130 - 25)+"px";
     gridManager.initializeCanvas();
     gridManager.resetCanvasZoom();
-    gridManager.clearUIToolStates();
+    gridManager.syncGridToolState();
 
     if (processedData.settings) {
         applyLoadedSettings(processedData.settings, promptForSettings);

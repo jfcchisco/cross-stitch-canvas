@@ -14,6 +14,8 @@ class GridManager {
         this.patternLoader = patternLoader;
         this.uiManager = uiManager;
         this.activeTool = null;
+        this.toolMode = null;
+        this.pathRequested = false;
         this.highlightedColor = null;
         this.highlightedSymbol = null;
         this.changeCounter = 0;
@@ -63,65 +65,61 @@ class GridManager {
      */
 
     // Tool activation methods
-    activatePaint() {
-        this.deactivateTools();
-        // Toggle paint mode
-        this.paintFlag = !this.paintFlag;
+    setToolMode(mode) {
+        const normalizedMode = mode === "paint" || mode === "bucket" || mode === "restore" ? mode : null;
+        this.toolMode = normalizedMode;
+        this.activeTool = normalizedMode;
+        this.paintFlag = normalizedMode === "paint";
+        this.bucketFlag = normalizedMode === "bucket";
+        this.restoreFlag = normalizedMode === "restore";
+        this.syncGridToolState();
+    }
 
-        if(this.paintFlag) {
-            this.activateUIToolState('paintTool');
-        }
-        if(this.highFlag) {
-            this.activateUIToolState('highTool');
-        }
-        this.bucketFlag = false;
-        this.restoreFlag = false;
+    toggleToolMode(mode) {
+        this.setToolMode(this.toolMode === mode ? null : mode);
+    }
+
+    activatePaint() {
+        this.toggleToolMode("paint");
     }
 
     activateBucket() {
-        this.deactivateTools();
-        // Toggle bucket mode
-        this.bucketFlag = !this.bucketFlag;
-
-        if(this.bucketFlag) {
-            this.activateUIToolState('bucketTool');
-        }
-        if(this.highFlag) {
-            this.activateUIToolState('highTool');
-        }
-        this.paintFlag = false;
-        this.restoreFlag = false;
+        this.toggleToolMode("bucket");
     }
 
     activateRestore() {
-        this.deactivateTools();
-        // Toggle restore mode
-        this.restoreFlag = !this.restoreFlag;
-        if(this.restoreFlag) {
-            this.activateUIToolState('restoreTool');
-        }
-        if(this.highFlag) {
-            this.activateUIToolState('highTool');
-        }
-        this.paintFlag = false;
-        this.bucketFlag = false;
-
+        this.toggleToolMode("restore");
     }
 
     activateHighlight() {
-        this.deactivateTools();
-        // Toggle highlight mode
-        this.highFlag = !this.highFlag;
-        if(this.highFlag) {
-            this.activateUIToolState('highTool');
+        this.setHighlightState(!this.highFlag);
+    }
+
+    setHighlightState(enabled) {
+        this.highFlag = Boolean(enabled);
+        if (!this.highFlag) {
+            this.pathRequested = false;
+            this.pathFlag = false;
+        } else {
+            this.syncPathState();
         }
-        this.paintFlag = false;
-        this.bucketFlag = false;
+        this.syncGridToolState();
         this.renderHighlightLayer();
     }
 
     pathToggle() {
-        this.pathFlag = !this.pathFlag;
+        const valid = this.isPathAvailable();
+        if (!valid) {
+            this.pathRequested = false;
+            this.pathFlag = false;
+            this.syncGridToolState();
+            this.uiManager.updateFootnote(this.getPathUnavailableMessage());
+            this.renderHighlightLayer();
+            return;
+        }
+        this.pathRequested = !this.pathRequested;
+        this.pathFlag = this.pathRequested;
+        this.syncGridToolState();
         this.renderHighlightLayer();
     }
 
@@ -130,8 +128,7 @@ class GridManager {
     }
 
     deactivateTools() {
-        this.activeTool = null;
-        this.clearUIToolStates();
+        this.setToolMode(null);
     }
 
     // Main interaction handler
@@ -343,6 +340,7 @@ class GridManager {
         }
         this.patternLoader.changeCounter--;
         // Rebuild the pattern cache because some tiles reverted
+        this.invalidateRoute(false);
         this.patternCacheDirty = true;
         this.refreshCanvas(true);
         this.uiManager.updateFootnote("Change undone");
@@ -487,6 +485,7 @@ class GridManager {
                 }
                 stitch.dmcCode = newCode;
                 this.updateStitchColorIndex(stitch, oldCode, newCode);
+                this.invalidateRoute(false);
                 return;
             }
         }
@@ -542,27 +541,17 @@ class GridManager {
     }
 
     selectColor(colorCode, symbol) {
-        this.pathFlag = colorCode === this.uiManager.SEQUENCED_COLOR;
+        // Selecting a color ends edit modes so the new selection is not ambiguous.
+        this.setToolMode(null);
 
-        // Deactivate tools that can modify the grid when selecting a color
-        if(this.bucketFlag) {
-            this.activateBucket();
-        } else if(this.paintFlag) {
-            this.activatePaint();
-        } else if(this.restoreFlag) {
-            this.activateRestore();
-        } 
-
-        // Update global highlight state
         this.highlightedColor = colorCode;
         this.highlightedSymbol = symbol;
-        
+
+        this.syncPathState();
         this.updateColorSelectorUI(colorCode, symbol);
-            
-            // Refresh grid to show highlighting
+
         this.renderHighlightLayer();
         this.uiManager.updateFootnote("Selected color: " + colorCode + " - " + this.getDMCValuesFromCode(colorCode).dmcName);
-
     }
 
     updateColorStats() {
@@ -604,17 +593,117 @@ class GridManager {
     }
 
     activateUIToolState(activeToolId) {
-        // Activate specific tool
         const toolElement = document.getElementById(activeToolId);
         if (toolElement) {
             toolElement.classList.add('activeTool');
         }
     }
 
+    isPathAvailable() {
+        const sequence = this.uiManager?.CLUSTER_SEQUENCE;
+        return Boolean(
+            this.highFlag
+            && this.highlightedColor
+            && sequence?.length
+            && this.highlightedColor === this.uiManager.SEQUENCED_COLOR
+        );
+    }
+
+    getPathUnavailableMessage() {
+        if (!this.highFlag) {
+            return "Turn on highlight to show the path";
+        }
+        if (!this.uiManager?.CLUSTER_SEQUENCE?.length) {
+            return "Calculate a path before showing it";
+        }
+        if (this.highlightedColor !== this.uiManager.SEQUENCED_COLOR) {
+            return "Select the highlighted color used to calculate the path";
+        }
+        return "Path is unavailable";
+    }
+
+    syncPathState() {
+        if (!this.isPathAvailable()) {
+            this.pathRequested = false;
+            this.pathFlag = false;
+        } else {
+            this.pathFlag = this.pathRequested;
+        }
+        this.syncGridToolState();
+    }
+
+    setCalculatedRoute(sequence, colorCode) {
+        this.uiManager.CLUSTER_SEQUENCE = Array.isArray(sequence) ? sequence : [];
+        this.uiManager.SEQUENCED_COLOR = this.uiManager.CLUSTER_SEQUENCE.length ? colorCode : null;
+        if (this.highlightedColor !== colorCode) {
+            this.pathRequested = false;
+        }
+        this.syncPathState();
+        this.syncGridToolState();
+        this.renderHighlightLayer();
+    }
+
+    setPathVisible(requested) {
+        if (!requested) {
+            this.pathRequested = false;
+            this.pathFlag = false;
+        } else if (this.isPathAvailable()) {
+            this.pathRequested = true;
+            this.pathFlag = true;
+        } else {
+            this.pathRequested = false;
+            this.pathFlag = false;
+            this.uiManager.updateFootnote(this.getPathUnavailableMessage());
+        }
+        this.syncGridToolState();
+        this.renderHighlightLayer();
+    }
+
+    invalidateRoute(render = true) {
+        if (this.uiManager) {
+            this.uiManager.CLUSTER_SEQUENCE = [];
+            this.uiManager.SEQUENCED_COLOR = null;
+        }
+        this.pathRequested = false;
+        this.pathFlag = false;
+        this.syncGridToolState();
+        if (render) {
+            this.renderHighlightLayer();
+        }
+    }
+
+    resetInteractionState() {
+        this.setToolMode(null);
+        this.pathRequested = false;
+        this.pathFlag = false;
+        this.invalidateRoute();
+    }
+
+    syncGridToolState() {
+        const states = {
+            highTool: this.highFlag,
+            contrastTool: this.contrastFlag,
+            pathTool: this.pathFlag,
+            paintTool: this.paintFlag,
+            bucketTool: this.bucketFlag,
+            restoreTool: this.restoreFlag
+        };
+
+        for (const [id, enabled] of Object.entries(states)) {
+            const element = document.getElementById(id);
+            if (!element) continue;
+            element.classList.toggle('activeTool', enabled);
+            element.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        }
+
+        const pathTool = document.getElementById('pathTool');
+        if (pathTool) {
+            pathTool.setAttribute('aria-disabled', this.isPathAvailable() ? 'false' : 'true');
+        }
+    }
+
     clearUIToolStates() {
-        document.querySelectorAll('.toolback').forEach(el => {
-            el.classList.remove('activeTool');
-        });
+        this.syncGridToolState();
     }
 
     updateColorSelectorUI(colorCode, symbol) {
@@ -632,11 +721,16 @@ class GridManager {
         });
     }
 
-    toggleHighContrast() {
-        this.contrastFlag = !this.contrastFlag;
+    setContrastState(enabled) {
+        this.contrastFlag = Boolean(enabled);
         this.patternCacheDirty = true;
+        this.syncGridToolState();
         this.renderCanvas();
         return this.contrastFlag;
+    }
+
+    toggleHighContrast() {
+        return this.setContrastState(!this.contrastFlag);
     }
 
     /**

@@ -219,8 +219,7 @@ class UIManager {
                     bucketSize,
                     connectionCache
                 );
-                this.CLUSTER_SEQUENCE = result.sequence;
-                this.SEQUENCED_COLOR = highlightedColor;
+                this.gridManager.setCalculatedRoute(result.sequence, highlightedColor);
                 if (stats) {
                     stats.textContent = `Covered: ${result.stitchCount}/${highlightedStitches.length} stitches · Estimated path cost: ${result.distance.toFixed(1)}`;
                 }
@@ -228,7 +227,7 @@ class UIManager {
                 this.previewRenderer.drawGridLines(ctx, box, cols, rows);
                 this.pathRenderer.drawRoute(ctx, result.sequence, box, Math.max(1, box * 0.12));
             } catch (error) {
-                this.CLUSTER_SEQUENCE = [];
+                this.gridManager.invalidateRoute();
                 if (stats) {
                     stats.textContent = `Path calculation failed: ${error.message}`;
                 }
@@ -240,8 +239,7 @@ class UIManager {
     }
 
     drawPath() {
-        this.gridManager.pathFlag = true;
-        this.gridManager.renderHighlightLayer();
+        this.gridManager.setPathVisible(true);
     }
 
     // Spinner functions
