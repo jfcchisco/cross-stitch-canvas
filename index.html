@@ -11,96 +11,91 @@
 <body>
     <div class="tools">
         <div id="openTool" class="toolback">
-            <div title="Open" class="tool" onclick="openFile()">
+            <div title="Open" class="tool" data-action="openFile">
                 <img src="./img/open.png" class="toolImage">
             </div>
         </div>
         <div id="saveTool" class="toolback">
-            <div title="Save" class="tool" onclick="save()">
+            <div title="Save" class="tool" data-action="save">
                 <img src="./img/save.png" class="toolImage">
             </div>
         </div>
         <div class="vertical"></div>
         <div id="downloadTool" class="toolback">
-            <div title="Download" class="tool" onclick="download()">
+            <div title="Download" class="tool" data-action="download">
                 <img src="./img/download.png" class="toolImage">
             </div>
         </div>
         <div id="uploadTool" class="toolback">
-            <div title="Upload" class="tool" onclick="upload()">
+            <div title="Upload" class="tool" data-action="upload">
                 <img src="./img/upload.png" class="toolImage">
             </div>
         </div>
         <div id="defaultPatternsTool" class="toolback">
-            <div title="Open default pattern" class="tool" onclick="openDefaultPatterns()">
+            <div title="Open default pattern" class="tool" data-action="openDefaultPatterns">
                 <img src="./img/default.png" class="toolImage">
             </div>
         </div>
         <div class="vertical"></div>
-        <div id="flossUsage" class="toolback" onclick="flossUsageOpen()">
+        <div id="flossUsage" class="toolback" data-action="flossUsageOpen">
             <div title="Floss Usage" class="tool">
                 <img src="./img/report.png" class="toolImage">
             </div>
         </div>
         
         <div id="highTool" class="toolback">
-            <div title="Highlight color" class="tool" onclick="highlight()">
+            <div title="Highlight color" class="tool" data-action="highlight">
                 <img src="./img/highlight.png" class="toolImage">
             </div>
         </div>
-        <div id="contrastTool" onclick="highContrast()">
+        <div id="contrastTool" data-action="highContrast">
             <div title="High Contrast" class="tool">
                 <img src="./img/contrast.png" class="toolImage">
             </div>
         </div>
-        <div id="pathTool" onclick="pathToggle()">
+        <div id="pathTool" data-action="pathToggle">
             <div title="Show path" class="tool">
                 <img src="./img/path.png" class="toolImage">
             </div>
         </div>
         <div class="vertical"></div>
         <div id="paintTool" class="toolback">
-            <div title="Paint color" class="tool" onclick="paint()">
+            <div title="Paint color" class="tool" data-action="paint">
                 <img src="./img/brush.png" class="toolImage">
             </div>
         </div>
         <div id="bucketTool" class="toolback">
-            <div title="Bucket color" class="tool" onclick="bucket()">
+            <div title="Bucket color" class="tool" data-action="bucket">
                 <img src="./img/bucket.png" class="toolImage">
             </div>
         </div>
         <div id="restoreTool" class="toolback">
-            <div title="Restore" class="tool" onclick="restore()">
+            <div title="Restore" class="tool" data-action="restore">
                 <img src="./img/restore.png" class="toolImage">
             </div>
         </div>
         <div class="vertical"></div>
         <div id="previewTool" class="toolback">
-            <div title="Preview" class="tool" onclick="previewOpen()">
+            <div title="Preview" class="tool" data-action="previewOpen">
                 <img src="./img/preview.png" class="toolImage">
             </div>
         </div>
-        <!-- <div id="undoTool" class="toolback" onclick="undo()">
-            <div title="Undo" class="tool">
-                <img src="./img/undo.png" class="toolImage">
-            </div>
-        </div> -->
-        <div id="zoomPlus" class="toolback" onclick="zoomIn()">
+        <div id="zoomPlus" class="toolback" data-action="zoomIn">
             <div title="Zoom In" class="tool">
                 <img src="./img/zoomPlus.png" class="toolImage">
             </div>
         </div>
-        <div id="zoomMinus" class="toolback" onclick="zoomOut()">
+        <div id="zoomMinus" class="toolback" data-action="zoomOut">
             <div title="Zoom Out" class="tool">
                 <img src="./img/zoomMinus.png" class="toolImage">
             </div>
         </div>
-        <div id="zoomReset" class="toolback" onclick="zoomReset()">
+        <div id="zoomReset" class="toolback" data-action="zoomReset">
             <div title="Zoom Reset" class="tool">
                 <img src="./img/zoomReset.png" class="toolImage">
             </div>
         </div>
-        <div id="nextTool" onclick="loadNextFile()">
+        <div id="nextTool" data-action="loadNextFile">
             <div title="Next Design" class="tool">
                 <img src="./img/arrow.png" class="toolImage">
             </div>
@@ -132,7 +127,7 @@
     <!-- MODALS -->
     <div id="myModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="flossUsageClose()">&times;</span>
+            <span class="close" data-action="flossUsageClose">&times;</span>
             <p id="properties"></p>
             <p id="progress"></p>
             <p id="flossCount"></p>
@@ -144,16 +139,16 @@
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="preview-toolbar">
-                <button class="preview-close" onclick="previewClose()" title="Close preview">✕</button>
+                <button class="preview-close" data-action="previewClose" title="Close preview">✕</button>
                 <div class="pathButtons">
                     <label for="pathSelect" class="visually-hidden">Choose path start</label>
-                    <select id="pathSelect" class="pathSelect" onchange="previewPath(Number(this.value))" title="Choose path start">
+                    <select id="pathSelect" class="pathSelect" data-action="previewPath" title="Choose path start">
                         <option value="0">First</option>
                         <option value="1">Center</option>
                         <option value="2">Coord</option>
                         <option value="3">Random</option>
                     </select>
-                    <button class="pathApply" type="button" onclick="previewPath(Number(document.getElementById('pathSelect').value))" title="Run selected path">▶</button>
+                    <button class="pathApply" type="button" data-action="previewPath" title="Run selected path">▶</button>
                 </div>
                 <div class="inputFields toolbarInputs">
                     <div class="inputField thresholdDiv">
@@ -174,7 +169,7 @@
                     </div>
                 </div>
                 <div class="drawPathButtons">
-                    <span class="drawPathButton" onclick="drawPath()">DRAW PATH</span>
+                    <span class="drawPathButton" data-action="drawPath">DRAW PATH</span>
                 </div>
                 <output id="pathStats" class="pathStats" aria-live="polite"></output>
             </div>
@@ -185,7 +180,7 @@
     <dialog id="cloudFileDialog" class="cloud-file-dialog" aria-labelledby="cloudFileDialogTitle">
         <div class="cloud-file-dialog-header">
             <h2 id="cloudFileDialogTitle">Open cloud pattern</h2>
-            <button type="button" class="cloud-file-dialog-close" aria-label="Close" onclick="closeCloudFileDialog()">&times;</button>
+            <button type="button" class="cloud-file-dialog-close" aria-label="Close" data-action="closeCloudFileDialog">&times;</button>
         </div>
         <ul id="cloudFileList" class="cloud-file-list"></ul>
         <p id="cloudFileEmpty" class="cloud-file-empty" hidden>No cloud files found.</p>

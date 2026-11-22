@@ -1,3 +1,5 @@
+import GridCanvasRenderer from "./grid-canvas-renderer.js";
+
 /**
  * GridManager Class
  * Manages the grid of tiles for the cross-stitch pattern.
@@ -49,6 +51,11 @@ class GridManager {
         this.patternCacheDirty = true;
         this.lastClickedX = 0;
         this.lastClickedY = 0;
+        this.canvasRenderer = new GridCanvasRenderer(
+            this,
+            uiManager.pathRenderer,
+            () => uiManager.CLUSTER_SEQUENCE
+        );
     }
 
     /**
@@ -425,11 +432,11 @@ class GridManager {
     drawChangedTileToPatternCanvas(patternCtx, tileX, tileY, newCode, origCode) {
         // Ensure pattern cache exists and is in-sync
         const canvas = document.getElementById('tileCanvas');
-        this.ensureCanvasSize(canvas);
+        this.canvasRenderer.ensureCanvasSize(canvas);
         // console.log(this.patternCacheDirty, this.patternCanvas.width, canvas.width, this.patternCanvas.height, canvas.height);
         if (this.patternCacheDirty || this.patternCanvas.width !== canvas.width || this.patternCanvas.height !== canvas.height) {
             // console.log("Pattern cache out of sync, rebuilding...");
-            this.cleanPatternCache(canvas);
+            this.canvasRenderer.cleanPatternCache(canvas);
             this.patternCacheDirty = false;
         }
         patternCtx = this.patternCanvas.getContext('2d');
@@ -649,7 +656,7 @@ class GridManager {
         
         canvas.width = cols * this.tileSize;
         canvas.height = rows * this.tileSize;
-        this.resizeHighlightCanvas();
+        this.canvasRenderer.resizeHighlightCanvas();
         this.buildStitchesByColor();
         this.minZoom = Math.min(this.tileContainer.offsetHeight / canvas.height, this.tileContainer.offsetWidth / canvas.width) * 0.95;
         this.cameraZoom = this.minZoom;
@@ -658,37 +665,15 @@ class GridManager {
     }
 
     cleanPatternCache(canvas) {
-        // console.log("cleanPatternCache: Rebuilding pattern cache...");
-        this.patternCanvas.width = canvas.width;
-        this.patternCanvas.height = canvas.height;
-        const patternCtx = this.patternCanvas.getContext("2d");
-        const currentPattern = this.patternLoader.getCurrentPattern();
-        this.drawTiles(patternCtx, currentPattern);
-        this.drawLines(patternCtx);
+        this.canvasRenderer.cleanPatternCache(canvas);
     }
 
     ensureCanvasSize(canvas) {
-        const expectedWidth = this.patternLoader.getCols() * this.tileSize;
-        const expectedHeight = this.patternLoader.getRows() * this.tileSize;
-        // Only resize if sizes differ to avoid clearing the canvas unnecessarily
-        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-            canvas.width = expectedWidth;
-            canvas.height = expectedHeight;
-            // Keep pattern cache in sync
-            this.patternCanvas.width = expectedWidth;
-            this.patternCanvas.height = expectedHeight;
-            this.patternCacheDirty = true;
-        }
-        this.resizeHighlightCanvas();
+        this.canvasRenderer.ensureCanvasSize(canvas);
     }
 
     resizeHighlightCanvas() {
-        const width = this.tileContainer.clientWidth;
-        const height = this.tileContainer.clientHeight;
-        if (this.highlightCanvas.width !== width || this.highlightCanvas.height !== height) {
-            this.highlightCanvas.width = width;
-            this.highlightCanvas.height = height;
-        }
+        this.canvasRenderer.resizeHighlightCanvas();
     }
 
     refreshCanvas(visibleFlag=false) {
@@ -699,64 +684,11 @@ class GridManager {
     }
 
     renderCanvas() {
-        const canvas = document.getElementById("tileCanvas");
-        const ctx = canvas.getContext("2d");
-        this.ensureCanvasSize(canvas);
-        
-        // Regenerate pattern cache only when needed
-        if (this.patternCacheDirty) {
-            this.cleanPatternCache(canvas);
-            this.patternCacheDirty = false;
-        }
-        
-        // Now just apply transformation to cached content
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.scale((canvas.width/canvas.clientWidth)*this.cameraZoom, (canvas.height/canvas.clientHeight)*this.cameraZoom);
-        ctx.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
-        ctx.drawImage(this.patternCanvas, 0, 0);
-        this.renderHighlightLayer();
-        this.drawRulers();
+        this.canvasRenderer.renderCanvas();
     }
 
     renderHighlightLayer() {
-        const canvas = this.tileCanvas;
-        const ctx = this.highlightCanvas.getContext("2d");
-        if (!ctx || !canvas.width || !canvas.height) {
-            return;
-        }
-
-        this.resizeHighlightCanvas();
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, this.highlightCanvas.width, this.highlightCanvas.height);
-        const scaleX = (this.highlightCanvas.width / this.highlightCanvas.clientWidth) * this.cameraZoom;
-        const scaleY = (this.highlightCanvas.height / this.highlightCanvas.clientHeight) * this.cameraZoom;
-        const translateX = -window.innerWidth / 2 + this.cameraOffset.x;
-        const translateY = -window.innerHeight / 2 + this.cameraOffset.y;
-        ctx.scale(scaleX, scaleY);
-        ctx.translate(translateX, translateY);
-
-        if (this.highFlag) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-            ctx.fillRect(
-                -translateX,
-                -translateY,
-                this.highlightCanvas.clientWidth / scaleX,
-                this.highlightCanvas.clientHeight / scaleY
-            );
-
-            const highlightedStitches = this.stitchesByColor.get(this.highlightedColor);
-            if (highlightedStitches) {
-                this.drawHighlightedStitches(ctx, highlightedStitches);
-            }
-
-            this.drawLines(ctx);
-        }
-
-        if (this.pathFlag) {
-            this.uiManager.drawPreviewPath(ctx);
-        }
+        this.canvasRenderer.renderHighlightLayer();
     }
 
     drawHighlightedStitches(ctx, stitches) {
