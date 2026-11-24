@@ -742,7 +742,7 @@ class GridManager {
         const cols = this.patternLoader.getCols();
         const rows = this.patternLoader.getRows();
         const maxDimension = Math.max(cols, rows);
-        this.tileSize = Math.min(Math.max(Math.floor(6000 / maxDimension), 20), 50);
+        this.tileSize = Math.min(Math.max(Math.floor(6000 / maxDimension), 15), 50);
         // Adjust max zoom based on tile size
         this.maxZoom = 50 / this.tileSize;
         
