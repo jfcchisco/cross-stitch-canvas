@@ -340,7 +340,6 @@ class GridManager {
         }
         this.patternLoader.changeCounter--;
         // Rebuild the pattern cache because some tiles reverted
-        this.invalidateRoute(false);
         this.patternCacheDirty = true;
         this.refreshCanvas(true);
         this.uiManager.updateFootnote("Change undone");
@@ -485,7 +484,6 @@ class GridManager {
                 }
                 stitch.dmcCode = newCode;
                 this.updateStitchColorIndex(stitch, oldCode, newCode);
-                this.invalidateRoute(false);
                 return;
             }
         }
